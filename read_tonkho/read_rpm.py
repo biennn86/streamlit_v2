@@ -131,16 +131,16 @@ def read_file_txt(link_file):
         data_readed = file.readlines()
     return data_readed
 
-def get_path_import_file():
-    file_type = [
-        ('All File', '*.*'),
-        ('CSV File', "*.csv"),
-        ('Excel File', ['*.xlsx', '*.xlsm'])   
-    ]
-    file_path = filedialog.askopenfilename(title='Chose File', multiple=True, filetypes=file_type)
-    root = tk.Tk()
-    root.withdraw()
-    return file_path
+# def get_path_import_file():
+#     file_type = [
+#         ('All File', '*.*'),
+#         ('CSV File', "*.csv"),
+#         ('Excel File', ['*.xlsx', '*.xlsm'])   
+#     ]
+#     file_path = filedialog.askopenfilename(title='Chose File', multiple=True, filetypes=file_type)
+#     root = tk.Tk()
+#     root.withdraw()
+#     return file_path
 
 def create_df_tonkho_from_list(data):
     columns_inv = ['gcas', 'batch', 'vnl', 'status', 'qty', 'pallet', 'location', 'note_inv', 'cat_inv']
