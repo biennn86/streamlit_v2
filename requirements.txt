@@ -43,7 +43,7 @@ pandastable==0.13.0
 panel==1.4.5
 param==2.1.1
 Pillow==9.4.0
-pip==24.2
+pip==24.3.1
 platformdirs==3.0.0
 plotly==5.22.0
 PlotPy==2.3.0
@@ -96,3 +96,4 @@ xlrd==2.0.1
 XlsxWriter==3.2.0
 xyzservices==2024.6.0
 youtube-dl==2021.12.17
+installed distutils-pytest==0.2.1
