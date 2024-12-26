@@ -1,0 +1,60 @@
+string = '''
+
+'''
+
+import re 
+import pandas as pd
+
+pattent_inv = re.compile(r'^(?:.+)(?<=NONE)(?:\b){0}', re.MULTILINE)
+pt_class_file = re.compile(r'(?<=Class:\s)(?:F|P)(?=\s+Item:)',  re.MULTILINE)
+
+lst_inv = pattent_inv.findall(string)
+match_cls_file = pt_class_file.search(string)
+cls_file = None
+if match_cls_file is not None:
+    cls_match = match_cls_file.group()
+else:
+    cls_match = None 
+    
+if cls_match == 'F':
+    cls_file = 'F'
+elif cls_match == 'P':
+    cls_file = 'P'
+    
+lst_result = []
+for line in lst_inv:
+    
+    line_cls_vn07 = re.sub(r'(VN07)', '', line)
+    index_status = re.search(r'(RL|QU|HD)', line_cls_vn07).span()[0]
+    line_left = line_cls_vn07[:index_status]
+    line_right = line_cls_vn07[index_status:]
+    
+    line_left = re.sub(r'(\s){1,}',';', line_left)
+    
+    line_right = re.sub(r'(\s){2,}',';', line_right)
+    line_right = re.sub(r'(\s){1,}','', line_right)
+    
+    line_full = line_left + line_right
+    split_line = line_full.split(';')
+    
+    if cls_file == 'F':
+        split_line.insert(2, 'VNL_FG')
+        if len(split_line[0]) == 0:
+            split_line[0] = lst_result[-1][0]
+            lst_result.append(split_line)
+        else:
+            lst_result.append(split_line)
+    if cls_file == 'P':
+        if len(split_line[0]) == 0:
+            split_line[0] = lst_result[-1][0]
+            lst_result.append(split_line)
+        if len(split_line) == 7:
+            split_line.insert(2, 'RPM_LOST_VNL')
+            lst_result.append(split_line)
+        elif len(split_line) == 8:
+            lst_result.append(split_line)
+
+for i in lst_result:
+    print(i)
+# columns = ['gcas', 'batch', 'vnl', 'status', 'qty', 'pallet', 'location', 'note']
+# df_inv = pd.DataFrame(lst_result, columns = columns)
