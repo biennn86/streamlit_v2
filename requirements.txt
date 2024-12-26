@@ -97,3 +97,4 @@ XlsxWriter==3.2.0
 xyzservices==2024.6.0
 youtube-dl==2021.12.17
 distutils-pytest==0.2.1
+tk==0.1.0
