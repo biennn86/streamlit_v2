@@ -42,8 +42,8 @@ pandas==1.5.3
 pandastable==0.13.0
 panel==1.4.5
 param==2.1.1
-Pillow==9.4.0
-pip==24.3.1
+Pillow
+pip
 platformdirs==3.0.0
 plotly==5.22.0
 PlotPy==2.3.0
