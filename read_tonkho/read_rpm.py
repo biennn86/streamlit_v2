@@ -1,6 +1,7 @@
 import sys
 import re
-from tk import *
+# from tk import *
+# from tkinter import *
 import pandas as pd
 from control.tonkho import Inventory
 
