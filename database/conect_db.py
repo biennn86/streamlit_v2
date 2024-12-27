@@ -1,7 +1,7 @@
 import sqlite3
 
 class ConnectDB:
-    __NAME_DB = 'database\pg.db'
+    __NAME_DB = 'database\\pg.db'
 
     def getConection(self):
         try:
