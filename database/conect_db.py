@@ -1,3 +1,12 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:6982124c3799bc7352205311dd71646274054de21783cc137c36b5d5212cdaf5
-size 302
+import sqlite3
+
+class ConnectDB:
+    __NAME_DB = 'database\pg.db'
+
+    def getConection(self):
+        try:
+            self.conn = sqlite3.connect(self.__NAME_DB)
+            print("kết nối db thành công")
+            return self.conn
+        except:
+            print('Connect Database Fail.')
