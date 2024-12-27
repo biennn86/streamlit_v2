@@ -37,7 +37,7 @@ class CreateDfToDB():
         self.dfTonkhoMtDataMtLoc['gcas'] = self.dfTonkhoMtDataMtLoc['gcas'].astype(str)
         self.dfTonghop = self.dfTonkhoMtDataMtLoc
 
-        # self.dfTonkhoMtDataMtLoc.to_excel('data_tonghop.xlsx', index=False)
+        self.dfTonkhoMtDataMtLoc.to_excel('data_tonghop.xlsx', index=False)
         # print(self.dfTonkhoMtDataMtLoc)
 
         return self.dfTonghop
