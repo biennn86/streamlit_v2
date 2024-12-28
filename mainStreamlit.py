@@ -19,10 +19,10 @@ st.html("./dashboard/style_mixup.html")
 #=========================================================================================================================
 #1. set layout
 border = False
-tab_tonkho, tab_emptyloc, tab_combine, tab_mixup = st.tabs(['Inventory', 'Empty Loc', 'Combine Bin', 'Mixup'])
+tab_dashboard, tab_emptyloc, tab_combine, tab_mixup, tab_tonkho = st.tabs(['DashBoard', 'Empty Loc', 'Combine Bin', 'Mixup', 'Inventory'])
 
 #set tabs
-container_inv = tab_tonkho.container(border=border)
+container_inv = tab_dashboard.container(border=border)
 cont_dashboard = container_inv.container(border=border)
 cont_title = cont_dashboard.container(border=border)
 col_wh1, col_wh2, col_wh3, col_pf_cl, col_lable_total = cont_dashboard.columns([1, 1, 1, 1, 1])
@@ -271,9 +271,19 @@ with title_mixup:
 with mixup:
     st.html(f"<span class='df_mixup'</span>")
     st.dataframe(obj_getpl_3wh.GetMixup(), width=1000, height=None, hide_index=True)
-    st.markdown('Đây là Lấy tồn kho')
-    st.dataframe(obj_getpl_3wh.GetInventory(), width=1000, height=None, hide_index=True)
-
+#=============================================TỒN KHO===============================================
+cont_inv = tab_tonkho.container(border=border)
+title_inv = cont_inv.container(border=border)
+all_inv = cont_inv.container(border=border)
+df_inventory_from_db = obj_getpl_3wh.GetInventory()
+row_no = df_inventory_from_db.shape[0]
+row_no = '{:,.0f}'.format(row_no)
+with title_inv:
+    st.html(f"<span class='title_inv'</span>")
+    st.subheader('INVENTORY BALANCES. TOTAL ROWS DATA {}'.format(row_no))
+with all_inv:
+    st.html(f"<span class='df_inv'</span>")
+    st.dataframe(df_inventory_from_db, width=1500, height=700, hide_index=True)
 
 
 

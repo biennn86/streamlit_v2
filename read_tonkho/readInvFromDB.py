@@ -221,8 +221,23 @@ class CreateDfToDB():
         return self.df_combinebin
     
     def Get_Inventory(self):
-        data_inv = Inventory().get_all_inv()
-        return data_inv
+        self.df_inventory = Inventory().get_all_inv()
+        self.df_inventory.index = range(1, len(self.df_inventory)+1)
+        self.df_inventory = self.df_inventory.reset_index(drop=False)
+        self.df_inventory.rename(columns={
+            'index': 'STT',
+            'date': 'DateTime',
+            'gcas': 'Gcas',
+            'batch': 'Batch',
+            'vnl': 'VNL',
+            'status': 'Status',
+            'qty': 'Qty',
+            'pallet': 'Pallet',
+            'location': 'Location',
+            'note_inv': 'Note',
+            'cat_inv': 'Category'
+        }, inplace=True)
+        return self.df_inventory
 
 class DashboarTonkho():
     #tạo 1 df tổng hợp số pallet theo kho và type location tương ứng
