@@ -4,6 +4,7 @@ import numpy as np
 from read_tonkho.read_rpm import *
 from control.masterdata import MasterData
 from control.location_new import LocationNew
+from control.tonkho import Inventory
 
 
 class CreateDfToDB():
@@ -218,6 +219,10 @@ class CreateDfToDB():
         # print(self.df_combinebin)
         # self.df_combinebin.to_excel('CombineBin.xlsx', index=False)
         return self.df_combinebin
+    
+    def Get_Inventory(self):
+        data_inv = Inventory().get_all_inv()
+        return data_inv
 
 class DashboarTonkho():
     #tạo 1 df tổng hợp số pallet theo kho và type location tương ứng

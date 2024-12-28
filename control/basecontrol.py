@@ -54,3 +54,12 @@ class BaseControl:
                 return last_date
         except:
             return None
+        
+    def get_all_inv(self):
+        try:
+            with ConnectDB().getConection() as conn:
+                QUERY = "SELECT * FROM {};".format(self.table)
+                data_inv = pd.read_sql_query(QUERY, conn)
+                return data_inv
+        except:
+            return None

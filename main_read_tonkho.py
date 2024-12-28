@@ -27,6 +27,9 @@ class BackEndSteamLit:
     def binmixup(self):
         mixup = self.objTonkho.FindMixup()
         return mixup
+    def get_inv(self):
+        inv = self.objTonkho.Get_Inventory()
+        return inv
 class CreateLocMasterData:
     def CreateLocaion(self):
         main_createloc()

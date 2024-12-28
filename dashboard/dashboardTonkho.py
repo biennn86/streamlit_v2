@@ -278,6 +278,9 @@ class CoutPlDetailLoc():
     def GetMixup(self):
         self.mixup = self.obj_dftonkho.binmixup()
         return self.mixup
+    def GetInventory(self):
+        self.inv = self.obj_dftonkho.get_inv()
+        return self.inv
 
     def GetPl_Wh1(self):
         typelocwh1 = ('hr', 'pf', 'ww', 'in')
