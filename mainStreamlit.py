@@ -271,6 +271,7 @@ with title_mixup:
 with mixup:
     st.html(f"<span class='df_mixup'</span>")
     st.dataframe(obj_getpl_3wh.GetMixup(), width=1000, height=None, hide_index=True)
+    st.markdown('Đây là Lấy tồn kho')
     st.dataframe(obj_getpl_3wh.GetInventory(), width=1000, height=None, hide_index=True)
 
 
