@@ -6,7 +6,7 @@ class ConnectDB:
     def getConection(self):
         try:
             self.conn = sqlite3.connect(self.__NAME_DB)
-            print("kết nối db thành công")
+            print("Kết nối Database thành công")
             return self.conn
         except:
             print('Connect Database Fail.')
