@@ -879,10 +879,11 @@ class CoutPlDetailLoc():
     def GetPl_Fg(self):
         '''
         Count tất cả pallet có cat_inv là FG. Tránh trường hợp count sót khi gcas chưa có trong masterdata
+        Trừ đi FG ở cont, door (scanout) và trừ đi FG ở Steam
         '''
         cat_fg = 'FG'
         type1 = 'finished_goods'
-        self.pallet_fg = CountPallet_FgRpmEo(self.dfInv, cat_fg).CoutPallet_Fg() - self.wh2_scanout
+        self.pallet_fg = CountPallet_FgRpmEo(self.dfInv, cat_fg).CoutPallet_Fg() - self.wh2_scanout - self.steam_fg
         self.obj_mt_fg = StMetric(label='FG BD 2500', value=self.pallet_fg)
 
         self.dict_mt_fg = {
