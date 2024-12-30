@@ -500,9 +500,12 @@ class CoutPlDetailLoc():
         self.wh3_in_fg = BaseCountPallet(self.dfInv, namewh, typelocwh3[3], self.CAT[1]).CountDetailLoc()
         self.wh3_in_rpm = BaseCountPallet(self.dfInv, namewh, typelocwh3[3], self.CAT[2]).CountDetailLoc()
 
-        #WH3 floor có cộng thêm hàng EO ở dưới sàn
-        #Trên rack chưa cộng EO vào
-        #Nhưng không cộng tồn EO dưới sàn vào tổng tồn WH3
+        '''
+        WH3 floor có cộng thêm hàng EO ở dưới sàn
+        Trên rack chưa cộng EO vào
+        Nhưng không cộng tồn EO dưới sàn vào tổng tồn WH3
+        '''
+       
         self.wh3_floor = (self.wh3_ww_fg +
                           self.wh3_ww_rpm +
                           self.wh3_ww_eo +
@@ -592,7 +595,7 @@ class CoutPlDetailLoc():
         typeloc_lb = ('hr', 'pf', 'ww')
         namewh = 'lb'
         dict_capa_lb = {
-            'total': 1151
+            'total': 1165
         }
 
         self.lb_hr_eo = BaseCountPallet(self.dfInv, namewh, typeloc_lb[0], self.CAT[0]).CountDetailLoc()
