@@ -642,37 +642,49 @@ class CoutPlDetailLoc():
         namewh = ('cool1', 'cool2', 'cool3')
 
         self.cool1_fl_eo = BaseCountPallet(self.dfInv, namewh[0], typeloc_cool[0], self.CAT[0]).CountDetailLoc()
+        self.cool1_fl_fg = BaseCountPallet(self.dfInv, namewh[0], typeloc_cool[0], self.CAT[1]).CountDetailLoc()
         self.cool1_fl_rpm = BaseCountPallet(self.dfInv, namewh[0], typeloc_cool[0], self.CAT[2]).CountDetailLoc()
         self.cool1_ww_eo = BaseCountPallet(self.dfInv, namewh[0], typeloc_cool[1], self.CAT[0]).CountDetailLoc()
+        self.cool1_ww_fg = BaseCountPallet(self.dfInv, namewh[0], typeloc_cool[1], self.CAT[1]).CountDetailLoc()
         self.cool1_ww_rpm = BaseCountPallet(self.dfInv, namewh[0], typeloc_cool[1], self.CAT[2]).CountDetailLoc()
 
         self.cool2_fl_eo = BaseCountPallet(self.dfInv, namewh[1], typeloc_cool[0], self.CAT[0]).CountDetailLoc()
+        self.cool2_fl_fg = BaseCountPallet(self.dfInv, namewh[1], typeloc_cool[0], self.CAT[1]).CountDetailLoc()
         self.cool2_fl_rpm = BaseCountPallet(self.dfInv, namewh[1], typeloc_cool[0], self.CAT[2]).CountDetailLoc()
         self.cool2_ww_eo = BaseCountPallet(self.dfInv, namewh[1], typeloc_cool[1], self.CAT[0]).CountDetailLoc()
+        self.cool2_ww_fg = BaseCountPallet(self.dfInv, namewh[1], typeloc_cool[1], self.CAT[1]).CountDetailLoc()
         self.cool2_ww_rpm = BaseCountPallet(self.dfInv, namewh[1], typeloc_cool[1], self.CAT[2]).CountDetailLoc()
 
         self.cool3_fl_eo = BaseCountPallet(self.dfInv, namewh[2], typeloc_cool[0], self.CAT[0]).CountDetailLoc()
+        self.cool3_fl_fg = BaseCountPallet(self.dfInv, namewh[2], typeloc_cool[0], self.CAT[1]).CountDetailLoc()
         self.cool3_fl_rpm = BaseCountPallet(self.dfInv, namewh[2], typeloc_cool[0], self.CAT[2]).CountDetailLoc()
         self.cool3_ww_eo = BaseCountPallet(self.dfInv, namewh[2], typeloc_cool[1], self.CAT[0]).CountDetailLoc()
+        self.cool3_ww_fg = BaseCountPallet(self.dfInv, namewh[2], typeloc_cool[1], self.CAT[1]).CountDetailLoc()
         self.cool3_ww_rpm = BaseCountPallet(self.dfInv, namewh[2], typeloc_cool[1], self.CAT[2]).CountDetailLoc()
 
-        self.cool1_total = (self.cool1_fl_eo + 
+        self.cool1_total = (self.cool1_fl_eo +
+                            self.cool1_fl_fg +
                             self.cool1_fl_rpm
                             )
         
         self.cool2_total = (self.cool2_fl_eo + 
+                            self.cool2_fl_fg +
                             self.cool2_fl_rpm
                             )
         
         self.cool3_total = (self.cool3_fl_eo + 
+                            self.cool3_fl_fg +
                             self.cool3_fl_rpm
                             )
         
         self.cool_ww = (self.cool1_ww_eo + 
+                        self.cool1_ww_fg + 
                         self.cool1_ww_rpm + 
                         self.cool2_ww_eo + 
+                        self.cool2_ww_fg +
                         self.cool2_ww_rpm + 
                         self.cool3_ww_eo + 
+                        self.cool3_ww_fg +
                         self.cool3_ww_rpm
                        )
 
