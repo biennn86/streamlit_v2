@@ -881,6 +881,10 @@ class CoutPlDetailLoc():
         Count tất cả pallet có cat_inv là FG. Tránh trường hợp count sót khi gcas chưa có trong masterdata
         Trừ đi FG ở cont, door (scanout) và trừ đi FG ở Steam
         '''
+        #chạy method get steam trước. Vì khi tính totalwh(BDWH123) thì method GetPL_Steam chưa được gọi
+        #method này đc gọi 2 lần :((
+        self.GetPl_Steam()
+
         cat_fg = 'FG'
         type1 = 'finished_goods'
         self.pallet_fg = CountPallet_FgRpmEo(self.dfInv, cat_fg).CoutPallet_Fg() - self.wh2_scanout - self.steam_fg
