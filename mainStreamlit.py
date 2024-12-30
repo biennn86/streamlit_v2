@@ -172,9 +172,6 @@ with cont_dashboard:
                 st.plotly_chart(figeo['total'])
 
     with cont_metric:
-        mt_fg = obj_getpl_3wh.GetPl_Fg()
-        mt_pm = obj_getpl_3wh.GetPl_Pm()
-        mt_rm = obj_getpl_3wh.GetPl_Rm()
         mt_steam = obj_getpl_3wh.GetPl_Steam()
         mt_scanout = obj_getpl_3wh.GetPl_Scanout()
         mt_fgls = obj_getpl_3wh.GetPl_Fgls()
@@ -184,6 +181,11 @@ with cont_dashboard:
         mt_pm_cat = obj_getpl_3wh.GetPl_PmWithCat()
         mt_fg_cat = obj_getpl_3wh.GetPl_FgWithCat()
         mt_lsl = obj_getpl_3wh.GetPl_Lsl()
+        #chuyển tính fg, pm, rm xuống dưới cùng
+        #vì khi tính fg, pm, rm cần chạy các method trên để lấy số trước
+        mt_fg = obj_getpl_3wh.GetPl_Fg()
+        mt_pm = obj_getpl_3wh.GetPl_Pm()
+        mt_rm = obj_getpl_3wh.GetPl_Rm()
 
         # 'pleol': self.obj_lsl_in,
         # 'lslpm': self.obj_lsl_pm,
