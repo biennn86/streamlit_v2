@@ -887,7 +887,7 @@ class CoutPlDetailLoc():
 
         cat_fg = 'FG'
         type1 = 'finished_goods'
-        self.pallet_fg = CountPallet_FgRpmEo(self.dfInv, cat_fg).CoutPallet_Fg() - self.wh2_scanout - self.steam_fg
+        self.pallet_fg = CountPallet_FgRpmEo(self.dfInv, cat_fg).CoutPallet_Fg() - self.wh2_scanout
         self.obj_mt_fg = StMetric(label='FG BD 2500', value=self.pallet_fg)
 
         self.dict_mt_fg = {
