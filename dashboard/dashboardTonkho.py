@@ -442,7 +442,7 @@ class CoutPlDetailLoc():
         
         self.wh2_pf = (self.wh2_pf_fg +
                        self.wh2_pf_rpm +
-                       self.wh2_pf_da_eo - 
+                       self.wh2_pf_eo -
                        self.wh2_pf_ho -
                        self.wh2_pf_da)
         
