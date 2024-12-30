@@ -730,55 +730,75 @@ class CoutPlDetailLoc():
         namewh = ('pf1', 'pf2', 'pf3', 'pf4', 'pf5')
 
         self.pf1_fl_eo = BaseCountPallet(self.dfInv, namewh[0], typeloc_pf[0], self.CAT[0]).CountDetailLoc()
+        self.pf1_fl_fg = BaseCountPallet(self.dfInv, namewh[0], typeloc_pf[0], self.CAT[1]).CountDetailLoc()
         self.pf1_fl_rpm = BaseCountPallet(self.dfInv, namewh[0], typeloc_pf[0], self.CAT[2]).CountDetailLoc()
         self.pf1_ww_eo = BaseCountPallet(self.dfInv, namewh[0], typeloc_pf[1], self.CAT[0]).CountDetailLoc()
+        self.pf1_ww_fg = BaseCountPallet(self.dfInv, namewh[0], typeloc_pf[1], self.CAT[1]).CountDetailLoc()
         self.pf1_ww_rpm = BaseCountPallet(self.dfInv, namewh[0], typeloc_pf[1], self.CAT[2]).CountDetailLoc()
 
         self.pf2_fl_eo = BaseCountPallet(self.dfInv, namewh[1], typeloc_pf[0], self.CAT[0]).CountDetailLoc()
+        self.pf2_fl_fg = BaseCountPallet(self.dfInv, namewh[1], typeloc_pf[0], self.CAT[1]).CountDetailLoc()
         self.pf2_fl_rpm = BaseCountPallet(self.dfInv, namewh[1], typeloc_pf[0], self.CAT[2]).CountDetailLoc()
         self.pf2_ww_eo = BaseCountPallet(self.dfInv, namewh[1], typeloc_pf[1], self.CAT[0]).CountDetailLoc()
+        self.pf2_ww_fg = BaseCountPallet(self.dfInv, namewh[1], typeloc_pf[1], self.CAT[1]).CountDetailLoc()
         self.pf2_ww_rpm = BaseCountPallet(self.dfInv, namewh[1], typeloc_pf[1], self.CAT[2]).CountDetailLoc()
 
         self.pf3_fl_eo = BaseCountPallet(self.dfInv, namewh[2], typeloc_pf[0], self.CAT[0]).CountDetailLoc()
+        self.pf3_fl_fg = BaseCountPallet(self.dfInv, namewh[2], typeloc_pf[0], self.CAT[1]).CountDetailLoc()
         self.pf3_fl_rpm = BaseCountPallet(self.dfInv, namewh[2], typeloc_pf[0], self.CAT[2]).CountDetailLoc()
         self.pf3_ww_eo = BaseCountPallet(self.dfInv, namewh[2], typeloc_pf[1], self.CAT[0]).CountDetailLoc()
+        self.pf3_ww_fg = BaseCountPallet(self.dfInv, namewh[2], typeloc_pf[1], self.CAT[1]).CountDetailLoc()
         self.pf3_ww_rpm = BaseCountPallet(self.dfInv, namewh[2], typeloc_pf[1], self.CAT[2]).CountDetailLoc()
 
         self.pf4_fl_eo = BaseCountPallet(self.dfInv, namewh[3], typeloc_pf[0], self.CAT[0]).CountDetailLoc()
+        self.pf4_fl_fg = BaseCountPallet(self.dfInv, namewh[3], typeloc_pf[0], self.CAT[1]).CountDetailLoc()
         self.pf4_fl_rpm = BaseCountPallet(self.dfInv, namewh[3], typeloc_pf[0], self.CAT[2]).CountDetailLoc()
         self.pf4_ww_eo = BaseCountPallet(self.dfInv, namewh[3], typeloc_pf[1], self.CAT[0]).CountDetailLoc()
+        self.pf4_ww_fg = BaseCountPallet(self.dfInv, namewh[3], typeloc_pf[1], self.CAT[1]).CountDetailLoc()
         self.pf4_ww_rpm = BaseCountPallet(self.dfInv, namewh[3], typeloc_pf[1], self.CAT[2]).CountDetailLoc()
 
         self.pf5_fl_eo = BaseCountPallet(self.dfInv, namewh[4], typeloc_pf[0], self.CAT[0]).CountDetailLoc()
+        self.pf5_fl_fg = BaseCountPallet(self.dfInv, namewh[4], typeloc_pf[0], self.CAT[1]).CountDetailLoc()
         self.pf5_fl_rpm = BaseCountPallet(self.dfInv, namewh[4], typeloc_pf[0], self.CAT[2]).CountDetailLoc()
         self.pf5_ww_eo = BaseCountPallet(self.dfInv, namewh[4], typeloc_pf[1], self.CAT[0]).CountDetailLoc()
+        self.pf5_ww_fg = BaseCountPallet(self.dfInv, namewh[4], typeloc_pf[1], self.CAT[1]).CountDetailLoc()
         self.pf5_ww_rpm = BaseCountPallet(self.dfInv, namewh[4], typeloc_pf[1], self.CAT[2]).CountDetailLoc()
 
         self.pf1_total = (self.pf1_fl_eo + 
+                          self.pf1_fl_fg +
                           self.pf1_fl_rpm)
         
         self.pf2_total = (self.pf2_fl_eo + 
+                          self.pf2_fl_fg +
                           self.pf2_fl_rpm)
         
         self.pf3_total = (self.pf3_fl_eo + 
+                          self.pf3_fl_fg +
                           self.pf3_fl_rpm)
         
         self.pf4_total = (self.pf4_fl_eo + 
+                          self.pf4_fl_fg +
                           self.pf4_fl_rpm)
         
-        self.pf5_total = (self.pf5_fl_eo + 
+        self.pf5_total = (self.pf5_fl_eo +
+                          self.pf5_fl_fg + 
                           self.pf5_fl_rpm)
         
         
         self.pf_ww_total = (self.pf1_ww_eo +
+                            self.pf1_ww_fg +
                             self.pf1_ww_rpm + 
                             self.pf2_ww_eo +
+                            self.pf2_ww_fg +
                             self.pf2_ww_rpm +
                             self.pf3_ww_eo +
+                            self.pf3_ww_fg +
                             self.pf3_ww_rpm + 
                             self.pf4_ww_eo +
+                            self.pf4_ww_fg +
                             self.pf4_ww_rpm +
                             self.pf5_ww_eo +
+                            self.pf5_ww_fg +
                             self.pf5_ww_rpm)
         
         self.pf_total = (self.pf1_total +
