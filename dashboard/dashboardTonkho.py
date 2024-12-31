@@ -149,7 +149,7 @@ class BaseCountPallet():
         
 class CountPalletDAHO(BaseCountPallet):
     '''
-    Kế thừa từ class BasecountPallet, add thê thuộc tính type_loc.
+    Kế thừa từ class BasecountPallet, add thêm thuộc tính type_loc.
     Trả về số pallet được query từ df tồn kho dùng riêng cho rack DA và HO
     '''
     def __init__(self, df, namewh, typerack, cat, typeloc):
@@ -187,6 +187,7 @@ class CountPallet_FgRpmEo():
     
     def CoutPallet_Pm(self):
         #Phải lấy luôn cả pack_mat và blank. Nên phương án đưa ra là loại bỏ hàng raw_mat là đáp ứng đc yc
+        #name_wh.isnull() -> lấy luôn cả dòng name_wh trống
         try:
             QUERY = "cat_inv == '{}' & type1 != '{}' & (name_wh == 'WH1' | name_wh == 'WH2' | name_wh == 'WH3')".format(self.cat_inv, self.type1)
             num_pallet = self.df.query(QUERY).agg({'pallet': 'sum'})[0]
@@ -247,6 +248,35 @@ class CountPalletWithLoc():
     def CountPallet(self):
         try:
             QUERY = "location == '{}'".format(self.location)
+            num_pallet = self.df.query(QUERY).agg({'pallet': 'sum'})[0]
+            return num_pallet
+        except Exception as err:
+            return None
+        
+class CountPalletBlock():
+    def __init__(self, df, cat_inv = None):
+        self.df = df
+        self.cat_inv = cat_inv
+
+    def CountTotalPlBlock(self):
+        try:
+            QUERY = "status == 'HD' & (name_wh != 'REJ' & name_wh != 'LSL')"
+            num_pallet = self.df.query(QUERY).agg({'pallet': 'sum'})[0]
+            return num_pallet
+        except Exception as err:
+            return None
+        
+    def CountPlBlockFG(self):
+        try:
+            QUERY = "status == 'HD' & cat_inv == 'FG' & (name_wh != 'REJ' & name_wh != 'LSL')"
+            num_pallet = self.df.query(QUERY).agg({'pallet': 'sum'})[0]
+            return num_pallet
+        except Exception as err:
+            return None
+    
+    def CountPlBlockLB(self):
+        try:
+            QUERY = "status == 'HD' & cat_inv == 'RPM' & name_wh == 'LB'"
             num_pallet = self.df.query(QUERY).agg({'pallet': 'sum'})[0]
             return num_pallet
         except Exception as err:
@@ -876,6 +906,16 @@ class CoutPlDetailLoc():
 
         return self.dict_steam_total
 
+    def GetPl_Block(self):
+        '''
+        Tính tổng pallet block trừ vị trí stream có name_wh là REJ và EOL có name_wh LSL
+        '''
+        self.total_pallet_block = CountPalletBlock(self.dfInv).CountTotalPlBlock()
+        self.pallet_fg_block = CountPalletBlock(self.dfInv).CountPlBlockFG()
+        self.pallet_lb_block = CountPalletBlock(self.dfInv).CountPlBlockLB()
+        self.pallet_rpm_block = self.total_pallet_block - self.pallet_fg_block - self.pallet_lb_block
+
+
     def GetPl_Fg(self):
         '''
         Count tất cả pallet có cat_inv là FG. Tránh trường hợp count sót khi gcas chưa có trong masterdata
@@ -883,7 +923,7 @@ class CoutPlDetailLoc():
         '''
         #chạy method get steam trước. Vì khi tính totalwh(BDWH123) thì method GetPL_Steam chưa được gọi
         #method này đc gọi 2 lần :((
-        self.GetPl_Steam()
+        # self.GetPl_Steam()
 
         cat_fg = 'FG'
         type1 = 'finished_goods'
@@ -896,6 +936,7 @@ class CoutPlDetailLoc():
         return self.dict_mt_fg
     
     def GetPl_Pm(self):
+        #tính tổng cột pallet có cat_inv là rpm, type1 khác raw_mat ở trong name_wh (wh1, wh2. wh3)
         cat_rpm = 'RPM'
         type_not_pm = 'raw_mat'
         self.pallet_pm = CountPallet_FgRpmEo(self.dfInv, cat_rpm, type_not_pm).CoutPallet_Pm()
@@ -907,6 +948,7 @@ class CoutPlDetailLoc():
         return self.dict_mt_pm
     
     def GetPl_Rm(self):
+        #tính tổng cột pallet có cat_inv là rpm, type1 là raw_mat ở trong name_wh (wh1, wh2. wh3)
         cat_rpm = 'RPM'
         type_rm = 'raw_mat'
         self.pallet_rm = CountPallet_FgRpmEo(self.dfInv, cat_rpm, type_rm).CoutPallet_Rm()
@@ -918,6 +960,7 @@ class CoutPlDetailLoc():
         return self.dict_mt_rm
     
     def GetPl_Eo(self):
+        #tính tổng cột pallet có cat_inv là EO
         self.dict_capa_eo = {'total': 461}
         cat_eo = 'EO'
         self.pallet_eo = CountPallet_FgRpmEo(self.dfInv, cat_eo).CoutPallet_Eo()
@@ -1060,6 +1103,7 @@ class CoutPlDetailLoc():
         return self.dict_mt_pm_cat
 
     def Get_FgRpmEo_Total(self):
+        #chưa sử dụng
         wh1_fg = (self.wh1_hr_fg +
                   self.wh1_pf_fg +
                   self.wh1_ww_fg +
