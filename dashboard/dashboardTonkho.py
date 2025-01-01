@@ -999,7 +999,7 @@ class CoutPlDetailLoc():
     
     def GetPl_EO(self):
         #tính tổng cột pallet có cat_inv là EO
-        self.dict_capa_eo = {'total': 461}
+        self.dict_capa_eo = {'total': 546}
         cat_eo = 'EO'
         self.pallet_eo = CountPallet_FgRpmEo(self.dfInv, cat_eo).CoutPallet_Eo()
         self.fig_eo = CreateGauge('', self.pallet_eo, self.dict_capa_eo['total']).create_gauge()
