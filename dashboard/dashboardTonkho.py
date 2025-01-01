@@ -178,8 +178,8 @@ class CountPallet_FgRpmEo():
 
     def CoutPallet_Fg(self):
         try:
-            #Cũ: QUERY = "cat_inv == '{}' & (name_wh == 'WH1' | name_wh == 'WH2' | name_wh == 'WH3')".format(self.cat_inv)
-            QUERY = "cat_inv == '{}'".format(self.cat_inv)
+            QUERY = "cat_inv == '{}' & (name_wh == 'WH1' | name_wh == 'WH2' | name_wh == 'WH3')".format(self.cat_inv)
+            # mới: QUERY = "cat_inv == '{}'".format(self.cat_inv)
             num_pallet = self.df.query(QUERY).agg({'pallet': 'sum'})[0]
             return num_pallet
         except Exception as err:
@@ -915,39 +915,77 @@ class CoutPlDetailLoc():
         self.pallet_lb_block = CountPalletBlock(self.dfInv).CountPlBlockLB()
         self.pallet_rpm_block = self.total_pallet_block - self.pallet_fg_block - self.pallet_lb_block
 
+        self.obj_mt_total_block = StMetric(label='BLOCK 200', value=self.total_pallet_block)
+        self.obj_mt_fg_block = StMetric(label='FG', value=self.pallet_fg_block)
+        self.obj_mt_rpm_block = StMetric(label='RPM', value=self.pallet_rpm_block)
+        self.obj_mt_lb_block = StMetric(label='LABEL', value=self.pallet_lb_block)
 
-    def GetPl_Fg(self):
+        self.dict_mt_block = {
+            'total_block': self.obj_mt_total_block,
+            'fg_block': self.obj_mt_fg_block,
+            'rpm_block': self.obj_mt_rpm_block,
+            'lb_block': self.obj_mt_lb_block
+        }
+
+        return self.dict_mt_block
+
+    def GetPl_Total_FG(self):
         '''
         Count tất cả pallet có cat_inv là FG. Tránh trường hợp count sót khi gcas chưa có trong masterdata
         Trừ đi FG ở cont, door (scanout) và trừ đi FG ở Steam
         '''
-        #chạy method get steam trước. Vì khi tính totalwh(BDWH123) thì method GetPL_Steam chưa được gọi
-        #method này đc gọi 2 lần :((
-        # self.GetPl_Steam()
+        
 
         cat_fg = 'FG'
         type1 = 'finished_goods'
         self.pallet_fg = CountPallet_FgRpmEo(self.dfInv, cat_fg).CoutPallet_Fg() - self.wh2_scanout
-        self.obj_mt_fg = StMetric(label='FG BD 2500', value=self.pallet_fg)
+        self.obj_mt_fg = StMetric(label='TOTAL FG', value=self.pallet_fg)
 
         self.dict_mt_fg = {
-            'fg': self.obj_mt_fg
+            'total_fg': self.obj_mt_fg
         }
         return self.dict_mt_fg
     
-    def GetPl_Pm(self):
+    def GetPl_FG(self):
+        '''
+        Tồn pallt FG phải từ thêm steam vì công thức lấy tồn FG là lấy hết những dòng có cat_inv là FG.
+        Trong đó có cả những pallet ở steam, nên phải trừ ra.
+        Tổng tồn trong wh1,2,3 từ đi hàng fg block
+
+        '''
+        #chạy method get steam trước. Vì khi tính totalwh(BDWH123) thì method GetPL_Steam chưa được gọi
+        #method này đc gọi 2 lần :((
+        # self.GetPl_Steam()
+        self.fg_bd = self.pallet_fg - self.pallet_fg_block
+        self.obj_fg_bd = StMetric(label='FG BD 2500', value=self.fg_bd)
+        self.dict_fgbd = {
+            'fg_bd': self.obj_fg_bd
+        }
+        return self.dict_fgbd
+    
+    def GetPl_Total_PM(self):
         #tính tổng cột pallet có cat_inv là rpm, type1 khác raw_mat ở trong name_wh (wh1, wh2. wh3)
         cat_rpm = 'RPM'
         type_not_pm = 'raw_mat'
         self.pallet_pm = CountPallet_FgRpmEo(self.dfInv, cat_rpm, type_not_pm).CoutPallet_Pm()
-        self.obj_mt_pm = StMetric(label='PM PLT 4500', value=self.pallet_pm)
+        self.obj_mt_pm = StMetric(label='TOTAL PM', value=self.pallet_pm)
 
         self.dict_mt_pm = {
-            'pm': self.obj_mt_pm
+            'total_pm': self.obj_mt_pm
         }
         return self.dict_mt_pm
     
-    def GetPl_Rm(self):
+    def GetPl_PM(self):
+        #PM không trừ steam vì trong công thức lấy pallet rpm chỉ lấy trong wh1,2,3 mà steam ở kho rej.
+        #Nghĩa là tồn pl rpm không có pl steam nên không cần trừ
+        self.pm_plt = self.pallet_pm - self.pallet_rpm_block
+        self.obj_rpm_plt = StMetric(label='PM PLT 4500', value=self.pm_plt)
+        self.dict_pm_plt = {
+            'pm_plt': self.obj_rpm_plt
+        }
+        return self.dict_pm_plt
+    
+    def GetPl_RM(self):
         #tính tổng cột pallet có cat_inv là rpm, type1 là raw_mat ở trong name_wh (wh1, wh2. wh3)
         cat_rpm = 'RPM'
         type_rm = 'raw_mat'
@@ -959,7 +997,7 @@ class CoutPlDetailLoc():
         }
         return self.dict_mt_rm
     
-    def GetPl_Eo(self):
+    def GetPl_EO(self):
         #tính tổng cột pallet có cat_inv là EO
         self.dict_capa_eo = {'total': 461}
         cat_eo = 'EO'
@@ -973,15 +1011,15 @@ class CoutPlDetailLoc():
         }
         return self.dictfig_eo
     
-    def GetPl_Total(self):
+    def GetPl_Total_BDWH(self):
         '''
         Lấy tổng tồn pallet FG, RPM của WH1,2,3 trừ đi pallet SCANOUT. 
         Mới: Không càn trừ scanout nữa vì đã trừ khi tính total FG
         '''
         self.dict_capa_total = {'total_pl': 8618}
-        self.pl_fg = self.GetPl_Fg()['fg'].value
-        self.pl_pm = self.GetPl_Pm()['pm'].value
-        self.pl_rm = self.GetPl_Rm()['rm'].value
+        self.pl_fg = self.GetPl_Total_FG()['total_fg'].value
+        self.pl_pm = self.GetPl_Total_PM()['total_pm'].value
+        self.pl_rm = self.GetPl_RM()['rm'].value
 
         self.total_pallet_fgrpm = self.pl_fg + self.pl_pm +  self.pl_rm
         self.fig_total_fgrpm = CreateGauge('', self.total_pallet_fgrpm, self.dict_capa_total['total_pl']).create_gauge()

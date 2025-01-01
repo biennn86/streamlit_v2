@@ -8,6 +8,7 @@ st.set_page_config(page_title='Dashboard P&G', page_icon='📊', layout='wide')
 st.html("./dashboard/style_wh123.html")
 st.html("./dashboard/style_mt_row1.html")
 st.html("./dashboard/style_mt_row2.html")
+st.html("./dashboard/style_mt_row3.html")
 st.html("./dashboard/style_bdwh_label_eo.html")
 st.html("./dashboard/style_pf_cool.html")
 #tab empty loc
@@ -138,7 +139,7 @@ with cont_dashboard:
     with cont_label_total:
         #=========BDWH===================
         cont_bdwh = cont_label_total.container(border=border)
-        bdwh = obj_getpl_3wh.GetPl_Total()
+        bdwh = obj_getpl_3wh.GetPl_Total_BDWH()
         with cont_bdwh:
             cont_bdwh.html(f"<span class='bdwh'</span>")
             with st.container(border=border):
@@ -161,7 +162,7 @@ with cont_dashboard:
                 st.plotly_chart(figlb['total'])
         #==============EO===================
         cont_eo = cont_label_total.container(border=border)
-        figeo = obj_getpl_3wh.GetPl_Eo()
+        figeo = obj_getpl_3wh.GetPl_EO()
         with cont_eo:
             cont_eo.html(f"<span class='eo'</span>")
             with st.container(border=border):
@@ -172,6 +173,12 @@ with cont_dashboard:
                 st.plotly_chart(figeo['total'])
 
     with cont_metric:
+        mt_block = obj_getpl_3wh.GetPl_Block()
+        mt_total_fg = obj_getpl_3wh.GetPl_Total_FG()
+        mt_total_pm = obj_getpl_3wh.GetPl_Total_PM()
+        mt_fg_bd = obj_getpl_3wh.GetPl_FG()
+        mt_pm_plt = obj_getpl_3wh.GetPl_PM()
+        mt_rm = obj_getpl_3wh.GetPl_RM()
         mt_steam = obj_getpl_3wh.GetPl_Steam()
         mt_scanout = obj_getpl_3wh.GetPl_Scanout()
         mt_fgls = obj_getpl_3wh.GetPl_Fgls()
@@ -181,11 +188,6 @@ with cont_dashboard:
         mt_pm_cat = obj_getpl_3wh.GetPl_PmWithCat()
         mt_fg_cat = obj_getpl_3wh.GetPl_FgWithCat()
         mt_lsl = obj_getpl_3wh.GetPl_Lsl()
-        #chuyển tính fg, pm, rm xuống dưới cùng
-        #vì khi tính fg, pm, rm cần chạy các method trên để lấy số trước
-        mt_fg = obj_getpl_3wh.GetPl_Fg()
-        mt_pm = obj_getpl_3wh.GetPl_Pm()
-        mt_rm = obj_getpl_3wh.GetPl_Rm()
 
         # 'pleol': self.obj_lsl_in,
         # 'lslpm': self.obj_lsl_pm,
@@ -193,7 +195,7 @@ with cont_dashboard:
         # 'lrt': self.lsl_lrt
         with st.container(border=border):
             a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 = st.columns([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-            a1.html(f"<span class='pm'</span>")
+            a1.html(f"<span class='pm_plt'</span>")
             a2.html(f"<span class='rm'</span>")
             a3.html(f"<span class='shipper'</span>")
             a4.html(f"<span class='bottle'</span>")
@@ -205,7 +207,7 @@ with cont_dashboard:
             a10.html(f"<span class='lrt'</span>")
 
             
-            a1.metric(**mt_pm['pm'].dict_metric())
+            a1.metric(**mt_pm_plt['pm_plt'].dict_metric())
             a2.metric(**mt_rm['rm'].dict_metric())
             a3.metric(**mt_pm_cat['shipper'].dict_metric())
             a4.metric(**mt_pm_cat['bottle'].dict_metric())
@@ -218,7 +220,7 @@ with cont_dashboard:
 
         with st.container(border=border):
             b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11 = st.columns([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-            b1.html(f"<span class='fg'</span>")
+            b1.html(f"<span class='fg_bd'</span>")
             b2.html(f"<span class='fgdwn'</span>")
             b3.html(f"<span class='fgfebz'</span>")
             b4.html(f"<span class='fghdl'</span>")
@@ -230,7 +232,7 @@ with cont_dashboard:
             b10.html(f"<span class='lost'</span>")
             b11.html(f"<span class='steam'</span>")
 
-            b1.metric(**mt_fg['fg'].dict_metric())
+            b1.metric(**mt_fg_bd['fg_bd'].dict_metric())
             b2.metric(**mt_fg_cat['fgdwn'].dict_metric())
             b3.metric(**mt_fg_cat['fgfebz'].dict_metric())
             b4.metric(**mt_fg_cat['fghdl'].dict_metric())
@@ -241,6 +243,23 @@ with cont_dashboard:
             b9.metric(**mt_matdm['matdm'].dict_metric())
             b10.metric(**mt_lost['lost'].dict_metric())
             b11.metric(**mt_steam['steam'].dict_metric())
+
+        with st.container(border=border):
+            c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11 = st.columns([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+            c1.html(f"<span class='total_fg'</span>")
+            c2.html(f"<span class='total_pm'</span>")
+            c3.html(f"<span class='total_block'</span>")
+            c4.html(f"<span class='fg_block'</span>")
+            c5.html(f"<span class='rpm_block'</span>")
+            c6.html(f"<span class='lb_block'</span>")
+
+            c1.metric(**mt_total_fg['total_fg'].dict_metric())
+            c2.metric(**mt_total_pm['total_pm'].dict_metric())
+            c3.metric(**mt_block['total_block'].dict_metric())
+            c4.metric(**mt_block['fg_block'].dict_metric())
+            c5.metric(**mt_block['rpm_block'].dict_metric())
+            c6.metric(**mt_block['lb_block'].dict_metric())
+
 #=============================================TAB_EMPTYLOC===============================================
 container_emploc = tab_emptyloc.container(border=border)
 title_emp = container_emploc.container(border=border)
