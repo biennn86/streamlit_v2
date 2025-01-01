@@ -119,7 +119,7 @@ class CreateDfToDB():
         #Lọc những vị trí cần lấy
         self.df_mixup_final = pd.merge(left=self.df_mixup_allloc, right=self.masterLocation, on=['location'], how='left')
         self.df_mixup_final =  self.df_mixup_final[self.df_mixup_final['type_rack'].isin(['HR', 'PF', 'MK']) & 
-                                                   self.df_mixup_final['type_loc'].isin(['DB', 'ST', 'FL', 'SV'])]
+                                                   self.df_mixup_final['type_loc'].isin(['DB', 'ST', 'FL', 'SV', 'OB'])]
         self.df_mixup_final = self.df_mixup_final[['date', 'location', 'gcas', 'batch', 'vnl', 'status', 'qty', 'pallet']].reset_index(drop=True)
         self.df_mixup_final = self.df_mixup_final.astype(str)
         # print(self.df_mixup_final)
