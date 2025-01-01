@@ -695,7 +695,8 @@ def create_loc_floor():
         loc_rt = LocationMethodFloor(loc, 'RETURN', 'FL', 'FL', 'WH2', loc, level, 1, 1, 1).createlocfloor()
         loc_fl.append(loc_rt)
     #12 VT sàn kho Nhãn
-    lst_loc_label_floor = {'LABEL1', 'LABEL2', 'LABEL3', 'LABEL4', 'LABEL5', 'LABEL6', 'LABEL7', 'LBSTEAM'}
+    lst_loc_label_floor = {'LABEL1', 'LABEL2', 'LABEL3', 'LABEL4', 'LABEL5', 'LABEL6', 'LABEL7', 'LBSTEAM', 
+                           'LABEL8A', 'LABEL8B', 'LABEL8C', 'LABEL8D', 'LABEL9A', 'LABEL9B', 'LABELCA', 'LABEL9D'}
     for loc in lst_loc_label_floor:
         loc_lb_fl = LocationMethodFloor(loc, 'WW', 'FL', 'WW', 'LB', loc, level, 1, 1, 1).createlocfloor()
         loc_fl.append(loc_lb_fl)
