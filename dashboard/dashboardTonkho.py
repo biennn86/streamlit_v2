@@ -1141,7 +1141,9 @@ class CoutPlDetailLoc():
         return self.dict_mt_pm_cat
 
     def Get_FgRpmEo_Total(self):
-        #chưa sử dụng
+        '''
+        chưa sử dụng
+        '''
         wh1_fg = (self.wh1_hr_fg +
                   self.wh1_pf_fg +
                   self.wh1_ww_fg +
