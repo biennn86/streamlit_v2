@@ -1257,13 +1257,6 @@ class CoutPlDetailLoc():
 
         return dict_total_fgrpmeo
 
-# class TabOther():
-#     def __init__(self):
-#         self.obj = BackEndSteamLit()
-#     def Empty_Loc(self):
-#         return self.obj.GetEMptyLoc()
-
-
 # @st.cache_resource
 class CreateGauge():
     def __init__(self, title, value, capa=1):
