@@ -36,6 +36,10 @@ cont_label_total = col_lable_total.container(border=border)
 obj_getpl_3wh =  CoutPlDetailLoc()
 if obj_getpl_3wh.dfInv is None:
     st.stop()
+else:
+    df_mixup = obj_getpl_3wh.GetMixup()
+    df_emptyloc = obj_getpl_3wh.GetEmptyLoc()
+    df_combinebin = obj_getpl_3wh.GetCombinebin()
 
 with cont_title:
     st.html(f"<span class='title_dashboard'</span>")
@@ -188,6 +192,8 @@ with cont_dashboard:
         mt_pm_cat = obj_getpl_3wh.GetPl_PmWithCat()
         mt_fg_cat = obj_getpl_3wh.GetPl_FgWithCat()
         mt_lsl = obj_getpl_3wh.GetPl_Lsl()
+        mt_jit = obj_getpl_3wh.GetPl_JIT()
+        mt_mx_combine_emp = obj_getpl_3wh.GetPL_Mx_Combine_Emp()
 
         # 'pleol': self.obj_lsl_in,
         # 'lslpm': self.obj_lsl_pm,
@@ -252,6 +258,10 @@ with cont_dashboard:
             c4.html(f"<span class='fg_block'</span>")
             c5.html(f"<span class='rpm_block'</span>")
             c6.html(f"<span class='lb_block'</span>")
+            c7.html(f"<span class='jit'</span>")
+            c8.html(f"<span class='emploc_wh123'</span>")
+            c9.html(f"<span class='combinebin'</span>")
+            c10.html(f"<span class='mixup'</span>")
 
             c1.metric(**mt_total_fg['total_fg'].dict_metric())
             c2.metric(**mt_total_pm['total_pm'].dict_metric())
@@ -259,6 +269,11 @@ with cont_dashboard:
             c4.metric(**mt_block['fg_block'].dict_metric())
             c5.metric(**mt_block['rpm_block'].dict_metric())
             c6.metric(**mt_block['lb_block'].dict_metric())
+            c7.metric(**mt_jit['jit'].dict_metric())
+            c8.metric(**mt_mx_combine_emp['emploc_wh123'].dict_metric())
+            c9.metric(**mt_mx_combine_emp['combinebin'].dict_metric())
+            c10.metric(**mt_mx_combine_emp['mixup'].dict_metric())
+
 
 #=============================================TAB_EMPTYLOC===============================================
 container_emploc = tab_emptyloc.container(border=border)
@@ -269,7 +284,7 @@ with title_emp:
     st.subheader('EMPTY LOCATION {}'.format(obj_getpl_3wh.StringDataTime))
 with cont_emp:
     st.html(f"<span class='df_emp'</span>")
-    st.dataframe(obj_getpl_3wh.GetEmptyLoc(), width=1000, height=1000, hide_index=True)
+    st.dataframe(df_emptyloc, width=1000, height=1000, hide_index=True)
 # obj_Empty = TabOther()
 # oo = obj_Empty.Empty_Loc()
 #=============================================COMBINE_BIN===============================================
@@ -281,7 +296,7 @@ with title_combinebin:
     st.subheader('COMBINE BIN {}'.format(obj_getpl_3wh.StringDataTime))
 with combinebin:
     st.html(f"<span class='df_combinebin'</span>")
-    st.dataframe(obj_getpl_3wh.GetCombinebin(), width=1000, height=None, hide_index=True)
+    st.dataframe(df_combinebin, width=1000, height=None, hide_index=True)
 #=============================================MIXUP===============================================
 cont_mixup = tab_mixup.container(border=border)
 title_mixup = cont_mixup.container(border=border)
@@ -291,7 +306,7 @@ with title_mixup:
     st.subheader('BIN MIXUP {}'.format(obj_getpl_3wh.StringDataTime))
 with mixup:
     st.html(f"<span class='df_mixup'</span>")
-    st.dataframe(obj_getpl_3wh.GetMixup(), width=1000, height=None, hide_index=True)
+    st.dataframe(df_mixup, width=1000, height=None, hide_index=True)
 #=============================================TỒN KHO===============================================
 cont_inv = tab_tonkho.container(border=border)
 title_inv = cont_inv.container(border=border)
@@ -305,7 +320,6 @@ with title_inv:
 with all_inv:
     st.html(f"<span class='df_inv'</span>")
     st.dataframe(df_inventory_from_db, width=1500, height=700, hide_index=True)
-
 
 
 

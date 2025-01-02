@@ -19,17 +19,18 @@ class BackEndSteamLit:
     # def GetEMptyLoc(self):
     #     return self.objTonkho.EmptyLoc()
     def emptyloc(self):
-        emp = self.objTonkho.EmptyLoc()
-        return emp
+        self.df_empty_loc = self.objTonkho.EmptyLoc()
+        return self.df_empty_loc
     def combinebin(self):
-        bincombine = self.objTonkho.CombineBin()
-        return bincombine
+        self.df_bincombine = self.objTonkho.CombineBin()
+        return self.df_bincombine
     def binmixup(self):
-        mixup = self.objTonkho.FindMixup()
-        return mixup
+        self.df_mixup = self.objTonkho.FindMixup()
+        return self.df_mixup
     def get_inv(self):
-        inv = self.objTonkho.Get_Inventory()
-        return inv
+        self.df_inventory = self.objTonkho.Get_Inventory()
+        return self.df_inventory
+    
 class CreateLocMasterData:
     def CreateLocaion(self):
         main_createloc()

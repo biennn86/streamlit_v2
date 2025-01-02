@@ -65,7 +65,7 @@ class CreateDfToDB():
         # # Hợp nhất các DataFrame nhỏ theo chiều ngang
         # self.dfEmptyLoc = pd.concat(self.dfs, axis=1, ignore_index=False)
         # self.dfEmptyLoc.rename(columns={'index': 'STT', 'location': 'Location', 'type_rack': 'Type', 'name_wh': 'Name_Wh', 'num_pallet': 'Num_Pallet', 'note': 'Note'}, inplace=True)
-        # # self.dfEmptyLoc.to_excel('EmptyLoc.xlsx', index=False)
+        # self.dfEmptyLoc.to_excel('EmptyLoc.xlsx', index=False)
         # # print(self.dfEmptyLoc)
         # return self.dfEmptyLoc
         #=================
@@ -87,6 +87,7 @@ class CreateDfToDB():
         }, inplace=True)
 
         self.df_emptyloc = self.dfMergeLocInv
+        # self.df_emptyloc.to_excel('EmptyLoc.xlsx', index=False)
         return self.df_emptyloc
     
     def FindMixup(self):

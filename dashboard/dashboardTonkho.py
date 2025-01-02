@@ -273,7 +273,7 @@ class CountPalletBlock():
             return num_pallet
         except Exception as err:
             return None
-    
+        
     def CountPlBlockLB(self):
         try:
             QUERY = "status == 'HD' & cat_inv == 'RPM' & name_wh == 'LB'"
@@ -281,6 +281,19 @@ class CountPalletBlock():
             return num_pallet
         except Exception as err:
             return None
+
+class CountPalletJIT():
+    def __init__(self, df):
+        self.df = df 
+    def PalletJIT(self):
+        try:
+            QUERY = "jit == 'JIT'"
+            num_pallet = self.df.query(QUERY).agg({'pallet': 'sum'})[0]
+            return num_pallet
+        except Exception as err:
+            return None
+    
+    
 
 # @st.cache_data
 class CoutPlDetailLoc():
@@ -300,17 +313,17 @@ class CoutPlDetailLoc():
         self.CAT = ('eo', 'fg', 'rpm')
 
     def GetEmptyLoc(self):
-        self.emptyloc = self.obj_dftonkho.emptyloc()
-        return self.emptyloc
+        self.df_emptyloc = self.obj_dftonkho.emptyloc()
+        return self.df_emptyloc
     def GetCombinebin(self):
-        self.combinebin = self.obj_dftonkho.combinebin()
-        return self.combinebin
+        self.df_combinebin = self.obj_dftonkho.combinebin()
+        return self.df_combinebin
     def GetMixup(self):
-        self.mixup = self.obj_dftonkho.binmixup()
-        return self.mixup
+        self.df_mixup = self.obj_dftonkho.binmixup()
+        return self.df_mixup
     def GetInventory(self):
-        self.inv = self.obj_dftonkho.get_inv()
-        return self.inv
+        self.df_inv = self.obj_dftonkho.get_inv()
+        return self.df_inv
 
     def GetPl_Wh1(self):
         typelocwh1 = ('hr', 'pf', 'ww', 'in')
@@ -1112,6 +1125,15 @@ class CoutPlDetailLoc():
 
         return self.dict_mt_fg_cat
     
+    def GetPl_JIT(self):
+        # jit = self.dfInv[self.dfInv['jit'] == 'JIT'].agg({'pallet': 'sum'})
+        self.pallet_jit = CountPalletJIT(self.dfInv).PalletJIT()
+        self.obj_mt_jit = StMetric(label='JIT', value = self.pallet_jit)
+        self.dict_mt_jit = {
+            'jit': self.obj_mt_jit
+        }
+        return self.dict_mt_jit
+    
     def GetPl_PmWithCat(self):
         #Cout pallet theo cat_inv và type2 shipper, pouch, bottle
         cat = ('shipper', 'pouch', 'bottle')
@@ -1139,6 +1161,27 @@ class CoutPlDetailLoc():
         }
 
         return self.dict_mt_pm_cat
+    
+    def GetPL_Mx_Combine_Emp(self):
+        self.num_mixup = self.df_mixup['Location'].nunique()
+        self.num_combinebin = self.df_combinebin.shape[0]
+        self.df_combinebine_copy = self.df_emptyloc.copy()
+        self.df_combinebine_copy.columns = [re.sub(r'[ -]', "_", string).lower() for string in self.df_combinebine_copy.columns]
+        self.num_emploc_wh123 = self.df_combinebine_copy.query("(wh_name == 'WH1') | (wh_name == 'WH2') | (wh_name == 'WH3')").agg({'number_pallet': 'sum'})[0]
+
+        self.obj_mt_num_mixup = StMetric(label='MIXUP', value=self.num_mixup)
+        self.obj_mt_num_combinebin = StMetric(label='COMBINE', value=self.num_combinebin)
+        self.obj_mt_num_emploc_wh123 = StMetric(label='EMPTY LOC', value=self.num_emploc_wh123)
+
+        self.dict_mt_mx_com_emp = {
+            'mixup': self.obj_mt_num_mixup,
+            'combinebin': self.obj_mt_num_combinebin,
+            'emploc_wh123': self.obj_mt_num_emploc_wh123
+        }
+
+        return self.dict_mt_mx_com_emp
+
+
 
     def Get_FgRpmEo_Total(self):
         '''
