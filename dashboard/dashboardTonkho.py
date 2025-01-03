@@ -25,9 +25,14 @@ class ImportInvToDf:
         with st.sidebar:
             #create location
             with st.expander('Create Location'):
-                obj_option = CreateLocMasterData()
-                if st.button('Create Location'):
-                    obj_option.CreateLocaion()
+                try:
+                    obj_option = CreateLocMasterData()
+                    if st.button('Create Location'):
+                        obj_option.CreateLocaion()
+                        st.toast('Create Location Successfully.', icon="ℹ️")
+                except Exception as err:
+                    st.toast('error create location: ' + str(err), icon="🚨")
+                    st.stop()
             #import master data
             with st.expander('Update Master Data'):
                 uploaded_file_mtdt = st.file_uploader('Choose File Master Data', accept_multiple_files=False)
