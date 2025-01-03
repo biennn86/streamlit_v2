@@ -32,7 +32,14 @@ class ImportInvToDf:
             with st.expander('Update Master Data'):
                 uploaded_file_mtdt = st.file_uploader('Choose File Master Data', accept_multiple_files=False)
                 if uploaded_file_mtdt is not None:
-                    import_mtdt(uploaded_file_mtdt)
+                    try:
+                        import_mtdt(uploaded_file_mtdt)
+                        st.toast('Import MasterData Successfully.', icon="ℹ️")
+                    except Exception as err:
+                        st.toast('error import masterdata: ' + str(err), icon="🚨")
+                        print('error import masterdata')
+                        st.stop()
+                        
             #import file tồn kho 
             with st.expander('Import Files Inventory'):
                 # uploaded_files = st.file_uploader('Choose Files Inventory FG-RPM-EO', accept_multiple_files=True)
@@ -308,8 +315,9 @@ class CoutPlDetailLoc():
             if self.dfInv is not None:
                 self.StringDataTime = self.dfInv.iloc[0, 0]
         except Exception as err:
-            print(err)
+            print('error cls countpldetailloc: ' + str(err))
             print('File Import Không Tồn Tại!')
+
         self.CAT = ('eo', 'fg', 'rpm')
 
     def GetEmptyLoc(self):

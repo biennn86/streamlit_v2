@@ -31,7 +31,10 @@ class BaseControl:
             with ConnectDB().getConection() as conn:
                 df = df.astype('string')
                 df_old = self.get_df_from_db()
+                if df_old is not None:
+                    df_old = df_old.astype('string')
                 df_new = pd.concat([df_old, df], axis=0)
+                #lấy tổng số hàng bị trùng lặp trong df
                 duplicates = df_new.duplicated().sum()
                 
                 if duplicates == 0:
