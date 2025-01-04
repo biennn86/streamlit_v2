@@ -33,6 +33,15 @@ class ImportInvToDf:
                 except Exception as err:
                     st.toast('error create location: ' + str(err), icon="🚨")
                     st.stop()
+            #download database
+            with st.expander('Download DataBase'):
+                with open("database//pg.db", "rb") as fp:
+                    btn = st.download_button(
+                        label="Download DB",
+                        data=fp,
+                        file_name="pg_backup.db",
+                        mime="application/octet-stream"
+                    )
             #import master data
             with st.expander('Update Master Data'):
                 uploaded_file_mtdt = st.file_uploader('Choose File Master Data', accept_multiple_files=False)
@@ -44,6 +53,8 @@ class ImportInvToDf:
                         st.toast('error import masterdata: ' + str(err), icon="🚨")
                         print('error import masterdata')
                         st.stop()
+            
+            
                         
             #import file tồn kho 
             with st.expander('Import Files Inventory'):
