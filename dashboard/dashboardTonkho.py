@@ -35,7 +35,7 @@ class ImportInvToDf:
                     st.stop()
             #download database
             with st.expander('Download DataBase'):
-                with open("database//pg.db", "rb") as db:
+                with open("pg.db", "rb") as db:
                     btn = st.download_button(
                         label="Download DB",
                         data=db,
