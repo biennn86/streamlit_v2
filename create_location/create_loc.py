@@ -156,6 +156,7 @@ def create_loc_wh2():
     tang_ae = ['A', 'B', 'C', 'D', 'E']
     tang_af = ['A', 'B', 'C', 'D', 'E', 'F']
     tang_da = ['A', 'B1', "B2", 'C1', 'C2', 'D1', 'D2']
+    tang_fm = ['A', 'B', 'C1', 'C2', 'D1', 'D2', 'E']
     locwh2 = []
     for namerack in name_rack_wh2:
         if namerack in ['FA']:
@@ -187,7 +188,7 @@ def create_loc_wh2():
         elif namerack in ['FL']:
             loc_fl = CreateLocation(namerack, 1, 35, tang_ae, [12, 13, 23, 24], CTGR_RACK_DB, NAME_WH2, {}).create_loc()
         elif namerack in ['FM']:
-            loc_fm = CreateLocation(namerack, 1, 37, tang_ae, [13, 14, 25, 26], CTGR_RACK_DB, NAME_WH2, {}).create_loc()
+            loc_fm = CreateLocation(namerack, 1, 37, tang_fm, [13, 14, 25, 26], CTGR_RACK_DB, NAME_WH2, {}).create_loc()
         elif namerack == 'DA':
             loc_da = CreateLocation(namerack, 1, 31, tang_da, [], CTGR_RACK_OB, NAME_WH2, {}).create_loc()
 
@@ -855,6 +856,6 @@ def main_createloc():
     lst_dict = dict(zip(lst_columns, lst_zip))
    
     df = pd.DataFrame(lst_dict).drop_duplicates()
-    LocationNew().insert_data_from_df(df, 'append')
+    LocationNew().insert_data_from_df(df, 'replace')
     
 
