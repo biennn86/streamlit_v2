@@ -775,7 +775,7 @@ def create_loc_pf_cool():
         loc_pf5_1 = LocationMethodFloor(loc, 'MK', 'FL', 'FL', 'PF5', 'PF5', level, 1, 1, 1).createlocfloor()
         loc_pf.append(loc_pf5_1)
 
-    pf5_2 = ['Z5' + str(i).zfill(2) for i in range(20, 69)] + ['Z5' + str(i).zfill(2) + 'A' for i in range(36, 52)]
+    pf5_2 = ['Z5' + str(i).zfill(2) for i in range(20, 69)] + ['Z5' + str(i).zfill(2) + 'A' for i in range(20, 52)]
     for loc in pf5_2:
         loc_pf5_2 = LocationMethodFloor(loc, 'MK', 'FL', 'FL', 'PF5', 'PF5', level, 1, 1, 1).createlocfloor()
         loc_pf.append(loc_pf5_2)

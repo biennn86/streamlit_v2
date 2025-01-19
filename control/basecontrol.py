@@ -28,6 +28,7 @@ class BaseControl:
         
     def insert_data_from_df(self, df: pd, method_insert = 'append'):
         try:
+            REPLACE = 'replace'
             with ConnectDB().getConection() as conn:
                 df = df.astype('string')
                 df_old = self.get_df_from_db()
@@ -37,7 +38,7 @@ class BaseControl:
                 #lấy tổng số hàng bị trùng lặp trong df
                 duplicates = df_new.duplicated().sum()
                 
-                if duplicates == 0:
+                if (duplicates == 0) or (method_insert == REPLACE):
                     df.to_sql(self.table, conn, if_exists= method_insert, index=False)
                     print('Insert Data Vào Table {} Thành Công. Số Dòng Insert Được {}.'.format(self.table, len(df)))
                 elif duplicates > 0:

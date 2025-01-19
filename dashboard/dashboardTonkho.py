@@ -975,7 +975,7 @@ class CoutPlDetailLoc():
 
         cat_fg = 'FG'
         type1 = 'finished_goods'
-        self.pallet_fg = CountPallet_FgRpmEo(self.dfInv, cat_fg).CoutPallet_Fg() - self.wh2_scanout
+        self.pallet_fg = CountPallet_FgRpmEo(self.dfInv, cat_fg).CoutPallet_Fg() - self.wh2_scanout_fg
         self.obj_mt_fg = StMetric(label='TOTAL FG', value=self.pallet_fg)
 
         self.dict_mt_fg = {
@@ -1004,7 +1004,7 @@ class CoutPlDetailLoc():
         #tính tổng cột pallet có cat_inv là rpm, type1 khác raw_mat ở trong name_wh (wh1, wh2. wh3)
         cat_rpm = 'RPM'
         type_not_pm = 'raw_mat'
-        self.pallet_pm = CountPallet_FgRpmEo(self.dfInv, cat_rpm, type_not_pm).CoutPallet_Pm()
+        self.pallet_pm = CountPallet_FgRpmEo(self.dfInv, cat_rpm, type_not_pm).CoutPallet_Pm() - self.wh2_scanout_rpm
         self.obj_mt_pm = StMetric(label='TOTAL PM', value=self.pallet_pm)
 
         self.dict_mt_pm = {
@@ -1038,7 +1038,7 @@ class CoutPlDetailLoc():
         #tính tổng cột pallet có cat_inv là EO
         self.dict_capa_eo = {'total': 546}
         cat_eo = 'EO'
-        self.pallet_eo = CountPallet_FgRpmEo(self.dfInv, cat_eo).CoutPallet_Eo()
+        self.pallet_eo = CountPallet_FgRpmEo(self.dfInv, cat_eo).CoutPallet_Eo() - self.wh2_scanout_eo
         self.fig_eo = CreateGauge('', self.pallet_eo, self.dict_capa_eo['total']).create_gauge()
         self.cu = f"{self.pallet_eo/self.dict_capa_eo['total']: .0%}"
 
