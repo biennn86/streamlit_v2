@@ -704,7 +704,7 @@ class CoutPlDetailLoc():
         return dictfig_lb
     
     def GetPl_Cooling(self):
-        dict_capa_cooling = {'total': 400}
+        dict_capa_cooling = {'total': 376}
         typeloc_cool = ('mk', 'ww')
         namewh = ('cool1', 'cool2', 'cool3')
 
