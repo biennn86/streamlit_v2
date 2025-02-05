@@ -1053,7 +1053,7 @@ class CoutPlDetailLoc():
         Lấy tổng tồn pallet FG, RPM của WH1,2,3 trừ đi pallet SCANOUT. 
         Mới: Không càn trừ scanout nữa vì đã trừ khi tính total FG
         '''
-        self.dict_capa_total = {'total_pl': 8618}
+        self.dict_capa_total = {'total_pl': 8776}
         self.pl_fg = self.GetPl_Total_FG()['total_fg'].value
         self.pl_pm = self.GetPl_Total_PM()['total_pm'].value
         self.pl_rm = self.GetPl_RM()['rm'].value
