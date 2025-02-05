@@ -427,8 +427,8 @@ class CoutPlDetailLoc():
         typelocwh2 = ('hr', 'pf', 'ww', 'in', 'pick', 'rework', 'return', 'scanout')
         namewh = 'wh2'
         dict_capa_wh2 = {
-            'total': 5010,
-            'hr': 3996,
+            'total': 5082,
+            'hr': 4068,
             'pf': 758,
             'fl': 256,
         }
@@ -546,9 +546,9 @@ class CoutPlDetailLoc():
         typelocwh3 = ('hr', 'pf', 'ww', 'in')
         namewh = 'wh3'
         dict_capa_wh3 = {
-            'total': 2393,
-            'hr': 1969,
-            'pf': 402,
+            'total': 2479,
+            'hr': 2114,
+            'pf': 343,
             'fl': 22,
         }
         self.wh3_hr_eo = BaseCountPallet(self.dfInv, namewh, typelocwh3[0], self.CAT[0]).CountDetailLoc()
