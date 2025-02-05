@@ -662,7 +662,7 @@ class CoutPlDetailLoc():
         typeloc_lb = ('hr', 'pf', 'ww')
         namewh = 'lb'
         dict_capa_lb = {
-            'total': 1165
+            'total': 1156
         }
 
         self.lb_hr_eo = BaseCountPallet(self.dfInv, namewh, typeloc_lb[0], self.CAT[0]).CountDetailLoc()
