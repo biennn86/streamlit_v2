@@ -156,6 +156,7 @@ def create_loc_wh2():
     tang_ae = ['A', 'B', 'C', 'D', 'E']
     tang_af = ['A', 'B', 'C', 'D', 'E', 'F']
     tang_da = ['A', 'B1', "B2", 'C1', 'C2', 'D1', 'D2']
+    tang_da_new = ['AN','AT', 'BN', 'BT', 'CN', 'CT', 'DN', 'DT']
     tang_fm = ['A', 'B', 'C1', 'C2', 'D1', 'D2', 'E']
     locwh2 = []
     for namerack in name_rack_wh2:
@@ -191,10 +192,11 @@ def create_loc_wh2():
             loc_fm = CreateLocation(namerack, 1, 37, tang_fm, [13, 14, 25, 26], CTGR_RACK_DB, NAME_WH2, {}).create_loc()
         elif namerack == 'DA':
             loc_da = CreateLocation(namerack, 1, 31, tang_da, [], CTGR_RACK_OB, NAME_WH2, {}).create_loc()
+            loc_da_new = CreateLocation(namerack, 1, 31, tang_da_new, [], CTGR_RACK_OB, NAME_WH2, {}).create_loc()
 
     locwh2 = loc_fa + loc_fb + loc_fc + loc_fd + loc_fd_eo + loc_fe +\
             loc_ff + loc_fg + loc_fh + loc_fi + loc_fk +\
-            loc_fl + loc_fm + loc_da
+            loc_fl + loc_fm + loc_da + loc_da_new
     return locwh2
 
 def create_loc_wh1():
