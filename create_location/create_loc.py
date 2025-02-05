@@ -667,7 +667,7 @@ def create_loc_floor():
         loc_w2wwh3 = LocationMethodFloor(loc, 'WW', 'FL', 'FL', 'WH3', loc, level, 1, 1, 1).createlocfloor()
         loc_fl.append(loc_w2wwh3)
     #6 Sàn kho 1
-    w2w_wh1 = {'WH1B1', 'WH1B2', 'WH1B3', 'WH1B4', 'WH1B5', 'WH1B6', 'WH1B7', 'WH1B7', 'WH1L1',
+    w2w_wh1 = {'WH1B1', 'WH1B2', 'WH1B3', 'WH1B4', 'WH1B5', 'WH1B6', 'WH1B7', 'WH1B7', 'WH1L1', 'WHL1',
                'HOB1', 'HOB2', 'HOB3', 'HOB4', 'HOB5', 'HOB6', 'HOB7', 'HOB8'}
     for loc in w2w_wh1:
         loc_w2wwh1 = LocationMethodFloor(loc, 'WW', 'FL', 'FL', 'WH1', loc, level, 1, 1, 1).createlocfloor()
