@@ -1,4 +1,4 @@
-from control.basecontrol import BaseControl
+from controllers.BaseControl import BaseControl
 
 class Inventory(BaseControl):
     def __init__(self):
