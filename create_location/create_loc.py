@@ -1,5 +1,5 @@
 import pandas as pd
-from control.location_new import *
+from controllers.location_new import *
 
 class LocationMethod():
     def __init__(self, namerack, vitri, tang, category_rack, name_wh, note):

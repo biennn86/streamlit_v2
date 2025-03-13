@@ -1,6 +1,6 @@
 import re
 import pandas as pd
-from control.masterdata import MasterData
+from controllers.masterdata import MasterData
 
 
 def import_mtdt(linkfile_masterdata):

@@ -2,9 +2,9 @@
 import pandas as pd
 import numpy as np
 from read_tonkho.read_rpm import *
-from control.masterdata import MasterData
-from control.location_new import LocationNew
-from control.tonkho import Inventory
+from controllers.masterdata import MasterData
+from controllers.location_new import LocationNew
+from controllers.tonkho import Inventory
 
 
 class CreateDfToDB():

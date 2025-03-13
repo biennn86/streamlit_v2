@@ -3,7 +3,7 @@ import re
 # from tk import *
 # from tkinter import *
 import pandas as pd
-from control.tonkho import Inventory
+from controllers.tonkho import Inventory
 
 # def create_data_rtcis():
 #     links_file = get_path_import_file()
