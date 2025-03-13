@@ -1,5 +1,6 @@
 import re
 import streamlit as st
+from utils.constants import ValidateFile, Pattern, Columns
 from models.ReadFileInvModel import ReadFileInvModel
 
 class ReadFileInvController:
@@ -13,12 +14,12 @@ class ReadFileInvController:
             return False, "The number of imported files must be divisible by 3."
             # st.toast('The number of files to import must be 3 (EO-FG-RPM).',  icon="⚠️")
         for file in uploaded_files:
-            if '.' in file.name:
-                duoifile = re.split(r'\.', file.name)[-1]
+            if Pattern.DOT.value in file.name:
+                duoifile = re.split(Pattern.DOT_PATTERN.value, file.name)[-1]
             else:
                 duoifile = None
                 
-            if duoifile not in ['xlsx', 'xlsm', 'xls', 'RPT', 'txt', 'TXT', None]:
+            if duoifile not in ValidateFile.LIST_DUOI_FILE_IMPORT.value:
                 return False, f"Invalid file type for {file.name}"
         return True, "Valid file"
     

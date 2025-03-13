@@ -27,6 +27,38 @@ PAGE_CONFIG = {
 class StatusBorder(Enum):
     BORDER = True
 
+class ValidateFile(Enum):
+    LIST_DUOI_FILE_IMPORT = ['xlsx', 'xlsm', 'xls', 'RPT', 'txt', 'TXT', None]
+    LIST_DUOI_FILE_EO = ['xlsx', 'xlsm', 'xls']
+    LIST_DUOI_FILE_TXT = ['RPT', 'txt', 'TXT', None]
+    DECODE_FILE_TXT = "utf-8"
+    CATEGORY_FG = ['F']
+    CATEGORY_RPM = ['P']
+    LEN_RPM_LOST_VNL = 7
+    LEN_LINE_FINAL = 9
+    
+
+class Pattern(Enum):
+    DOT = '.'
+    DOT_PATTERN = r'\.'
+    CATEGORY_FILE = r'(?<=Class:\s)(?:F|P)(?=\s+Item:)'
+    GET_DATETIME = r'(?:.+)(?=BinhDuong\sRTCIS)'
+    GET_TONKHO = r'^(?:.+)(?<=NONE)(?:\b){0}'
+    VN07 = r'(VN07)'
+    TWO_SPACE = r'\s{2,}'
+    ONE_SPACE = r'\s{1,}'
+    STATUS = r'(RL|QU|HD)'
+
+class Columns(Enum):
+    COLUMNS_FILE_EO = ['stt', 'barcode', 'lot#', 'po#', 'owner', 'gcas', 'description', 'supply_chain', 'type', 'status', 'created_by', 'created_date', 'wh_date', 'bin', 'assignment#', 'qty', 'remained_qty']
+    COLUMNS_INV = ['gcas', 'batch', 'vnl', 'status', 'qty', 'pallet', 'location', 'note_inv', 'cat_inv']
+    COLUMNS_EO_NEED = ['GCAS', 'Lot#', 'Barcode', 'Qty', 'Bin', 'Type']
+    
+class VNL_CAT(Enum):
+    VNL_FG = 'VNL_FG'
+    RPM_LOST_VNL = 'RPM_LOST_VNL'
+    FG = 'FG'
+    RPM = 'RPM'
 # Database Configuration
 DB_CONFIG = {
     "host": "localhost",
