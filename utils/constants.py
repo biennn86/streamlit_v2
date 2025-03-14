@@ -59,6 +59,9 @@ class VNL_CAT(Enum):
     RPM_LOST_VNL = 'RPM_LOST_VNL'
     FG = 'FG'
     RPM = 'RPM'
+
+
+    
 # Database Configuration
 DB_CONFIG = {
     "host": "localhost",

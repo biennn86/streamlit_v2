@@ -96,8 +96,8 @@ class ReadFileInvModel:
             return None
     
     def read_data_file(self, data):
-        FG = ValidateFile.CATEGORY_FG.value; RPM = ValidateFile.CATEGORY_RPM.value
-        LEN_RPM_LOST_VNL = ValidateFile.LEN_RPM_LOST_VNL.value; LEN_LINE_FINAL = ValidateFile.LEN_LINE_FINAL.value
+        LEN_RPM_LOST_VNL = ValidateFile.LEN_RPM_LOST_VNL.value
+        LEN_LINE_FINAL = ValidateFile.LEN_LINE_FINAL.value
         #option 1: ^(?=\s*[0-9]{8})(.+)(?<=NONE) -> không lấy được dòng không có gcas và có batch bắt đầu bằng chữ
         #option 2:  ^(?=\s*).+(?<=NONE) -> lấy được tất cả các dòng thõa mãn điều kiện
         #option 3: ^(?:.+)(?<=NONE)(?:\b){0} -> lấy được tất cả các dòng thõa mãn điều kiện và tốc độ tính toán nhanh hơn
@@ -118,10 +118,9 @@ class ReadFileInvModel:
                 # check_line_get = pattern_getline_tonkho.match(line)
                 # if check_line_get:
                 #     data_line = check_line_get.group()
-                data_line = line
-                data_line = re.sub(Pattern.VN07.value, "", data_line)
-                data_line = re.sub(Pattern.TWO_SPACE.value, ";", data_line)
-                scile = re.search(Pattern.STATUS.value, data_line).span()[0]
+                data_line = re.sub(Pattern.VN07.value, "", line)
+                data_line = re.sub(Pattern.TWO_SPACE.value, ";", line)
+                scile = re.search(Pattern.STATUS.value, line).span()[0]
                 data_line_left = data_line[:scile]
                 data_line_right = data_line[scile:]
                 data_line_left =  re.sub(Pattern.ONE_SPACE.value, ";", data_line_left)
@@ -129,16 +128,16 @@ class ReadFileInvModel:
                 data_line_final = data_line_left + data_line_right
                 data_line_final = data_line_final.split(";")
             
-                if (cls_match == FG):
-                    data_line_final.insert(2, VNL_CAT.VNL_FG)
-                    data_line_final.append(VNL_CAT.FG)
+                if (cls_match in ValidateFile.CATEGORY_FG.value):
+                    data_line_final.insert(2, VNL_CAT.VNL_FG.value)
+                    data_line_final.append(VNL_CAT.FG.value)
 
-                if (cls_match == RPM):
+                if (cls_match in ValidateFile.CATEGORY_RPM.value):
                     if (len(data_line_final) == LEN_RPM_LOST_VNL):
-                        data_line_final.insert(2, VNL_CAT.RPM_LOST_VNL)
-                        data_line_final.append(VNL_CAT.RPM)
+                        data_line_final.insert(2, VNL_CAT.RPM_LOST_VNL.value)
+                        data_line_final.append(VNL_CAT.RPM.value)
                     else:
-                        data_line_final.append(VNL_CAT.RPM)
+                        data_line_final.append(VNL_CAT.RPM.value)
 
                 len_lst_final = len(data_line_final)
                 if (list_data == []) and (len_lst_final == LEN_LINE_FINAL):
@@ -151,8 +150,7 @@ class ReadFileInvModel:
                     else:
                         list_data.append(data_line_final)
             except Exception as e:
-                print('Lỗi đọc file txt: f(read_data_file)')
-                print(e)
+                print(f'Lỗi đọc file txt: {str(e)}')
     
         df_data = self.create_df_tonkho_from_list(list_data)
         return df_data

@@ -1,5 +1,6 @@
 import streamlit as st
 from views.MenuApp import MenuApp
+from views.View import View
 from controllers.ReadFileInvController import ReadFileInvController
 
 class UploadFileView(MenuApp):
@@ -14,7 +15,8 @@ class UploadFileView(MenuApp):
             for success in results['success']:
                 st.toast(success, icon="ℹ️")
             # Hiển thị dữ liệu đã gộp
-            st.dataframe(results['combined_data'])
+            # st.dataframe(results['combined_data'])
+            View().tab_dashboard(results['combined_data'])
         # Hiển thị lỗi nếu có
         if results['errors']:
             for error in results['errors']:

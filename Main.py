@@ -1,5 +1,5 @@
 import streamlit as st
-from views.View import Views
+from views.View import View
 from utils.constants import PAGE_CONFIG
 from views.UploadFileView import UploadFileView
 
@@ -17,18 +17,17 @@ class Main:
         )
         
     def showmenu(self):
-        Views().import_files_inventory()
-        Views().create_location()
-        Views().update_masterdata()
-        Views().tab_dashboard()
+        View().import_files_inventory()
+        View().create_location()
+        View().update_masterdata()
+        View().tab_dashboard()
+
     def import_file(self):
-        upload_files = Views().import_files_inventory()
+        upload_files = View().import_files_inventory()
 
 
 if __name__ == "__main__":
     Main().init_page_config()
-    # Main().showmenu()
-    # Main().import_file()
     upload_view = UploadFileView()
     upload_view.render_upload_section()
     

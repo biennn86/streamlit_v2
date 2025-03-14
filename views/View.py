@@ -3,7 +3,7 @@ from views.MenuApp import MenuApp
 from views.tabs.TabDashBoard import *
 
 
-class Views(MenuApp):
+class View(MenuApp):
     def __init__(self):
         super().__init__()
 
@@ -14,8 +14,8 @@ class Views(MenuApp):
         self.tab_mixup,\
         self.tab_tonkho = st.tabs(['DashBoard', 'Empty Loc', 'Combine Bin', 'Mixup', 'Inventory'])
 
-    def tab_dashboard(self):
+    def tab_dashboard(self, dict_data):
         self.setup_tab()
         with self.tab_dashboard:
-            TabDashBoard().showtab()
+            TabDashBoard().showtab(dict_data)
         
