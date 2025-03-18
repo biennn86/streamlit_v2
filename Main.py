@@ -2,6 +2,7 @@ import streamlit as st
 from views.View import View
 from utils.constants import PAGE_CONFIG
 from views.UploadFileView import UploadFileView
+from views.DashBoardView import DashBoardView
 
 class Main:
     def __init__(self):
@@ -30,4 +31,6 @@ if __name__ == "__main__":
     Main().init_page_config()
     upload_view = UploadFileView()
     upload_view.render_upload_section()
+    db = DashBoardView().showlocation()
+    print(db)
     

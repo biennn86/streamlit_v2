@@ -53,6 +53,7 @@ class Columns(Enum):
     COLUMNS_FILE_EO = ['stt', 'barcode', 'lot#', 'po#', 'owner', 'gcas', 'description', 'supply_chain', 'type', 'status', 'created_by', 'created_date', 'wh_date', 'bin', 'assignment#', 'qty', 'remained_qty']
     COLUMNS_INV = ['gcas', 'batch', 'vnl', 'status', 'qty', 'pallet', 'location', 'note_inv', 'cat_inv']
     COLUMNS_EO_NEED = ['GCAS', 'Lot#', 'Barcode', 'Qty', 'Bin', 'Type']
+    COLUMNS_MASTERDATA_NEED = ['gcas','description', 'cat', 'type1', 'type2', 'source', 'jit']
     
 class VNL_CAT(Enum):
     VNL_FG = 'VNL_FG'

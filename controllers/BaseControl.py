@@ -3,8 +3,8 @@ import pandas as pd
 
 class BaseControl:
     def __init__(self):
-        self.conn = ConnectDB().getConection()
-        self.cursor = self.conn.cursor()
+        # self.conn = ConnectDB().getConection()
+        # self.cursor = self.conn.cursor()
         self.table = None
 
     def insert(self, data):
