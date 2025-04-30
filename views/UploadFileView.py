@@ -1,6 +1,6 @@
 import streamlit as st
 from views.MenuApp import MenuApp
-from views.View import View
+from views.Tabs import Tabs
 from controllers.ReadFileInvController import ReadFileInvController
 
 class UploadFileView(MenuApp):
@@ -20,7 +20,7 @@ class UploadFileView(MenuApp):
                 st.toast(success, icon="ℹ️")
             # Hiển thị dữ liệu đã gộp
             # st.dataframe(results['combined_data'])
-            View().tab_dashboard(results['combined_data'])
+            Tabs().tab_dashboard(results['combined_data'])
         # Hiển thị lỗi nếu có
         if results['errors']:
             for error in results['errors']:

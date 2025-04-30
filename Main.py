@@ -1,5 +1,6 @@
 import streamlit as st
-from views.View import View
+from views.Tabs import Tabs
+from views.MenuApp import MenuApp
 from utils.constants import PAGE_CONFIG
 from views.UploadFileView import UploadFileView
 from views.DashBoardView import DashBoardView
@@ -18,13 +19,13 @@ class Main:
         )
         
     def showmenu(self):
-        View().import_files_inventory()
-        View().create_location()
-        View().update_masterdata()
-        View().tab_dashboard()
+        MenuApp().import_files_inventory()
+        MenuApp().create_location()
+        MenuApp().update_masterdata()
+        Tabs().tab_dashboard()
 
     def import_file(self):
-        upload_files = View().import_files_inventory()
+        upload_files = MenuApp().import_files_inventory()
 
 
 if __name__ == "__main__":

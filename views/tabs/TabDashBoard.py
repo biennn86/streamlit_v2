@@ -2,7 +2,7 @@ import streamlit as st
 from utils.constants import StatusBorder
 
 class TabDashBoard:
-    def showtab(self, dict_data):
+    def showtab(self, df_inventory):
         container_inv = st.container(border=StatusBorder.BORDER.value)
         cont_dashboard = container_inv.container(border=StatusBorder.BORDER.value)
         cont_title = cont_dashboard.container(border=StatusBorder.BORDER.value)
@@ -14,8 +14,8 @@ class TabDashBoard:
         cont_pf_cl = col_pf_cl.container(border=StatusBorder.BORDER.value)
         cont_label_total = col_lable_total.container(border=StatusBorder.BORDER.value)
 
-        cont_wh1.dataframe(dict_data)
-        cont_wh2.dataframe(dict_data)
+        cont_wh1.dataframe(df_inventory)
+        cont_wh2.dataframe(df_inventory)
 
         
 
