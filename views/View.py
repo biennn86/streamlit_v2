@@ -14,8 +14,8 @@ class View(MenuApp):
         self.tab_mixup,\
         self.tab_tonkho = st.tabs(['DashBoard', 'Empty Loc', 'Combine Bin', 'Mixup', 'Inventory'])
 
-    def tab_dashboard(self, dict_data):
+    def tab_dashboard(self, df_data_inventory):
         self.setup_tab()
         with self.tab_dashboard:
-            TabDashBoard().showtab(dict_data)
+            TabDashBoard().showtab(df_data_inventory)
         

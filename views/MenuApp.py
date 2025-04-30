@@ -1,6 +1,9 @@
 import streamlit as st
 
 class MenuApp:
+    '''
+    Hiển thị các menubar như import inventory, create location, update masterdata trên trình duyệt.
+    '''
     def import_files_inventory(self):
         with st.sidebar:
             with st.expander('Import Files Inventory'):

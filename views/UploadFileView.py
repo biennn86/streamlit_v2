@@ -4,6 +4,10 @@ from views.View import View
 from controllers.ReadFileInvController import ReadFileInvController
 
 class UploadFileView(MenuApp):
+    '''
+    Kế thừa MenuApp để hiển thị các menu trên trình duyệt.
+    Nhận kết quả xử lý của controller.
+    '''
     def __init__(self):
         self.controller = ReadFileInvController()
     

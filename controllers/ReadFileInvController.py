@@ -23,7 +23,7 @@ class ReadFileInvController:
         return True, "Valid file"
     
     def process_files(self, uploaded_files):
-        """Xử lý nhiều file"""
+        '''Xử lý nhiều file'''
         results = {
             'success': [],
             'errors': [],

@@ -31,6 +31,6 @@ if __name__ == "__main__":
     Main().init_page_config()
     upload_view = UploadFileView()
     upload_view.render_upload_section()
-    db = DashBoardView().showlocation()
-    print(db)
+    # db = DashBoardView().showlocation()
+    # print(db)
     

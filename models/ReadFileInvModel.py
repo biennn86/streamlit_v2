@@ -9,8 +9,10 @@ class ReadFileInvModel:
         self.filename = None
 
     def cover_multifile_todict(self, uploaded_files):
-        # Chuyển file import thành dict. Key chứa tên file, value chứa value data
-        # Chỉ lấy 3 file cuối trong uploaded_files, khi user import nhiều file chưa clear cache được
+        '''
+        Chuyển file import thành dict. Key chứa tên file, value chứa value data
+        Chỉ lấy 3 file cuối trong uploaded_files, khi user import nhiều file chưa clear cache được
+        '''
         dict_files_data_soucre = {}
         get_3_last_file = uploaded_files[len(uploaded_files) - 3:]
         for file in get_3_last_file:
