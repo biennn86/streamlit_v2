@@ -3,7 +3,7 @@ from views.Tabs import Tabs
 from views.MenuApp import MenuApp
 from utils.constants import PAGE_CONFIG
 from views.UploadFileView import UploadFileView
-from views.DashBoardView import DashBoardView
+from views.MergeDataView import MergeDataView
 
 class Main:
     def __init__(self):
@@ -31,7 +31,6 @@ class Main:
 if __name__ == "__main__":
     Main().init_page_config()
     upload_view = UploadFileView()
-    upload_view.render_upload_section()
-    # db = DashBoardView().showlocation()
-    # print(db)
+    df_inv = upload_view.render_upload_section()
+    db = MergeDataView().render_mergedata(df_inv)
     

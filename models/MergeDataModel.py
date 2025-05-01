@@ -6,19 +6,23 @@ from controllers.masterdata import MasterData
 class MergeDataModel:
     def get_location(self):
         df_location = LocationNew().get_df_from_db()
-        df_location = df_location[Columns.COLUMNS_MASTERDATA_NEED.value]
         return df_location
     
     def get_masterdata(self):
         df_masterdata = MasterData().get_df_from_db()
+        df_masterdata = df_masterdata[Columns.COLUMNS_MASTERDATA_NEED.value]
         return df_masterdata
     
-    def merge_inv_loc_masdata(self, df_inv):
+    def merge_inv_loc_masterdata(self, df_inv):
         '''
         Khi update master data dùng method append để lấy được lịch sử thay đổi thông tin của gas (ví dụ như pallet pattern)
         nên khi lấy master data ra phân tích phải loại bỏ trùng để tránh duplicate data đi merge.
         Khi dropduplicate giữ lại dòng cuối cùng để lấy thông tin data mới nhất
+        Trả về Dataframe tổng hợp giữa tồn kho, location, masterdata.
         '''
+        if df_inv is None:
+            exit()
+            
         self.df_location = self.get_location()
         self.df_masterdata = self.get_masterdata()
         df_inv['gcas'] = pd.to_numeric(df_inv['gcas'], downcast='integer')

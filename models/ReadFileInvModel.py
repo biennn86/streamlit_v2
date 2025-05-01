@@ -32,13 +32,13 @@ class ReadFileInvModel:
                 dict_files_data_soucre.update({file.name: data_txt})
         return dict_files_data_soucre
 
-    def validate_files(self, dict_data):
+    def validate_files(self, dict_data_rpmfgeo):
         regex_find_dot = re.compile(Pattern.DOT_PATTERN.value)
         regex_catfile = re.compile(Pattern.CATEGORY_FILE.value, re.MULTILINE)
         columns_eo = Columns.COLUMNS_FILE_EO.value
         IS_FILE_EO = False; IS_FILE_FG = False; IS_FILE_RPM = False
         #1: Check nội dung bên trong của từng file
-        for key, value in dict_data.items():
+        for key, value in dict_data_rpmfgeo.items():
             if Pattern.DOT.value in key:
                 match_dot = regex_find_dot.split(key)
                 duoi_file = match_dot[-1]
@@ -72,10 +72,10 @@ class ReadFileInvModel:
     def process_data(self, uploaded_files):
         list_df = []
         CAT_FG = ValidateFile.CATEGORY_FG.value
-        dict_data = self.cover_multifile_todict(uploaded_files)
-        isvalid = self.validate_files(dict_data)
+        dict_data_rpmfgeo = self.cover_multifile_todict(uploaded_files)
+        isvalid = self.validate_files(dict_data_rpmfgeo)
         if isvalid:
-            for key, value in dict_data.items():
+            for key, value in dict_data_rpmfgeo.items():
                 if Pattern.DOT.value in key:
                     duoi_file = re.split(Pattern.DOT_PATTERN.value, key)[-1]
                 else:

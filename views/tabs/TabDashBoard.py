@@ -14,8 +14,9 @@ class TabDashBoard:
         cont_pf_cl = col_pf_cl.container(border=StatusBorder.BORDER.value)
         cont_label_total = col_lable_total.container(border=StatusBorder.BORDER.value)
 
-        cont_wh1.dataframe(df_inventory)
-        cont_wh2.dataframe(df_inventory)
+        # cont_wh1.dataframe(df_inventory)
+        # cont_wh2.dataframe(df_inventory)
+        container_inv.dataframe(df_inventory)
 
         
 

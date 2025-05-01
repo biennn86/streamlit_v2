@@ -20,7 +20,8 @@ class UploadFileView(MenuApp):
                 st.toast(success, icon="ℹ️")
             # Hiển thị dữ liệu đã gộp
             # st.dataframe(results['combined_data'])
-            Tabs().tab_dashboard(results['combined_data'])
+            # Tabs().tab_dashboard(results['combined_data'])
+            return results['combined_data']
         # Hiển thị lỗi nếu có
         if results['errors']:
             for error in results['errors']:
