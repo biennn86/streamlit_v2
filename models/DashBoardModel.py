@@ -8,6 +8,7 @@ class DashBoardModel:
     '''
     def __init__(self, dfInv):
         self.dfInv = dfInv
+        self.CAT = ('eo', 'fg', 'rpm')
         # try:
         #     self.obj_dftonkho = ImportInvToDf().ImportInv()
         #     self.dfInv = self.obj_dftonkho.mainReadTonkho()
@@ -17,7 +18,6 @@ class DashBoardModel:
         #     print('error cls countpldetailloc: ' + str(err))
         #     print('File Import Không Tồn Tại!')
 
-        self.CAT = ('eo', 'fg', 'rpm')
 
     # def GetEmptyLoc(self):
     #     self.df_emptyloc = self.obj_dftonkho.emptyloc()

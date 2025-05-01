@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from readtrans.read_trans_rtcis import *
-from control.data_after_analy import DataAnalys
+from controllers.data_after_analy import DataAnalys
 
 
 def get_data_analys_from_sql():
