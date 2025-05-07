@@ -191,7 +191,7 @@ def create_loc_wh2():
         elif namerack in ['FM']:
             loc_fm = CreateLocation(namerack, 1, 37, tang_fm, [13, 14, 25, 26], CTGR_RACK_DB, NAME_WH2, {}).create_loc()
         elif namerack == 'DA':
-            loc_da = CreateLocation(namerack, 1, 31, tang_da, [], CTGR_RACK_OB, NAME_WH2, {}).create_loc()
+            # loc_da = CreateLocation(namerack, 1, 31, tang_da, [], CTGR_RACK_OB, NAME_WH2, {}).create_loc()
             loc_da_new = CreateLocation(namerack, 1, 31, tang_da_new, [], CTGR_RACK_OB, NAME_WH2, {}).create_loc()
 
     locwh2 = loc_fa + loc_fb + loc_fc + loc_fd + loc_fd_eo + loc_fe +\
