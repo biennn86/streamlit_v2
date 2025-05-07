@@ -196,7 +196,7 @@ def create_loc_wh2():
 
     locwh2 = loc_fa + loc_fb + loc_fc + loc_fd + loc_fd_eo + loc_fe +\
             loc_ff + loc_fg + loc_fh + loc_fi + loc_fk +\
-            loc_fl + loc_fm + loc_da + loc_da_new
+            loc_fl + loc_fm + loc_da_new #+ loc_da
     return locwh2
 
 def create_loc_wh1():
