@@ -1,5 +1,5 @@
 import streamlit as st
-from views.MenuApp import MenuApp
+from views.menu_appview import MenuApp
 from views.tabs.TabDashBoard import *
 
 

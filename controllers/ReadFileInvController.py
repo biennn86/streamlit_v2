@@ -3,6 +3,10 @@ from utils.constants import ValidateFile, Pattern, Columns
 from models.ReadFileInvModel import ReadFileInvModel
 
 class ReadFileInvController:
+    '''
+    Controller: xử lý các vấn đề liên quan đến FILE
+    Model: xử lý các vấn đề liên quan đến DỮ LIỆU
+    '''
     def __init__(self):
         self.model = ReadFileInvModel()
 
@@ -10,7 +14,7 @@ class ReadFileInvController:
         if (len(uploaded_files) == 0):
             return False, "No file uploaded"
         elif len(uploaded_files) % 3 != 0:
-            return False, "The number of imported files must be divisible by 3."
+            return False, f"The number of imported files must be divisible by 3. Total files {len(uploaded_files)}"
             # st.toast('The number of files to import must be 3 (EO-FG-RPM).',  icon="⚠️")
         for file in uploaded_files:
             if Pattern.DOT.value in file.name:
@@ -38,6 +42,6 @@ class ReadFileInvController:
             #Gọi method models
             processed_data  = self.model.process_data(uploaded_files)
             results['combined_data'] = processed_data
-            results['success'].append('Import Inventory Successfully.')
+            results['success'].append(f'Import Inventory Successfully. Total rows {processed_data.shape[0]:,}')
         
         return results

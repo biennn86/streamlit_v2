@@ -1,6 +1,6 @@
 import streamlit as st
 from views.Tabs import Tabs
-from views.MenuApp import MenuApp
+from views.menu_appview import MenuApp
 from utils.constants import PAGE_CONFIG
 from views.UploadFileView import UploadFileView
 from views.MergeDataView import MergeDataView

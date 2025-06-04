@@ -120,8 +120,9 @@ class ReadFileInvModel:
                 # if check_line_get:
                 #     data_line = check_line_get.group()
                 data_line = re.sub(Pattern.VN07.value, "", line)
-                data_line = re.sub(Pattern.TWO_SPACE.value, ";", line)
-                scile = re.search(Pattern.STATUS.value, line).span()[0]
+                data_line = re.sub(Pattern.TWO_SPACE.value, ";", data_line)
+                print(data_line)
+                scile = re.search(Pattern.STATUS.value, data_line).span()[0]
                 data_line_left = data_line[:scile]
                 data_line_right = data_line[scile:]
                 data_line_left =  re.sub(Pattern.ONE_SPACE.value, ";", data_line_left)
