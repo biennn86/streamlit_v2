@@ -39,6 +39,11 @@ class DashboardView:
             st.toast(meesage, icon="ℹ️")
             # if len(upload_files)%3==0:
             #     st.dataframe(self.inventory_controller.get_merge_data(), use_container_width=True, height=600)
-        df = self.analytics_controller.get_demo()
-        st.dataframe(df, height=600, use_container_width=True)
-        st.write(creare_location)
+        dict_chart = self.analytics_controller.get_all_chart()
+        # # st.dataframe(df, height=600, use_container_width=True)
+        for key, value in dict_chart.items():
+            try:
+                st.write(key)
+                st.plotly_chart(value)
+            except:
+                st.metric(**value)

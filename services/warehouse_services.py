@@ -2,6 +2,8 @@ import logging
 from typing import List, Tuple, Dict, Any, Optional
 from dataclasses import dataclass, field
 import pandas as pd
+from services.chart_services import GaugeChart, Metric
+from services.support_sevices import VariableContainer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__) 
@@ -162,13 +164,18 @@ class WarehouseAnalyzer(DataProcessor):
 		"""
 		Phân tích tất cả các nhóm kho được cấu hình và trả về kết quả gộp
 		"""
-		all_results: Dict[str, float] = {}
+		raw_all_results: Dict[str, float] = {}
 		for wh_key in self.warehouse_filters.keys():
 			# Sử dụng update để gộp kết quả từ analyze_warehouse vào all_results
 			# keys từ analyze_warehouse đã có dạng wh_type_cat
-			all_results.update(self.analyze_warehouse(wh_key))
+			raw_all_results.update(self.analyze_warehouse(wh_key))
+		#THÊM các vị trí cấu hình nhưng không có data (gán 0), và lưu vào all_results.
+		potential_wh_type_cat_keys = self.get_all_potential_wh_type_cat_keys()
+		final_results: Dict[str, float] = {key: 0 for key in potential_wh_type_cat_keys}
+		# Cập nhật/Thêm các key từ kết quả thô
+		final_results.update(raw_all_results)
 		
-		return all_results
+		return final_results
 
 	def get_all_potential_wh_type_cat_keys(self) -> List[str]:
 		"""
@@ -185,3 +192,53 @@ class WarehouseAnalyzer(DataProcessor):
 
 		# Chuyển set sang list và sắp xếp để kết quả luôn nhất quán
 		return sorted(list(potential_keys), reverse=True)
+	
+	def get_comprehensive_analysis(self) -> Dict[str, float]:
+		"""
+		Lấy tất cả kết quả phân tích và kết hợp thành một dictionary duy nhất.
+		"""
+		results: Dict[str, float] = {}
+		
+		#Phân tích từng nhóm kho
+		warehouse_results = self.analyze_all_warehouses()
+		results.update(warehouse_results)
+		return results
+	
+	def get_chart_for_dashboard(self):
+		"""Từ Dict name_wh_type_rack_cat_inv biến đổi thành name_wh_type_rack.
+			Đưa gọi chart trả về obj để view lên dashboard
+		"""
+		#Get Dict sau khi tổng hợp từ config warehouse
+		dict_namewh_typerack_catinv: Dict[str, float] = self.get_comprehensive_analysis()
+		#Set đối tượng cho từng items của dict. Key làm tên biến, value làm value của biến
+		dict_data_draw_chart = VariableContainer(dict_namewh_typerack_catinv).get_comprehensive_data_chart()
+
+		dict_all_chart: Dict[str, Any] = {}
+		for name, pallet_type in dict_data_draw_chart.items():
+			if pallet_type.type_chart == 1:
+				fig = GaugeChart("", pallet_type.pallet, pallet_type.capa_chart).create_fig()
+				dict_all_chart[name] = fig
+			else:
+				fig = Metric("unknown", pallet_type.pallet).get_info_metric()
+				dict_all_chart[name] = fig
+		return dict_all_chart
+				
+		
+		#Tạo dict chứa key, value và type chart của từng vị trí
+		# dict_namewh_typerack_typechart: Dict[str, Dict[float, float]] = {}
+		# total_for_group = 0
+		# for key, value in dict_groupby.items():
+		# 	if key.startswith(f"wh1"):
+		# 		total_for_group += value
+		# 		dict_namewh_typerack_typechart[key] = {value, 1}
+		# 		dict_namewh_typerack_typechart['total_wh1'] = {total_for_group, 1}
+
+
+		# print(dict_namewh_typerack_typechart)
+
+
+
+		# dothi = CreateGauge("", variable_raw.wh1_hr, 4800).create_fig()
+		# metric = Metric(label="Kho 2", value=variable_raw.wh1_pf).get_info_metric()
+		# return dothi, metric
+

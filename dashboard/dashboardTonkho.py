@@ -415,7 +415,7 @@ class CoutPlDetailLoc():
     
     def GetPl_Wh2(self):
         '''
-        Kho 2 có những vị trí đặc biệt và cách tính toán khác với wh1, wh2
+        Kho 2 có những vị trí đặc biệt và cách tính toán khác với wh1, wh3
         Điểm chung tính total pallet hightrack, level A và Floor
         Điểm riêng:
         - High Rack kho 2 cộng luôn tồn tầng A, hight rack của rack DA, trừ số pallet các vị trí HO

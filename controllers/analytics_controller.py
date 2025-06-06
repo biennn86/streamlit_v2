@@ -14,10 +14,10 @@ class AnalyticsController:
         self.anlytics = analytics
         self.services = services
 
-    def get_demo(self):
+    def get_all_chart(self):
         df = self.anlytics.get_merge_data()
         self.services = WarehouseAnalyzer(df)
-        ka = self.services.analyze_all_warehouses()
-        return ka
+        dict_all_chart = self.services.get_chart_for_dashboard()
+        return dict_all_chart
 
         
