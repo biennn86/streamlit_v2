@@ -69,6 +69,15 @@ class WarehouseFilter:
 			"cat_inv": self.cat_inv
 		}
 	
+@dataclass
+class DynamicWarehouseFilter:
+	def __init__(self, **kwargs):
+		for key, value in kwargs.items():
+			setattr(self, key, value)
+	
+	def get_dynamic_filter_dict(self):
+		return self.__dict__
+	
 class WarehouseAnalyzer(DataProcessor):
 	"""
 	Lớp phân tích dữ liệu kho hàng và tính toán số pallet theo các tiêu chí
@@ -176,6 +185,88 @@ class WarehouseAnalyzer(DataProcessor):
 		final_results.update(raw_all_results)
 		
 		return final_results
+	
+	def count_block_pallet(self) -> Dict[str, float]:
+		"""
+			Tính tổng pallet có status HD và trừ vị trí stream có name_wh là REJ và EOL có name_wh LSL
+			Tính riêng pallet block của fg, rpm, lable và rm
+			Trong pallet block_rpm vẫn có block_rm. Block_rm tính riêng ra đề trừ đi số pallet NORM. RM
+			Tổng pallet Block sẽ được tính trong VariableContainer
+		"""
+		if "status" not in self.df.columns:
+			logger.warning(f"Cột 'status' không tồn tại. Không thể tính pallet bị khóa.")
+			return {}
+		#Tạo bộ lọc
+		filtered_df = self.df[self.df['status'] == "hd"].copy()
+		mask = pd.Series(True, filtered_df.index)
+		mask = (filtered_df['name_wh'] != 'rej')&(filtered_df['name_wh'] != 'lsl')
+		filtered_df = filtered_df[mask]
+
+		results = {}
+
+		#Tính pallet fg, eo block
+		for cat_inv in ['fg', 'eo', 'rpm']:
+			sub_df = filtered_df[filtered_df['cat_inv'] == cat_inv]
+			result_key = f"block_{cat_inv}"
+			results[result_key] = sub_df['pallet'].sum() if not sub_df.empty else 0
+
+		#Tính pallet block raw_mat và label
+		block_rm_df = filtered_df[filtered_df['type1'] == 'raw_mat']
+		block_lb_df = filtered_df[filtered_df['name_wh'] == 'lb']
+		results['block_rm'] = block_rm_df['pallet'].sum() if not block_rm_df.empty else 0
+		results['block_lb'] = block_lb_df['pallet'].sum() if not block_lb_df.empty else 0
+
+		#Tính lại pallet block_rpm. Lấy block_rpm - block_lb
+		results['block_rpm'] = results['block_rpm'] - results['block_lb']
+		
+		return results
+	
+	def count_pallet_fgls_fgdm_matdm_lost(self) -> Dict[str, float]:
+		"""Tính tổng pallet có trong 4 vị trí trên
+		"""
+		if "location" not in self.df.columns:
+			logger.warning(f"Cột 'location' không tồn tại. Không thể tính pallet các vị trí FGLS, FGDM, MATDM, LOST.")
+			return {}
+		
+		filtered_df = self.df[self.df['location'].isin(['fgls', 'fgdm', 'matdm', 'lost'])].copy()
+
+		results = {}
+
+		for loc in ['fgls', 'fgdm', 'matdm', 'lost']:
+			sub_df = filtered_df[filtered_df['location'] == loc]
+			key_result = f"pallet_{loc}"
+			results[key_result] = sub_df['pallet'].sum() if not sub_df.empty else 0
+		
+		return results
+	
+	def count_pallet_fg_with_cat(self) -> Dict[str, float]:
+		"""Count Pallet theo Cat dwn, febz, hdl dựa vào cat_inv là FG và cột cat (masterdata)
+		Trừ đi hàng ở steam và lsl
+		Pallet FG_Other sẽ được tính trong VariableContainer
+		"""
+		if "cat" not in self.df.columns:
+			logger.warning(f"Cột 'cat' không tồn tại. Không thể tính pallet theo CAT.")
+			return {}
+		
+		mask = pd.Series(True, self.df.index)
+		mask &= (self.df['name_wh'] != 'rej')&(self.df['name_wh'] != 'lsl')
+		mask &= self.df['cat_inv'] == 'fg'
+		mask &= self.df['cat'].isin(['dwn', 'febz', 'hdl'])
+
+		filtered_df = self.df[mask].copy()
+
+		results = {}
+
+		for cat in ['dwn', 'febz', 'hdl']:
+			sub_df = filtered_df[filtered_df['cat'] == cat]
+			key_result = f"pallet_fg{cat}"
+			results[key_result] = sub_df['pallet'].sum() if not sub_df.empty else 0
+
+		return results
+
+
+
+
 
 	def get_all_potential_wh_type_cat_keys(self) -> List[str]:
 		"""
@@ -202,7 +293,24 @@ class WarehouseAnalyzer(DataProcessor):
 		#Phân tích từng nhóm kho
 		warehouse_results = self.analyze_all_warehouses()
 		results.update(warehouse_results)
+
+		# Count pallet block
+		block_pallet = self.count_block_pallet()
+		results.update(block_pallet)
+		
+		#Count pallet FGLS, FGDM, MATDM, LOST
+		pallet_fgls_fgdm_matdm_lost = self.count_pallet_fgls_fgdm_matdm_lost()
+		results.update(pallet_fgls_fgdm_matdm_lost)
+
+		#Count pallet FG with CAT
+		pallet_fg_with_cat = self.count_pallet_fg_with_cat()
+		results.update(pallet_fg_with_cat)
+
+
 		return results
+	
+	
+
 	
 	def get_chart_for_dashboard(self):
 		"""Từ Dict name_wh_type_rack_cat_inv biến đổi thành name_wh_type_rack.

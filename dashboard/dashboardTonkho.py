@@ -985,9 +985,9 @@ class CoutPlDetailLoc():
     
     def GetPl_FG(self):
         '''
-        Tồn pallt FG phải từ thêm steam vì công thức lấy tồn FG là lấy hết những dòng có cat_inv là FG.
+        Tồn pallt FG phải trừ thêm steam vì công thức lấy tồn FG là lấy hết những dòng có cat_inv là FG.
         Trong đó có cả những pallet ở steam, nên phải trừ ra.
-        Tổng tồn trong wh1,2,3 từ đi hàng fg block
+        Tổng tồn trong wh1,2,3 trừ đi hàng fg block
 
         '''
         #chạy method get steam trước. Vì khi tính totalwh(BDWH123) thì method GetPL_Steam chưa được gọi

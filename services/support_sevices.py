@@ -29,7 +29,6 @@ class VariableContainer:
 		df = df[['namewh_typerack_catinv', 'namewh_typerack', 'pallet_count']]
 		#Tính tổng cột pallet thêm namewh và type_rack
 		df = df.groupby('namewh_typerack')['pallet_count'].sum().reset_index()
-		print(df)
 		#Chuyển ngược dataframe lại thành dict
 		dict_namewh_typerack = df.set_index('namewh_typerack')['pallet_count'].to_dict()
 		#Set đối tượng cho từng items của dict. Key làm tên biến, value làm value của biến
@@ -46,13 +45,6 @@ class VariableContainer:
 				# logger.info(f"Đã gán: self.{key} = {value}") # Có thể bỏ comment để debug
 			else:
 				logger.warning(f"Cảnh báo: Key '{key}' không phải là tên biến hợp lệ. Bỏ qua.")
-
-		# self._set_total_floor_wh1()
-		# self._set_total_floor_wh2()
-		# self._set_total_floor_wh3()
-		# self._get_total_floor_cooling()
-		# self._get_total_floor_perfume()
-		# self.get_sumary()
 
 	def _set_total_floor_wh1(self):
 		"""Tính total pallet cho wh1, tính pallet_floor
@@ -172,7 +164,7 @@ class VariableContainer:
 				"wh1_floor", "wh1_pf", "wh1_hr", "wh1_total",
 				"wh2_floor", "wh2_pf", "wh2_hr", "wh2_total",
 				"wh3_floor", "wh3_pf", "wh3_hr", "wh3_total",
-				"cool_total", "pf_total")
+				"cool_total", "pf_total", "lb_total")
 			#any([k.find("_total")!=-1, k.find("wh")!=-1])
 			if k in use_chart_gauge:
 				type_chart = 1
@@ -190,7 +182,7 @@ class VariableContainer:
 			value = getattr(self, attribute_name)
 			delattr(self, attribute_name) # Cách an toàn hơn để xóa thuộc tính
 			# Hoặc: del self.__dict__[attribute_name] # Cách trực tiếp hơn nếu bạn chắc chắn
-			logger.info(f"Đã xóa thuộc tính '{attribute_name}' với giá trị {value} trong class 'VariableContainer'.")
+			# logger.info(f"Đã xóa thuộc tính '{attribute_name}' với giá trị {value} trong class 'VariableContainer'.")
 		else:
 			logger.error(f"Thuộc tính '{attribute_name}' không tồn tại.")
 			
