@@ -27,8 +27,10 @@ class VariableContainer:
 		df['namewh_typerack'] = df['namewh_typerack_catinv'].apply(lambda x: x.split("_")[0] + "_" + x.split("_")[1])
 		#Sắp xếp lại df cho dễ nhìn, khó tính lắm
 		df = df[['namewh_typerack_catinv', 'namewh_typerack', 'pallet_count']]
+		print(df.to_string())
 		#Tính tổng cột pallet thêm namewh và type_rack
 		df = df.groupby('namewh_typerack')['pallet_count'].sum().reset_index()
+		print(df.to_string())
 		#Chuyển ngược dataframe lại thành dict
 		dict_namewh_typerack = df.set_index('namewh_typerack')['pallet_count'].to_dict()
 		#Set đối tượng cho từng items của dict. Key làm tên biến, value làm value của biến
@@ -63,8 +65,9 @@ class VariableContainer:
 		Kho 2 có những vị trí đặc biệt và cách tính toán khác với wh1, wh3
         Điểm chung tính total pallet hightrack, level A và Floor
         Điểm riêng:
-        - High Rack kho 2 cộng luôn tồn tầng A, hight rack của rack DA, trừ số pallet các vị trí HO
-        - Floor: lấy tồn pallet các vị trí in (nhập 2,3,4), pick (fill hàng), các vị trí đường luồng wh2_
+        - High Rack kho 2 cộng luôn tồn tầng A của rack DA
+		- Pickface của rack kho 2 trừ đi pf_da và trừ luôn HO
+        - Floor: lấy tồn pallet các vị trí in (nhập 2,3,4), pick (fill hàng), vị trí HO, các vị trí đường luồng wh2_
         các vị trí STJP, FGDM, FGLS
         Lưu ý: khi tính tồn kho hr, pf của wh2 đã có tồn kho của rack DA rồi. Nên chỉ cần lấy tồn pf_da trừ khỏi pf_wh2
         và cộng ngược lại hr_wh để đảm bảo tồn rack DA được cộng hết cho hr_wh2
@@ -78,11 +81,13 @@ class VariableContainer:
         typerack_ho = ('pf',)
         typeloc_ho = ('ho',)
 		"""
-		wh2_floor = self.wh2_in + self.wh2_pick + self.wh2_ww + self.wh2_return + self.wh2_rework
+		wh2_floor = self.wh2_in + self.wh2_pick + self.wh2_ww + self.wh2_return + self.wh2_rework + self.ho_pf
+		self.wh2_hr = self.wh2_hr + self.da_pf
+		self.wh2_pf = self.wh2_pf - self.da_pf - self.ho_pf
 		wh2_total = self.wh2_pf + self.wh2_hr + wh2_floor
 		setattr(self, 'wh2_total', wh2_total)
 		setattr(self, 'wh2_floor', wh2_floor)
-		for name in ("wh2_in", "wh2_pick", "wh2_ww", "wh2_return"):
+		for name in ("wh2_in", "wh2_pick", "wh2_ww", "wh2_return", "wh2_rework", "da_pf", "da_hr", "ho_pf"):
 			self.delete_attribute(name)
 	
 	def _set_total_floor_wh3(self):
@@ -140,13 +145,129 @@ class VariableContainer:
 
 		for name in ("lb_ww", "lb_pf", "lb_hr"):
 			self.delete_attribute(name)
+	
+	def _get_total_eo(self):
+		"""Lấy tổng tồn eo - eo_steam
+		"""
+		
+		eo_total = self.pallet_totaleo - self.variables_dict.get("rej_reject_eo", 0)
+		
+		setattr(self, 'eo_total', eo_total)
 
+		for name in ("pallet_totaleo",):
+			self.delete_attribute(name)
+	
+	def _get_total_rm(self):
+		"""	Pallet raw_mat chỉ lấy trong wh1, wh2, wh3 và những dòng nan sau khi đã filter cột type1=="raw_mat"
+			total_rm = Lấy tổng pallet_rm
+			Không cần trừ pallet rm ở steam vì có lọc vào đâu :))
+		"""
+		rm_total = self.pallet_totalrm
+
+		setattr(self, 'rm_total', rm_total)
+
+		for name in ("pallet_totalrm",):
+			self.delete_attribute(name)
+
+	def _get_total_fg(self):
+		"""Tổng pallet FG trong wh1, wh2, wh3 trừ đi vị trí scanout
+		"""
+		fg_total = self.pallet_totalfg - self.wh2_scanout
+
+		setattr(self, 'fg_total', fg_total)
+
+		for name in ("pallet_totalfg",):
+			self.delete_attribute(name)
+
+	def _get_total_bdfg(self):
+		"""Pallet FGBD fg_total trừ đi block_fg
+		"""
+		fgbd_total = self.fg_total - self.block_plfg
+
+		setattr(self, 'fgbd_total', fgbd_total)
+
+	def _get_total_pm(self):
+		"""Tổng pallet PM trong wh1, wh2, wh3
+		"""
+		pm_total = self.pallet_totalpm
+
+		setattr(self, 'pm_total', pm_total)
+
+		for name in ("pallet_totalpm",):
+			self.delete_attribute(name)
+
+	def _get_total_bdpm(self):
+		"""Pallet PMBD pm_total trừ đi block_pm
+		"""
+		pmbd_total = self.pm_total - self.block_plpm
+
+		setattr(self, 'pmbd_total', pmbd_total)
+
+	def _get_total_bdwh(self):
+		"""Tổng của fg_total + pm_totam + rm_total
+		"""
+		wh_total = self.fg_total + self.pm_total + self.rm_total
+
+		setattr(self, 'wh_total', wh_total)
+
+	def _get_total_block(self):
+		"""Gom lại pallet block còn 4 cái
+			Total block, fg block, rpm block, label block
+		"""
+		block_fg = self.block_plfg
+		block_rpm = self.block_plrm + self.block_plpm
+		block_lb = self.block_pllb
+		block_total = block_fg + block_rpm + block_lb
+
+		setattr(self, "block_fg", block_fg)
+		setattr(self, "block_rpm", block_rpm)
+		setattr(self, "block_lb", block_lb)
+		setattr(self, "block_total", block_total)
+
+		for name in ("block_plfg", "block_plrm", "block_plpm", "block_pllb", "block_pleo", "block_plrpm"):
+			self.delete_attribute(name)
+	
+	def _get_other_fg_with_cat(self):
+		"""Lấy fg_total (chưa trừ scanout) trừ đi dwn, febz, hdl
+		"""
+		fg_other = self.pallet_totalfg - self.fg_dwn - self.fg_hdl - self.fg_febz
+
+		setattr(self, "fg_other", fg_other)
+
+	def _get_other_pm_with_type2(self):
+		"""Lấy rpm_total chưa trừ cont trừ đi dwn, febz, hdl
+		"""
+		pm_other = self.pallet_totalpm - self.pm_bottle - self.pm_pouch - self.pm_shipper
+
+		setattr(self, "pm_other", pm_other)
+	
+	def _get_pallet_steam(self):
+		"""Chuyển attr rej_reject thành stream cho dễ nhớ
+		"""
+		pallet_steam = self.rej_reject
+
+		setattr(self, "pallet_steam", pallet_steam)
+
+		self.delete_attribute("rej_reject")
+	
+	def _get_pallet_scanout(self):
+		"""Chuyển pallet wh2_scanout thành scanout cho dễ nhớ
+		"""
+		pallet_scanout = self.wh2_scanout
+
+		setattr(self, "pallet_scanout", pallet_scanout)
+
+		self.delete_attribute("wh2_scanout")
 
 
 	def get_comprehensive_data_chart(self):
 		"""
 		chart_type = 1 -> chart Gauge
 		chart_type = 2 -> Metric
+		Thứ tự gọi hàm ở dưới rất quan trọng. 
+		_get_other_fg_with_cat() và _get_other_pm_with_type2() phải gọi trước
+		_get_total_rm() và _get_total_fg() vì khi gọi 2 hàm này thì attr pallet_totalfg và pallet_totalpm
+		sẽ bị delete khỏi hệ thống không còn attr để gọi tính toán cho 2 hàm trên.
 		"""
 		dict_data: Dict[str, Dict[float, int]] = {}
 		self._set_total_floor_wh1()
@@ -155,16 +276,34 @@ class VariableContainer:
 		self._get_total_floor_cooling()
 		self._get_total_floor_perfume()
 		self._get_total_label()
+		self._get_total_eo()
+		self._get_other_fg_with_cat()
+		self._get_other_pm_with_type2()
+		self._get_total_rm()
+		self._get_total_fg()
+		self._get_total_bdfg()
+		self._get_total_pm()
+		self._get_total_bdpm()
+		self._get_total_bdwh()
+		self._get_total_block()
+		self._get_pallet_steam()
+		self._get_pallet_scanout()
 
 		#Xóa thuộc tính "variables_dict" đã gán trên init để lấy số lượng pallet EO tính WH2
 		self.delete_attribute('variables_dict')
+
+		i=1
+		for  key, value in self.__dict__.items():
+			print(f"Key {i}: {key}  Value: {value}")
+			i += 1
+
 		for k in self.__dict__:
 			str_name = k.split("_")
 			use_chart_gauge = (
 				"wh1_floor", "wh1_pf", "wh1_hr", "wh1_total",
 				"wh2_floor", "wh2_pf", "wh2_hr", "wh2_total",
 				"wh3_floor", "wh3_pf", "wh3_hr", "wh3_total",
-				"cool_total", "pf_total", "lb_total")
+				"cool_total", "pf_total", "lb_total", "wh_total")
 			#any([k.find("_total")!=-1, k.find("wh")!=-1])
 			if k in use_chart_gauge:
 				type_chart = 1

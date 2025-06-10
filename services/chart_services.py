@@ -86,7 +86,7 @@ class Metric:
 #============================
 # import plotly.graph_objects as go
 
-# class CreateGauge:
+# class GaugeChart:
 #     """
 #     Tạo một biểu đồ gauge (đồng hồ đo) tùy chỉnh bằng Plotly.
 
@@ -121,8 +121,8 @@ class Metric:
 #         Raises:
 #             ValueError: Nếu 'capacity' nhỏ hơn hoặc bằng 0, hoặc 'value' âm.
 #         """
-#         if not isinstance(title, str) or not title:
-#             raise ValueError("Title must be a non-empty string.")
+#         # if not isinstance(title, str) or not title:
+#         #     raise ValueError("Title must be a non-empty string.")
 #         if not isinstance(value, (int, float)) or value < 0:
 #             raise ValueError("Value must be a non-negative number.")
 #         if not isinstance(capacity, (int, float)) or capacity <= 0:
@@ -149,7 +149,7 @@ class Metric:
 #         else:
 #             return self._COLOR_HIGH_CU
 
-#     def create_gauge(self) -> go.Figure:
+#     def create_fig(self) -> go.Figure:
 #         """
 #         Tạo và trả về đối tượng Plotly Figure cho biểu đồ gauge.
 

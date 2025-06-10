@@ -2,6 +2,7 @@ import logging
 from typing import List, Tuple, Dict, Any, Optional
 from dataclasses import dataclass, field
 import pandas as pd
+import numpy as np
 from services.chart_services import GaugeChart, Metric
 from services.support_sevices import VariableContainer
 
@@ -207,17 +208,17 @@ class WarehouseAnalyzer(DataProcessor):
 		#Tính pallet fg, eo block
 		for cat_inv in ['fg', 'eo', 'rpm']:
 			sub_df = filtered_df[filtered_df['cat_inv'] == cat_inv]
-			result_key = f"block_{cat_inv}"
+			result_key = f"block_pl{cat_inv}"
 			results[result_key] = sub_df['pallet'].sum() if not sub_df.empty else 0
 
 		#Tính pallet block raw_mat và label
 		block_rm_df = filtered_df[filtered_df['type1'] == 'raw_mat']
 		block_lb_df = filtered_df[filtered_df['name_wh'] == 'lb']
-		results['block_rm'] = block_rm_df['pallet'].sum() if not block_rm_df.empty else 0
-		results['block_lb'] = block_lb_df['pallet'].sum() if not block_lb_df.empty else 0
+		results['block_plrm'] = block_rm_df['pallet'].sum() if not block_rm_df.empty else 0
+		results['block_pllb'] = block_lb_df['pallet'].sum() if not block_lb_df.empty else 0
 
 		#Tính lại pallet block_rpm. Lấy block_rpm - block_lb
-		results['block_rpm'] = results['block_rpm'] - results['block_lb']
+		results['block_plpm'] = results['block_plrpm'] - results['block_pllb'] - results['block_plrm']
 		
 		return results
 	
@@ -240,9 +241,9 @@ class WarehouseAnalyzer(DataProcessor):
 		return results
 	
 	def count_pallet_fg_with_cat(self) -> Dict[str, float]:
-		"""Count Pallet theo Cat dwn, febz, hdl dựa vào cat_inv là FG và cột cat (masterdata)
-		Trừ đi hàng ở steam và lsl
-		Pallet FG_Other sẽ được tính trong VariableContainer
+		"""	Count Pallet theo Cat dwn, febz, hdl dựa vào cat_inv là FG và cột cat (masterdata)
+			Không lấy pallet ở steam và lsl có name_wh lần lượt là rej, lsl
+			Pallet FG_Other sẽ được tính trong VariableContainer. Lấy tổng FG trừ 3 cái còn lại
 		"""
 		if "cat" not in self.df.columns:
 			logger.warning(f"Cột 'cat' không tồn tại. Không thể tính pallet theo CAT.")
@@ -259,10 +260,161 @@ class WarehouseAnalyzer(DataProcessor):
 
 		for cat in ['dwn', 'febz', 'hdl']:
 			sub_df = filtered_df[filtered_df['cat'] == cat]
-			key_result = f"pallet_fg{cat}"
+			key_result = f"fg_{cat}"
 			results[key_result] = sub_df['pallet'].sum() if not sub_df.empty else 0
 
 		return results
+	
+	def count_pallet_jit(self) -> Dict[str, float]:
+		"""	Không lấy pallet ở steam và lsl có name_wh lần lượt là rej, lsl
+			Lấy tổng pallet ở cột jit có nội dung là jit và cat_inv là rpm
+		"""
+		if "jit" not in self.df.columns:
+			logger.warning(f"Cột 'jit' không tồn tại. Không thể tính pallet JIT.")
+			return {}
+		
+		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
+		mask = pd.Series(True, filtered_df.index)
+		mask = (filtered_df['name_wh'] != 'rej')&(filtered_df['name_wh'] != 'lsl')
+		mask &= filtered_df['jit'] == 'jit'
+		filtered_df = filtered_df[mask]
+
+		results = {}
+
+		pallet_jit = filtered_df['pallet'].sum() if not filtered_df.empty else 0
+
+		results['pallet_jit'] = pallet_jit
+
+		return results
+	
+	def count_pallet_rpm_with_type2(self) -> Dict[str, float]:
+		"""	Không lấy pallet ở steam và lsl có name_wh lần lượt là rej, lsl
+			Cout pallet theo cat_inv và type2 shipper, pouch, bottle.
+			Muốn tính được other phải lấy tổng trừ đi 3 cái còn lại
+		"""
+		if "type2" not in self.df.columns:
+			logger.warning(f"Cột 'type2' không tồn tại. Không thể tính pallet shipper, pouch, bottle.")
+			return {}
+		
+		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
+		mask = pd.Series(True, filtered_df.index)
+		mask &= (filtered_df['name_wh'] != 'rej')&(filtered_df['name_wh'] != 'lsl')
+		mask &= filtered_df['type2'].isin(['shipper', 'pouch', 'bottle'])
+
+		filtered_df = filtered_df[mask]
+
+		results = {}
+
+		for type2 in ['shipper', 'pouch', 'bottle']:
+			sub_df = filtered_df[filtered_df['type2'] == type2]
+			key_result = f"pm_{type2}"
+			results[key_result] = sub_df['pallet'].sum() if not sub_df.empty else 0
+
+		return results
+	
+	def count_pallet_rack_da(self) -> Dict[str, float]:
+		"""	Cout pallet có cột type_loc là ob
+		"""
+		filtered_df = self.df[self.df['type_loc'] == 'ob'].copy()
+
+		results = {}
+
+		for type_rack in ['pf', 'hr']:
+			df_type_rack = filtered_df[filtered_df['type_rack'] == type_rack]
+			for cat_inv in ['fg', 'rpm', 'eo']:
+				df_cat_inv = df_type_rack[df_type_rack['cat_inv'] == cat_inv]
+				key_result = f"da_{type_rack}_{cat_inv}"
+				results[key_result] = df_cat_inv['pallet'].sum() if not df_cat_inv.empty else 0
+
+		return results
+	
+	def count_pallet_rack_ho(self) -> Dict[str, float]:
+		"""	Cout pallet có cột type_loc là ho
+		"""
+		filtered_df = self.df[self.df['type_loc'] == 'ho'].copy()
+
+		results = {}
+
+		for type_rack in ['pf']:
+			df_type_rack = filtered_df[filtered_df['type_rack'] == type_rack]
+			for cat_inv in ['fg', 'rpm', 'eo']:
+				df_cat_inv = df_type_rack[df_type_rack['cat_inv'] == cat_inv]
+				key_result = f"ho_{type_rack}_{cat_inv}"
+				results[key_result] = df_cat_inv['pallet'].sum() if not df_cat_inv.empty else 0
+
+		return results
+	
+	def count_pallet_total_fg(self) -> Dict[str, float]:
+		"""	Count tất cả pallet có cat_inv là FG.
+			Tránh trường hợp count sót khi gcas chưa có trong masterdata
+			Chỉ count những vị trí có trong 'wh1', 'wh2', 'wh3'
+		"""
+
+		filtered_df = self.df[self.df['cat_inv'] == 'fg'].copy()
+		mask = pd.Series(True, filtered_df.index)
+		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3'])
+		filtered_df = filtered_df[mask]
+
+		results = {}
+
+		key_result = f"pallet_totalfg"
+		results[key_result] = filtered_df['pallet'].sum() if not filtered_df.empty else 0
+
+		return results
+	
+	def count_pallet_total_pm(self) -> Dict[str, float]:
+		"""	Tính tổng cột pallet có cat_inv là rpm.
+			Không lấy pallet ở steam và lsl có name_wh lần lượt là rej, lsl, label.
+			Sở dĩ không lọc trong wh1,2,3 vì có trường hợp pm sẽ đem vào lưu cooling3, cooling1 trong những ngày kho đầy
+			Cột type1 khác raw_mat
+		"""
+
+		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
+		mask = pd.Series(True, filtered_df.index)
+		mask &= filtered_df['type1'] != 'raw_mat'
+		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3'])
+		filtered_df = filtered_df[mask]
+
+		results = {}
+
+		key_result = f"pallet_totalpm"
+		results[key_result] = filtered_df['pallet'].sum() if not filtered_df.empty else 0
+
+		return results
+	
+	def count_pallet_total_rm(self) -> Dict[str, float]:
+		"""	Tính tổng cột pallet có cat_inv là rpm.
+			Chỉ lấy trong wh1,2,3 và những dòng trống vì location chưa update trong masterlocation
+			Sở dĩ không lấy như pm là loại những pallet ở steam, lsl, label vì hàng rm khi lưu vào các
+			kho đặc biệt như cool1,2,3 or pf1,2,3,4,5 đã được count riêng rồi.
+			Cột type1 bằng raw_mat
+		"""
+
+		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
+		mask = pd.Series(True, filtered_df.index)
+		mask &= filtered_df['type1'] == 'raw_mat'
+		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3', 'nan'])
+		filtered_df = filtered_df[mask]
+
+		results = {}
+
+		key_result = f"pallet_totalrm"
+		results[key_result] = filtered_df['pallet'].sum() if not filtered_df.empty else 0
+
+		return results
+	
+	def count_pallet_eo(self) -> Dict[str, float]:
+		"""Tính tổng cột pallet có cat_inv là EO
+		"""
+		filtered_df = self.df[self.df['cat_inv'] == 'eo'].copy()
+
+		results = {}
+
+		key_result = f"pallet_totaleo"
+		results[key_result] = filtered_df['pallet'].sum() if not filtered_df.empty else 0
+
+		return results
+
 
 
 
@@ -306,6 +458,37 @@ class WarehouseAnalyzer(DataProcessor):
 		pallet_fg_with_cat = self.count_pallet_fg_with_cat()
 		results.update(pallet_fg_with_cat)
 
+		#Count pallet JIT
+		pallet_jit = self.count_pallet_jit()
+		results.update(pallet_jit)
+
+		# Count pallet type2 (shipper, pouch, bottle)
+		pallet_type2 = self.count_pallet_rpm_with_type2()
+		results.update(pallet_type2)
+
+		#Count pallet rack DA
+		pallet_rack_da = self.count_pallet_rack_da()
+		results.update(pallet_rack_da)
+
+		#Count pallet vị trí HO
+		pallet_location_ho = self.count_pallet_rack_ho()
+		results.update(pallet_location_ho)
+
+		#Count pallet total FG
+		pallet_total_fg = self.count_pallet_total_fg()
+		results.update(pallet_total_fg)
+
+		#Count pallet total pm
+		pallet_total_pm = self.count_pallet_total_pm()
+		results.update(pallet_total_pm)
+
+		#Count pallet total rm
+		pallet_total_rm = self.count_pallet_total_rm()
+		results.update(pallet_total_rm)
+
+		#Count pallet total eo
+		pallet_total_eo = self.count_pallet_eo()
+		results.update(pallet_total_eo)
 
 		return results
 	
