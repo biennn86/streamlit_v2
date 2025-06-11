@@ -1,5 +1,6 @@
 import logging
 import keyword
+import re
 import pandas as pd
 from typing import List, Tuple, Dict, Any, Optional
 from dataclasses import dataclass, field
@@ -11,6 +12,9 @@ class VariableContainer:
 	"""
 	Một container sử dụng các key của dictionary làm tên thuộc tính
 	để dễ dàng truy cập và thực hiện các phép tính.
+	Muốn truy cập biến chi tiết (fg, rpm, eo): self.variables. Vì self.variables được init khi khởi tạo
+	Khi tính toán xong phải delete atts self.variables
+	Muốn truy cập biến đã tổng hợp khi đã loại bỏ (fg, rpm, eo): self
 	"""
 	def __init__(self, variables_dict: Dict[str, float]):
 		"""
@@ -20,6 +24,10 @@ class VariableContainer:
 			variables_dict (dict): Dictionary có key là tên biến (string)
 								   và value là giá trị của biến (số).
 		"""
+		if not isinstance(variables_dict, dict):
+			logger.error(f"Đầu vào phải là một dictionary.")
+			raise
+
 		self.variables_dict = variables_dict
 		#Cover dict thành dataframe
 		df = pd.DataFrame(list(variables_dict.items()), columns=['namewh_typerack_catinv', 'pallet_count'])
@@ -27,17 +35,15 @@ class VariableContainer:
 		df['namewh_typerack'] = df['namewh_typerack_catinv'].apply(lambda x: x.split("_")[0] + "_" + x.split("_")[1])
 		#Sắp xếp lại df cho dễ nhìn, khó tính lắm
 		df = df[['namewh_typerack_catinv', 'namewh_typerack', 'pallet_count']]
-		print(df.to_string())
 		#Tính tổng cột pallet thêm namewh và type_rack
 		df = df.groupby('namewh_typerack')['pallet_count'].sum().reset_index()
-		print(df.to_string())
 		#Chuyển ngược dataframe lại thành dict
 		dict_namewh_typerack = df.set_index('namewh_typerack')['pallet_count'].to_dict()
 		#Set đối tượng cho từng items của dict. Key làm tên biến, value làm value của biến
-
 		if not isinstance(dict_namewh_typerack, dict):
 			logger.error(f"Đầu vào phải là một dictionary.")
 			raise
+
 		for key, value in dict_namewh_typerack.items():
 			# Kiểm tra xem key có phải là tên thuộc tính (biến) hợp lệ trong Python không
 			# isidentifier() kiểm tra cú pháp tên biến
@@ -147,10 +153,10 @@ class VariableContainer:
 			self.delete_attribute(name)
 	
 	def _get_total_eo(self):
-		"""Lấy tổng tồn eo - eo_steam
+		"""Lấy tổng tồn eo - eo_steam - eo lưu cont
 		"""
 		
-		eo_total = self.pallet_totaleo - self.variables_dict.get("rej_reject_eo", 0)
+		eo_total = self.pallet_totaleo - self.variables_dict.get("rej_reject_eo", 0) - self.variables_dict.get("wh2_scanout_eo", 0)
 		
 		setattr(self, 'eo_total', eo_total)
 
@@ -161,6 +167,7 @@ class VariableContainer:
 		"""	Pallet raw_mat chỉ lấy trong wh1, wh2, wh3 và những dòng nan sau khi đã filter cột type1=="raw_mat"
 			total_rm = Lấy tổng pallet_rm
 			Không cần trừ pallet rm ở steam vì có lọc vào đâu :))
+			Trừ luôn pallet rpm trên scanout đem lên lưu cont
 		"""
 		rm_total = self.pallet_totalrm
 
@@ -172,7 +179,7 @@ class VariableContainer:
 	def _get_total_fg(self):
 		"""Tổng pallet FG trong wh1, wh2, wh3 trừ đi vị trí scanout
 		"""
-		fg_total = self.pallet_totalfg - self.wh2_scanout
+		fg_total = self.pallet_totalfg - self.variables_dict.get("wh2_scanout_fg", 0)
 
 		setattr(self, 'fg_total', fg_total)
 
@@ -189,7 +196,7 @@ class VariableContainer:
 	def _get_total_pm(self):
 		"""Tổng pallet PM trong wh1, wh2, wh3
 		"""
-		pm_total = self.pallet_totalpm
+		pm_total = self.pallet_totalpm - self.variables_dict.get("wh2_scanout_rpm", 0)
 
 		setattr(self, 'pm_total', pm_total)
 
@@ -199,7 +206,7 @@ class VariableContainer:
 	def _get_total_bdpm(self):
 		"""Pallet PMBD pm_total trừ đi block_pm
 		"""
-		pmbd_total = self.pm_total - self.block_plpm
+		pmbd_total = self.pm_total - self.block_plpm - self.block_plrm
 
 		setattr(self, 'pmbd_total', pmbd_total)
 
@@ -292,28 +299,44 @@ class VariableContainer:
 		#Xóa thuộc tính "variables_dict" đã gán trên init để lấy số lượng pallet EO tính WH2
 		self.delete_attribute('variables_dict')
 
-		i=1
-		for  key, value in self.__dict__.items():
-			print(f"Key {i}: {key}  Value: {value}")
-			i += 1
+		#Check tên biến và giá trị trả về của class
+		# i=1
+		# for  key, value in self.__dict__.items():
+		# 	print(f"Key {i}: {key}  Value: {value}")
+		# 	i += 1
 
-		for k in self.__dict__:
-			str_name = k.split("_")
+		for key in self.__dict__:
+			str_name = key.split("_")
 			use_chart_gauge = (
 				"wh1_floor", "wh1_pf", "wh1_hr", "wh1_total",
 				"wh2_floor", "wh2_pf", "wh2_hr", "wh2_total",
 				"wh3_floor", "wh3_pf", "wh3_hr", "wh3_total",
-				"cool_total", "pf_total", "lb_total", "wh_total")
-			#any([k.find("_total")!=-1, k.find("wh")!=-1])
-			if k in use_chart_gauge:
+				"cool_total", "pf_total", "lb_total", "eo_total", "wh_total")
+			#any([key.find("_total")!=-1, key.find("wh")!=-1])
+			if key in use_chart_gauge:
 				type_chart = 1
-				dict_data[k] = DataChartType(
-					pallet=getattr(self, k),
+				dict_data[key] = DataChartType(
+					pallet=getattr(self, key),
 					type_chart=type_chart,
 					capa_chart=CAPACITY_WAREHOUSE.get(str_name[0], 1).get(str_name[1], 1))
 			else:
 				type_chart = 2
-				dict_data[k] = DataChartType(pallet=getattr(self, k), type_chart=type_chart)
+				name_wh_detail = str_name[0]
+				name_wh = re.match(r'\D+', str_name[0]).group()
+				title = f"{TITLE_METRIC_CHART.get(key, None)}"
+				if name_wh in ['cool', 'pf']:
+					if str_name[1] == 'floor':
+						capa_wh = CAPACITY_WAREHOUSE.get(name_wh, None).get(key, None)
+						title = f"{TITLE_METRIC_CHART.get(key, None)} {capa_wh}"
+					else:
+						capa_wh = CAPACITY_WAREHOUSE.get(name_wh, None).get(name_wh_detail, None)
+						title = f"{TITLE_METRIC_CHART.get(name_wh_detail, None)} {capa_wh}"
+
+				dict_data[key] = DataChartType(
+					pallet=getattr(self, key),
+					type_chart=type_chart,
+					title_chart=title)
+
 		return dict_data
 	
 	def delete_attribute(self, attribute_name):
@@ -364,18 +387,69 @@ CAPACITY_WAREHOUSE = {
 		'floor': 22
 	},
 	'cool': {
-		'total': 376
+		'total': 376,
+		'cool1': 96,
+		'cool2': 178,
+		'cool3': 126,
+		'cool_floor': 20 #'cool_floor
 	},
 	'pf': {
-		'total': 364
+		'total': 364,
+		'pf1': 32,
+		'pf2': 42,
+		'pf3': 36,
+		'pf4': 66,
+		'pf5': 188,
+		'pf_floor': 37
 	},
 	'lb': {
 		'total': 1156
 	},
-	'eo_cons': {
+	'eo': {
 		'total': 546
 	},
 	'wh': {
 		'total': 8776
 	}
+}
+
+TITLE_METRIC_CHART = {
+	'cool1': 'C1 - ',
+	'cool2': 'C2 - ',
+	'cool3': 'C3 - ',
+	'cool_floor': 'Floor - ',
+	'pf1': 'PF1 - ',
+	'pf2': 'PF2 - ',
+	'pf3': 'PF3 - ',
+	'pf4': 'PF4 - ',
+	'pf5': 'PF5 - ',
+	'pf_floor': 'Floor - ',
+	'fg_dwn': 'FG DWN',
+	'fg_febz': 'FG FEBZ',
+	'fg_hdl': 'FG HDL',
+	'fg_other': 'FG OTHER',
+	'lsl_in': 'PL EOL',
+	'lsl_lrt': 'LRT',
+	'lsl_lslpm': 'LSL PM',
+	'lsl_lslrm': 'LSL RM',
+	'pallet_fgdm': 'FGDM',
+	'pallet_fgls': 'FGLS',
+	'pallet_lost': 'LOST',
+	'pallet_matdm': 'MATDM',
+	'pallet_jit': 'JIT',
+	'pm_bottle': 'BOTTLE',
+	'pm_pouch': 'POUCH',
+	'pm_shipper': 'SHIPPER',
+	'pm_other': 'OTHER',
+	'pallet_scanout': 'CONT**',
+	'pallet_steam': 'STEAM 1,2',
+	'block_fg': 'FG',
+	'block_rpm': 'RPM',
+	'block_lb': 'LB',
+	'block_total': 'BLOCK 200',
+	'fg_total': 'TOTAL FG',
+	'pm_total': 'TOTAL PM',
+	'rm_total': 'NORM. RM',
+	'fgbd_total': 'FG BD 2500',
+	'pmbd_total': 'PM PLT 4500',
 }

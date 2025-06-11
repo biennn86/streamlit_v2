@@ -40,10 +40,12 @@ class DashboardView:
             # if len(upload_files)%3==0:
             #     st.dataframe(self.inventory_controller.get_merge_data(), use_container_width=True, height=600)
         dict_chart = self.analytics_controller.get_all_chart()
-        # # st.dataframe(df, height=600, use_container_width=True)
+        # st.dataframe(df, height=600, use_container_width=True)
         for key, value in dict_chart.items():
             try:
                 st.write(key)
                 st.plotly_chart(value)
             except:
                 st.metric(**value)
+        # st.metric(**dict_chart.block_rpm)
+        # st.plotly_chart(dict_chart.wh_total)

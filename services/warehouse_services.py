@@ -1,4 +1,5 @@
 import logging
+import keyword
 from typing import List, Tuple, Dict, Any, Optional
 from dataclasses import dataclass, field
 import pandas as pd
@@ -352,7 +353,7 @@ class WarehouseAnalyzer(DataProcessor):
 
 		filtered_df = self.df[self.df['cat_inv'] == 'fg'].copy()
 		mask = pd.Series(True, filtered_df.index)
-		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3'])
+		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3', 'lsl', 'nan'])
 		filtered_df = filtered_df[mask]
 
 		results = {}
@@ -414,11 +415,6 @@ class WarehouseAnalyzer(DataProcessor):
 		results[key_result] = filtered_df['pallet'].sum() if not filtered_df.empty else 0
 
 		return results
-
-
-
-
-
 
 	def get_all_potential_wh_type_cat_keys(self) -> List[str]:
 		"""
@@ -492,9 +488,6 @@ class WarehouseAnalyzer(DataProcessor):
 
 		return results
 	
-	
-
-	
 	def get_chart_for_dashboard(self):
 		"""Từ Dict name_wh_type_rack_cat_inv biến đổi thành name_wh_type_rack.
 			Đưa gọi chart trả về obj để view lên dashboard
@@ -507,29 +500,38 @@ class WarehouseAnalyzer(DataProcessor):
 		dict_all_chart: Dict[str, Any] = {}
 		for name, pallet_type in dict_data_draw_chart.items():
 			if pallet_type.type_chart == 1:
-				fig = GaugeChart("", pallet_type.pallet, pallet_type.capa_chart).create_fig()
+				fig = GaugeChart(pallet_type.title_chart, pallet_type.pallet, pallet_type.capa_chart).create_fig()
 				dict_all_chart[name] = fig
 			else:
-				fig = Metric("unknown", pallet_type.pallet).get_info_metric()
+				fig = Metric(pallet_type.title_chart, pallet_type.pallet).get_info_metric()
 				dict_all_chart[name] = fig
-		return dict_all_chart
+		
+		obj_all_chart = VariableChartContainer(dict_all_chart).to_dict()
+		return obj_all_chart
 				
 		
-		#Tạo dict chứa key, value và type chart của từng vị trí
-		# dict_namewh_typerack_typechart: Dict[str, Dict[float, float]] = {}
-		# total_for_group = 0
-		# for key, value in dict_groupby.items():
-		# 	if key.startswith(f"wh1"):
-		# 		total_for_group += value
-		# 		dict_namewh_typerack_typechart[key] = {value, 1}
-		# 		dict_namewh_typerack_typechart['total_wh1'] = {total_for_group, 1}
+class VariableChartContainer:
+	def __init__(self, variables_dict: Dict[str, Any]):
+		"""
+		Khởi tạo đối tượng từ một dictionary.
 
+		Args:
+			variables_dict (dict): Dictionary có key là tên biến (string)
+								và value là giá trị obj.
+		"""
+		if not isinstance(variables_dict, dict):
+			logger.error(f"Đầu vào phải là một dictionary.")
+			raise
+		
+		for key, value in variables_dict.items():
+			# Kiểm tra xem key có phải là tên thuộc tính (biến) hợp lệ trong Python không
+			# isidentifier() kiểm tra cú pháp tên biến
+			# keyword.iskeyword() kiểm tra xem tên có phải là từ khóa reserved không
+			if isinstance(key, str) and key.isidentifier() and not keyword.iskeyword(key):
+				setattr(self, key, value)
+				# logger.info(f"Đã gán: self.{key} = {value}") # Có thể bỏ comment để debug
+			else:
+				logger.warning(f"Cảnh báo: Key '{key}' không phải là tên biến hợp lệ. Bỏ qua.")
 
-		# print(dict_namewh_typerack_typechart)
-
-
-
-		# dothi = CreateGauge("", variable_raw.wh1_hr, 4800).create_fig()
-		# metric = Metric(label="Kho 2", value=variable_raw.wh1_pf).get_info_metric()
-		# return dothi, metric
-
+	def to_dict(self):
+		return self.__dict__
