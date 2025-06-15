@@ -17,8 +17,25 @@ class AnalyticsModel:
         """Lấy datamerge từ InventoryModel
         """
         try:
-            df_merge = self.inventory_model.get_merge_data(date_time)
-            return df_merge
+            self.df_merge = self.inventory_model.get_merge_data(date_time)
+            return self.df_merge
         except Exception as e:
             logger.error(f"Get merge data error: {e}")
             raise
+        
+    def get_master_location(self) -> pd.DataFrame:
+        """Lấy master location từ database thông qua InventoryModel
+        """
+        try:
+            df_loc = self.inventory_model.get_location()
+            return df_loc
+        except Exception as e:
+            logger.error(f"Get Master Location Error: {e}")
+            raise
+
+
+    def get_datatime_current(self) -> str:
+        """Lấy datatime hiện tại của dataframe trong cột date
+        """
+        date_time = self.df_merge.iloc[1, 0].upper()
+        return date_time

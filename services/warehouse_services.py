@@ -5,7 +5,11 @@ from dataclasses import dataclass, field
 import pandas as pd
 import numpy as np
 from services.chart_services import GaugeChart, Metric
-from services.support_sevices import VariableContainer
+from services.variable_db_container import VariableContainer
+from services.mixup_services import FindMixup
+from services.emptyloc_services import EmptyLocation
+from services.combinebin_services import CombineBin
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__) 
@@ -28,10 +32,12 @@ class DataProcessor:
 			#Chỉ áp dụng .str.lower() cho các Series kiểu object/string
 			if pd.api.types.is_string_dtype(self.df[col]):
 				#Chuyển về str và xử lý NaN
-				self.df[col] = self.df[col].str.lower().astype(str).fillna('')
+				self.df[col] = self.df[col].fillna('')
+				self.df[col] = self.df[col].str.lower().astype(str)
 			elif isinstance(self.df[col], pd.Series): #Fallback cho các trường hợp khác có thể là object
 				try:
-					self.df[col] = self.df[col].astype(str).str.lower().fillna('')
+					self.df[col] = self.df[col].fillna('')
+					self.df[col] = self.df[col].astype(str).str.lower()
 				except Exception:
 					pass # Bỏ qua nếu không chuyển đổi được
 
@@ -70,15 +76,6 @@ class WarehouseFilter:
 			"type_rack": self.type_rack,
 			"cat_inv": self.cat_inv
 		}
-	
-@dataclass
-class DynamicWarehouseFilter:
-	def __init__(self, **kwargs):
-		for key, value in kwargs.items():
-			setattr(self, key, value)
-	
-	def get_dynamic_filter_dict(self):
-		return self.__dict__
 	
 class WarehouseAnalyzer(DataProcessor):
 	"""
@@ -187,6 +184,31 @@ class WarehouseAnalyzer(DataProcessor):
 		final_results.update(raw_all_results)
 		
 		return final_results
+	
+	def get_mixup(self) -> pd.DataFrame:
+		"""Lấy bin mixup 
+		"""
+		df_mixup = FindMixup(self.df).get_mixup()
+
+		return df_mixup
+	
+	def get_empty_location(self, df_masterloc) -> pd.DataFrame:
+		"""Lấy vị trí trong theo data frame hiện tại.
+			Args:
+				dataframe masterlocion lấy từ analytics_controller
+		"""
+		df_empty_loc = EmptyLocation(df_data=self.df, df_masterloc=df_masterloc).get_empty_location()
+
+		return df_empty_loc
+	
+	def get_combinebin(self) -> pd.DataFrame:
+		"""	Lấy những vị trí đang tồn 1 pallet ở trên bin.
+			Tìm những bin có cùng gcas và lot đang ở bin đôi và đang có tồn 1 pallet.
+			Mục đích giải phóng bin có tồn 1 pallet và tối ưu bin double để full 2 pallet.
+		"""
+		df_combinebin = CombineBin(self.df).get_combinebin()
+
+		return df_combinebin
 	
 	def count_block_pallet(self) -> Dict[str, float]:
 		"""
@@ -353,7 +375,7 @@ class WarehouseAnalyzer(DataProcessor):
 
 		filtered_df = self.df[self.df['cat_inv'] == 'fg'].copy()
 		mask = pd.Series(True, filtered_df.index)
-		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3', 'lsl', 'nan'])
+		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3', ''])
 		filtered_df = filtered_df[mask]
 
 		results = {}
@@ -373,7 +395,7 @@ class WarehouseAnalyzer(DataProcessor):
 		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
 		mask = pd.Series(True, filtered_df.index)
 		mask &= filtered_df['type1'] != 'raw_mat'
-		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3'])
+		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3', ''])
 		filtered_df = filtered_df[mask]
 
 		results = {}
@@ -394,7 +416,7 @@ class WarehouseAnalyzer(DataProcessor):
 		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
 		mask = pd.Series(True, filtered_df.index)
 		mask &= filtered_df['type1'] == 'raw_mat'
-		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3', 'nan'])
+		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3', ''])
 		filtered_df = filtered_df[mask]
 
 		results = {}
@@ -502,11 +524,13 @@ class WarehouseAnalyzer(DataProcessor):
 			if pallet_type.type_chart == 1:
 				fig = GaugeChart(pallet_type.title_chart, pallet_type.pallet, pallet_type.capa_chart).create_fig()
 				dict_all_chart[name] = fig
-			else:
+			elif  pallet_type.type_chart == 2:
 				fig = Metric(pallet_type.title_chart, pallet_type.pallet).get_info_metric()
 				dict_all_chart[name] = fig
+			elif  pallet_type.type_chart == 3:
+				dict_all_chart[name] = pallet_type.cu_chart
 		
-		obj_all_chart = VariableChartContainer(dict_all_chart).to_dict()
+		obj_all_chart = VariableChartContainer(dict_all_chart)
 		return obj_all_chart
 				
 		

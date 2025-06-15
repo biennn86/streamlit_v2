@@ -86,6 +86,7 @@ with cont_dashboard:
             st.plotly_chart(figwh3['hr'])
             st.plotly_chart(figwh3['pf'])
             st.plotly_chart(figwh3['fl'])
+            
     with cont_pf_cl:
         #title
         title_pf_cl= cont_pf_cl.columns([1])

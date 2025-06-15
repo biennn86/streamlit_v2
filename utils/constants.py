@@ -25,7 +25,7 @@ PAGE_CONFIG = {
 
 # Status Border Configuration
 class StatusBorder(Enum):
-    BORDER = True
+    BORDER = False
 
 class ValidateFile(Enum):
     LIST_DUOI_FILE_IMPORT = ['xlsx', 'xlsm', 'xls', 'RPT', 'txt', 'TXT', None]

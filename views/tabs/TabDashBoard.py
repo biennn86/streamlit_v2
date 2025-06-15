@@ -1,5 +1,6 @@
 import streamlit as st
 from utils.constants import StatusBorder
+from models.analytics import InventoryModel
 
 class TabDashBoard:
     def showtab(self, df_inventory):

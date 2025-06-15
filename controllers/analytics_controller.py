@@ -1,4 +1,5 @@
 import logging
+import pandas as pd
 from typing import List, Tuple, Dict, Any, Optional
 
 from models.analytics import AnalyticsModel
@@ -14,10 +15,26 @@ class AnalyticsController:
         self.anlytics = analytics
         self.services = services
 
-    def get_all_chart(self):
+    def get_datetime_current(self) -> str:
+        """Lấy date time hiện tại trong analytics đã lấy
+        """
+        return self.anlytics.get_datatime_current()
+    
+    def get_all_chart(self) -> Dict[str, Any]:
         df = self.anlytics.get_merge_data()
         self.services = WarehouseAnalyzer(df)
         dict_all_chart = self.services.get_chart_for_dashboard()
         return dict_all_chart
+    
+    def get_mixup(self) -> pd.DataFrame:
+        return self.services.get_mixup()
+    
+    def get_empty_location(self) -> pd.DataFrame:
+        df_master_loc = self.anlytics.get_master_location()
+        return self.services.get_empty_location(df_master_loc)
+    
+    def get_combinebin(self) -> pd.DataFrame:
+        df_combinebin = self.services.get_combinebin()
+        return df_combinebin
 
         
