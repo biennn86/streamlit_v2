@@ -285,7 +285,7 @@ with title_emp:
     st.subheader('EMPTY LOCATION {}'.format(obj_getpl_3wh.StringDataTime))
 with cont_emp:
     st.html(f"<span class='df_emp'</span>")
-    st.dataframe(df_emptyloc, width=1000, height=1000, hide_index=True)
+    st.dataframe(df_emptyloc, width=1000, height=1000, hide_index=True, use_container_width=True)
 # obj_Empty = TabOther()
 # oo = obj_Empty.Empty_Loc()
 #=============================================COMBINE_BIN===============================================
@@ -297,7 +297,7 @@ with title_combinebin:
     st.subheader('COMBINE BIN {}'.format(obj_getpl_3wh.StringDataTime))
 with combinebin:
     st.html(f"<span class='df_combinebin'</span>")
-    st.dataframe(df_combinebin, width=1000, height=None, hide_index=True)
+    st.dataframe(df_combinebin, width=1000, height=None, hide_index=True, use_container_width=True)
 #=============================================MIXUP===============================================
 cont_mixup = tab_mixup.container(border=border)
 title_mixup = cont_mixup.container(border=border)
@@ -307,7 +307,7 @@ with title_mixup:
     st.subheader('BIN MIXUP {}'.format(obj_getpl_3wh.StringDataTime))
 with mixup:
     st.html(f"<span class='df_mixup'</span>")
-    st.dataframe(df_mixup, width=1000, height=None, hide_index=True)
+    st.dataframe(df_mixup, width=1000, height=None, hide_index=True, use_container_width=True)
 #=============================================TỒN KHO===============================================
 cont_inv = tab_tonkho.container(border=border)
 title_inv = cont_inv.container(border=border)
@@ -320,7 +320,7 @@ with title_inv:
     st.subheader('INVENTORY BALANCES. TOTAL ROWS DATA {}'.format(row_no))
 with all_inv:
     st.html(f"<span class='df_inv'</span>")
-    st.dataframe(df_inventory_from_db, width=1500, height=700, hide_index=True)
+    st.dataframe(df_inventory_from_db, width=1500, height=700, hide_index=True, use_container_width=True)
 
 
 
