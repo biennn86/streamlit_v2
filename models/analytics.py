@@ -11,7 +11,7 @@ class AnalyticsModel:
     """Lấy data đã merge từ InventoryModel để đi phân tích
     """
     def __init__(self, inveotory: InventoryModel):
-        self.inventory_model = InventoryModel()
+        self.inventory_model = inveotory
     
     def get_merge_data(self, date_time: Optional[str]=None) -> pd.DataFrame:
         """Lấy datamerge từ InventoryModel

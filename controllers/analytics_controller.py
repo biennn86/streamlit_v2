@@ -36,5 +36,8 @@ class AnalyticsController:
     def get_combinebin(self) -> pd.DataFrame:
         df_combinebin = self.services.get_combinebin()
         return df_combinebin
+    
+    def get_current_df_data(self) -> pd.DataFrame:
+        return self.services.get_current_df_data()
 
         

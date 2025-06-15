@@ -1,3 +1,4 @@
+import streamlit as st
 import logging
 from typing import List, Tuple, Dict, Any, Optional
 import re 
@@ -17,7 +18,7 @@ class InventoryModel:
         self.inventory = TableNameInventory()
         self.location = TableNameLocation()
         self.masterdata = TableNameMasterdata()
-
+    
     def process_inventory(self, uploaded_files: List) -> pd.DataFrame:
         """
         Chuyển đổi nội dung 3 file FG, RPM, EO thành DataFrame
@@ -65,7 +66,7 @@ class InventoryModel:
         except Exception as e:
             logger.error(f"Error saving inventory data: {e}")
             return False, pd.DataFrame()
-        
+  
     def get_inventory_data(self, date_time: Optional[str]=None) -> pd.DataFrame:
         """Trích xuất inventory theo ngày hoặc lấy inventory lần import gần nhất
         Return: DataFrame inventory
@@ -104,6 +105,7 @@ class InventoryModel:
         except Exception as e:
             logger.error(f"Error retrieving location data: {e}")
             return pd.DataFrame()
+        
     
     def get_merge_data(self, date_time: Optional[str]=None)-> pd.DataFrame:
         """Merge data của inventory, location, masterdata

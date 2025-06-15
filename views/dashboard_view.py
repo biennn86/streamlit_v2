@@ -10,7 +10,8 @@ from controllers.analytics_controller import AnalyticsController
 from views.tabs.tabdashboard_view import TabDashboardView
 from views.tabs.tabmixup_view import TabMixupView
 from views.tabs.tabemptyloc_view import TabEmptyLocView
-from views.tabs.combinebin_view import CombineBinView
+from views.tabs.tabcombinebin_view import CombineBinView
+from views.tabs.tabdataaviewer_view import TabDataViewer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ class DashboardView:
         self.mixup_view = TabMixupView(analytics_controller)
         self.emptyloc_view = TabEmptyLocView(analytics_controller)
         self.combinebin_view = CombineBinView(analytics_controller)
+        self.dataviewer_view = TabDataViewer(analytics_controller)
         #khởi tạo class menu app
         self.menuapp = MenuApp()
 
@@ -65,6 +67,12 @@ class DashboardView:
         
         with tab4:
             self.combinebin_view.render()
+        
+        with tab5:
+            pass
+
+        with tab6:
+            self.dataviewer_view.render()
 
 #===============================================
         # dict_chart = self.analytics_controller.get_all_chart()

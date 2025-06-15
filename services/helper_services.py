@@ -22,6 +22,7 @@ def normalize_data_upper(df) -> None:
     """Chuẩn hóa dữ liệu chuyển các cột text về lowrcase
     """
     string_columns = df.select_dtypes(include=['object', 'string'])
+    
     for col in string_columns:
         #Chỉ áp dụng .str.lower() cho các Series kiểu object/string
         if pd.api.types.is_string_dtype(df[col]):

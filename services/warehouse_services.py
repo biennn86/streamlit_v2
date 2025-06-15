@@ -210,6 +210,15 @@ class WarehouseAnalyzer(DataProcessor):
 
 		return df_combinebin
 	
+	def get_current_df_data(self) -> pd.DataFrame:
+		"""Lấy data frame đấ merge đang hiện hành
+			Cung cấp cho view để dùng cho chức năng data viewer
+		"""
+		if not self.df.empty:
+			return self.df.copy(deep=True)
+		else:
+			return pd.DataFrame
+	
 	def count_block_pallet(self) -> Dict[str, float]:
 		"""
 			Tính tổng pallet có status HD và trừ vị trí stream có name_wh là REJ và EOL có name_wh LSL
