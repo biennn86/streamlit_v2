@@ -61,7 +61,7 @@ class FindMixup:
 		#lấy cột cần hiển thị
 		df_mixup = df_mixup[['date', 'gcas', 'description', 'location', 'batch', 'status', 'qty', 'pallet']]
 		#viết hoa chữ cái đầu name columns
-		df_mixup.columns = [col.capitalize() for col in df_mixup.columns]
+		df_mixup.columns = [str(col).capitalize() for col in df_mixup.columns]
 		#Đánh lại số index
 		df_mixup.index = range(1, len(df_mixup)+1)
 		#viết hoa data striog, object trong df

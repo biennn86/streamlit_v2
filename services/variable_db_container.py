@@ -465,4 +465,6 @@ TITLE_METRIC_CHART = {
 	'rm_total': 'NORM. RM',
 	'fgbd_total': 'FG BD 2500',
 	'pmbd_total': 'PM PLT 4500',
+	'pallet_mixup': 'MIXUP',
+	'pallet_combinebin': 'COMBINE'
 }

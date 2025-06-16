@@ -11,7 +11,7 @@ from views.tabs.tabdashboard_view import TabDashboardView
 from views.tabs.tabmixup_view import TabMixupView
 from views.tabs.tabemptyloc_view import TabEmptyLocView
 from views.tabs.tabcombinebin_view import CombineBinView
-from views.tabs.tabdataaviewer_view import TabDataViewer
+from views.tabs.tabdataviewer_view import TabDataViewer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -29,6 +29,9 @@ class DashboardView:
         self.dataviewer_view = TabDataViewer(analytics_controller)
         #khởi tạo class menu app
         self.menuapp = MenuApp()
+        #khởi tạo session_state để bắt sự kiện on_change
+        if "uploaded_files" not in st.session_state:
+            st.session_state.uploaded_files = False
 
     def init_page_config(self):
         st.set_page_config(
@@ -41,17 +44,28 @@ class DashboardView:
 
     def render(self) -> None:
         self.init_page_config()
+        st.title("🏭 Warehouse Inventory Management System")
         #show sidebar menu
         creare_location = self.menuapp.create_location()
         upload_files = self.menuapp.import_files_inventory()
+        st.session_state.len_uploaded_files = len(upload_files)
        
-        if any(upload_files):
+        if st.session_state.uploaded_files is None:
+            """Phác thảo bắt sự kiện upload_files để clear session_state cho streamlit lấy data mới upload đi phân tích
+                1. khởi tạo ss uploaded_files có data False
+                2. Lúc đó sẽ bỏ qua if này và chạy xuống dưới, lấy data gần nhất trong database để analytics
+                3. khi người dùng chọn uploaded_files thì ss uploaded_file sẽ update lại giá trị là None
+                5. lúc đó sẽ đủ điều kiện để vào if này và đi phân tích file mới, đồng thời clear ss cũ cập nhật
+                lại ss uploaded_files để tránh vào lần nữa.
+                Tóm lại: sẽ bắt sự kiện ss uploaded_files là None để lấy files mới
+            """
+            st.session_state.clear()
+            st.session_state.uploaded_files = True
             is_valid, meesage, df = self.inventory_controller.import_file(upload_files)
             st.toast(meesage, icon="ℹ️")
+
             if not is_valid:
                 st.stop()
-            # if len(upload_files)%3==0:
-            #     st.dataframe(self.inventory_controller.get_merge_data(), use_container_width=True, height=600)
 
          # Main tabs
         tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 DashBoard", "📋 Empty Loc", "🔢 Mixup", "⚙️ Combine Bin", "📊 Analytics", "📋 Data Viewer"])
@@ -60,28 +74,25 @@ class DashboardView:
             self.dashboard_view.render()
         
         with tab2:
+            # st.toggle("On/Off", key="togg_empty")
+            # if st.session_state.togg_empty:
             self.emptyloc_view.render()
             
         with tab3:
+            # st.toggle("On/Off", key="togg_mixup")
+            # if st.session_state.togg_mixup:
             self.mixup_view.render()
         
         with tab4:
+            # st.toggle("On/Off", key="togg_combine")
+            # if st.session_state.togg_combine:
             self.combinebin_view.render()
         
         with tab5:
             pass
 
         with tab6:
+            # st.write(st.session_state)
             self.dataviewer_view.render()
 
 #===============================================
-        # dict_chart = self.analytics_controller.get_all_chart()
-        # # st.dataframe(df, height=600, use_container_width=True)
-        # for key, value in dict_chart.items():
-        #     try:
-        #         st.write(key)
-        #         st.plotly_chart(value)
-        #     except:
-        #         st.metric(**value)
-        # # st.metric(**dict_chart.block_rpm)
-        # # st.plotly_chart(dict_chart.wh_total)

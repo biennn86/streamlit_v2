@@ -84,6 +84,11 @@ class WarehouseAnalyzer(DataProcessor):
 	def __init__(self, df: Optional[pd.DataFrame]=None):
 		super().__init__(df)
 		self._setup_warehouse_filters()
+		#Khởi tạo các biến cần phải check để chạy lấy df, từ đó lấy được số pallet để đưa lên dashboard
+		#Mục đích để chạy hàm tổng hợp 1 lần tránh phải chạy 2 lần khi chương trình được chạy
+		self.df_mixup = pd.DataFrame
+		self.df_empty_loc = pd.DataFrame
+		self.df_combinebin = pd.DataFrame
 
 	def _setup_warehouse_filters(self) -> None:
 		"""
@@ -188,27 +193,60 @@ class WarehouseAnalyzer(DataProcessor):
 	def get_mixup(self) -> pd.DataFrame:
 		"""Lấy bin mixup 
 		"""
-		df_mixup = FindMixup(self.df).get_mixup()
-
-		return df_mixup
+		if self.df_mixup.empty:
+			self.df_mixup = FindMixup(self.df).get_mixup()
+			return self.df_mixup
+		else:
+			return self.df_mixup
 	
+	def count_location_mixup(self) -> int:
+		"""Lấy số lượng bin mixup đưa lên dashboard sau khi đã lấy df_mixup
+		"""
+		df_mixup = self.get_mixup()
+		results = {}
+		location_mixup = df_mixup['Location'].nunique() if not df_mixup.empty else 0
+		results['pallet_mixup'] = location_mixup
+
+		return results
+
 	def get_empty_location(self, df_masterloc) -> pd.DataFrame:
 		"""Lấy vị trí trong theo data frame hiện tại.
 			Args:
 				dataframe masterlocion lấy từ analytics_controller
 		"""
-		df_empty_loc = EmptyLocation(df_data=self.df, df_masterloc=df_masterloc).get_empty_location()
+		if self.df_empty_loc.empty:
+			df_empty_loc = EmptyLocation(df_data=self.df, df_masterloc=df_masterloc).get_empty_location()
+			return df_empty_loc
+		else:
+			return df_empty_loc
+	
+	# def count_pallet_bin_empty(self) -> int:
+	# 	"""Lấy số pallet còn trống trong wh1, wh2, wh2
+	# 	"""
+	# 	df_empty_loc = self.get_empty_location()
+	# 	print(df_empty_loc)
 
-		return df_empty_loc
 	
 	def get_combinebin(self) -> pd.DataFrame:
 		"""	Lấy những vị trí đang tồn 1 pallet ở trên bin.
 			Tìm những bin có cùng gcas và lot đang ở bin đôi và đang có tồn 1 pallet.
 			Mục đích giải phóng bin có tồn 1 pallet và tối ưu bin double để full 2 pallet.
 		"""
-		df_combinebin = CombineBin(self.df).get_combinebin()
+		if self.df_combinebin.empty:
+			df_combinebin = CombineBin(self.df).get_combinebin()
+			return df_combinebin
+		else:
+			return df_combinebin
+	
+	def count_bin_combine(self) -> int:
+		"""Get pallet cần combine bin
+		"""
+		df_combinebin = self.get_combinebin()
+		results = {}
+		location_combinebin = len(df_combinebin) if not df_combinebin.empty else 0
+		results['pallet_combinebin'] = location_combinebin
 
-		return df_combinebin
+		return results
 	
 	def get_current_df_data(self) -> pd.DataFrame:
 		"""Lấy data frame đấ merge đang hiện hành
@@ -516,6 +554,18 @@ class WarehouseAnalyzer(DataProcessor):
 		#Count pallet total eo
 		pallet_total_eo = self.count_pallet_eo()
 		results.update(pallet_total_eo)
+
+		#Count location mixup
+		location_mixup = self.count_location_mixup()
+		results.update(location_mixup)
+
+		# #Count pallet empty bin
+		# pallet_empty = self.count_pallet_bin_empty()
+		# # results.update(pallet_empty)
+
+		#Count bin cần combine
+		pallet_combinebin = self.count_bin_combine()
+		results.update(pallet_combinebin)
 
 		return results
 	
