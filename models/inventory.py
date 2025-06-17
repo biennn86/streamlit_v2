@@ -108,7 +108,7 @@ class InventoryModel:
         
     
     def get_merge_data(self, date_time: Optional[str]=None)-> pd.DataFrame:
-        """Merge data của inventory, location, masterdata
+        """ Merge data của inventory, location, masterdata
             Có thể truyền vào string date_time được chọn từ streamlit
         Returns:
             DataFrame đã merge
@@ -133,8 +133,10 @@ class InventoryModel:
             dfInv_MtData_MtLoc['num_pallet'] = pd.to_numeric(dfInv_MtData_MtLoc['num_pallet'], downcast='float')
             dfInv_MtData_MtLoc['gcas'] = dfInv_MtData_MtLoc['gcas'].astype(str)
             dfTonghop = dfInv_MtData_MtLoc
+
             # dfTonghop.to_excel('data_tonghop.xlsx', index=False)
             logger.info(f"Merged {len(dfTonghop)} records inventory, location, masterdata")
+            
             return dfTonghop
         except Exception as e:
             logger.error(f"Error merge data: {e}")

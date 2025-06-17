@@ -1,9 +1,11 @@
 import pandas as pd
 
-def normalize_data_lower(df) -> None:
+def normalize_data_lower(df_data: pd.DataFrame) -> None:
     """Chuẩn hóa dữ liệu chuyển các cột text về lowrcase
     """
+    df = df_data.copy()
     string_columns = df.select_dtypes(include=['object', 'string'])
+
     for col in string_columns:
         #Chỉ áp dụng .str.lower() cho các Series kiểu object/string
         if pd.api.types.is_string_dtype(df[col]):
@@ -18,9 +20,11 @@ def normalize_data_lower(df) -> None:
                 pass # Bỏ qua nếu không chuyển đổi được
     return df
 
-def normalize_data_upper(df) -> None:
+def normalize_data_upper(df_data: pd.DataFrame) -> None:
     """Chuẩn hóa dữ liệu chuyển các cột text về lowrcase
     """
+
+    df = df_data.copy()
     string_columns = df.select_dtypes(include=['object', 'string'])
     
     for col in string_columns:

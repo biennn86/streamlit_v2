@@ -4,6 +4,9 @@ from typing import List, Tuple, Dict, Any, Optional
 from dataclasses import dataclass, field
 import pandas as pd
 import numpy as np
+
+from models.analytics import AnalyticsModel
+
 from services.chart_services import GaugeChart, Metric
 from services.variable_db_container import VariableContainer
 from services.mixup_services import FindMixup
@@ -83,6 +86,10 @@ class WarehouseAnalyzer(DataProcessor):
 	"""
 	def __init__(self, df: Optional[pd.DataFrame]=None):
 		super().__init__(df)
+		# analytics_model: AnalyticsModel
+		# self.analytics_model = analytics_model
+		# print(self.analytics_model.get_master_location())
+		
 		self._setup_warehouse_filters()
 		#Khởi tạo các biến cần phải check để chạy lấy df, từ đó lấy được số pallet để đưa lên dashboard
 		#Mục đích để chạy hàm tổng hợp 1 lần tránh phải chạy 2 lần khi chương trình được chạy
@@ -204,7 +211,7 @@ class WarehouseAnalyzer(DataProcessor):
 		"""
 		df_mixup = self.get_mixup()
 		results = {}
-		location_mixup = df_mixup['Location'].nunique() if not df_mixup.empty else 0
+		location_mixup = df_mixup['location'].nunique() if not df_mixup.empty else 0
 		results['pallet_mixup'] = location_mixup
 
 		return results
