@@ -20,10 +20,10 @@ logger = logging.getLogger(__name__)
 class DataProcessor:
 	"""Lớp cơ sở để xử lý dữ liệu từ DataFrame
 	"""
-	def __init__(self, df: Optional[pd.DataFrame]=None):
-		if isinstance(df, pd.DataFrame):
+	def __init__(self, df_merge: Optional[pd.DataFrame]=None):
+		if isinstance(df_merge, pd.DataFrame):
 			#Sử dụng .copy(deep=True) để đảm bảo không bị ảnh hưởng tới DataFrame gốc
-			self.df =df.copy(deep=True)
+			self.df =df_merge.copy(deep=True)
 			#Chuyển tất cả giá trị cột text về chữ thường để tránh các vấn đề về case-sensitivity
 			self._normalize_data()
 	
@@ -84,8 +84,8 @@ class WarehouseAnalyzer(DataProcessor):
 	"""
 	Lớp phân tích dữ liệu kho hàng và tính toán số pallet theo các tiêu chí
 	"""
-	def __init__(self, df: Optional[pd.DataFrame]=None):
-		super().__init__(df)
+	def __init__(self, df_merge: Optional[pd.DataFrame]=None):
+		super().__init__(df_merge)
 		# analytics_model: AnalyticsModel
 		# self.analytics_model = analytics_model
 		# print(self.analytics_model.get_master_location())
