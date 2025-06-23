@@ -18,6 +18,12 @@ class InventoryModel:
         self.inventory = TableNameInventory()
         self.location = TableNameLocation()
         self.masterdata = TableNameMasterdata()
+
+        #Tạo df location, và masterdata để lưu data và ram
+        #Mục đích để chỉ chạy get data 1 lần, lần sau chạy check biến khác rỗng sẽ lấy
+        #data trên ram trả về
+        self.df_location = pd.DataFrame()
+        self.df_masterdata = pd.DataFrame()
     
     def process_inventory(self, uploaded_files: List) -> pd.DataFrame:
         """
@@ -85,10 +91,13 @@ class InventoryModel:
             DataFrame Masterdataa
         """
         try:
-            df = self.masterdata.read_to_dataframe()
-            df = df[Columns.COLUMNS_MASTERDATA_NEED.value]
-            logger.info(f"Retrieved {len(df)} masterdata records from database")
-            return df
+            if self.df_masterdata.empty:
+                self.df_masterdata = self.masterdata.read_to_dataframe()
+                self.df_masterdata = self.df_masterdata[Columns.COLUMNS_MASTERDATA_NEED.value]
+                logger.info(f"Retrieved {len(self.df_masterdata)} masterdata records from database")
+                return self.df_masterdata
+            else:
+                return self.df_masterdata
         except Exception as e:
             logger.error(f"Error retrieving masterdata data: {e}")
             return pd.DataFrame()
@@ -99,9 +108,12 @@ class InventoryModel:
             DataFrame Masterlocation
         """
         try:
-            df = self.location.read_to_dataframe()
-            logger.info(f"Retrieved {len(df)} location records from database")
-            return df
+            if self.df_location.empty:
+                self.df_location = self.location.read_to_dataframe()
+                logger.info(f"Retrieved {len(self.df_location)} location records from database")
+                return self.df_location
+            else:
+                return self.df_location
         except Exception as e:
             logger.error(f"Error retrieving location data: {e}")
             return pd.DataFrame()

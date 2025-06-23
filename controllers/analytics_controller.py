@@ -30,7 +30,6 @@ class AnalyticsController:
         if "dict_all_chart" not in st.session_state:
             df = self.anlytics.get_merge_data()
             self.services.set_df(df)
-            # self.services = WarehouseAnalyzer(df)
             dict_all_chart = self.services.get_chart_for_dashboard()
             st.session_state.dict_all_chart = dict_all_chart
             return dict_all_chart
