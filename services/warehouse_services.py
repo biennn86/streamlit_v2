@@ -21,12 +21,17 @@ class DataProcessor:
 	"""Lớp cơ sở để xử lý dữ liệu từ DataFrame
 	"""
 	def __init__(self, df_merge: Optional[pd.DataFrame]=None):
-		if isinstance(df_merge, pd.DataFrame):
-			#Sử dụng .copy(deep=True) để đảm bảo không bị ảnh hưởng tới DataFrame gốc
-			self.df =df_merge.copy(deep=True)
-			#Chuyển tất cả giá trị cột text về chữ thường để tránh các vấn đề về case-sensitivity
-			self._normalize_data()
-	
+		self.df = df_merge
+		# if isinstance(df_merge, pd.DataFrame):
+		# 	#Sử dụng .copy(deep=True) để đảm bảo không bị ảnh hưởng tới DataFrame gốc
+		# 	self.df =df_merge.copy(deep=True)
+		# 	#Chuyển tất cả giá trị cột text về chữ thường để tránh các vấn đề về case-sensitivity
+		# 	self._normalize_data()
+
+	def set_df(self, df_merge: Optional[pd.DataFrame]=None):
+		self.df =df_merge.copy(deep=True)
+		self._normalize_data()
+
 	def _normalize_data(self) -> None:
 		"""Chuẩn hóa dữ liệu chuyển các cột text về lowrcase
 		"""
@@ -84,18 +89,17 @@ class WarehouseAnalyzer(DataProcessor):
 	"""
 	Lớp phân tích dữ liệu kho hàng và tính toán số pallet theo các tiêu chí
 	"""
-	def __init__(self, df_merge: Optional[pd.DataFrame]=None):
+	def __init__(self, analytics_model: AnalyticsModel, df_merge: Optional[pd.DataFrame]=None):
 		super().__init__(df_merge)
-		# analytics_model: AnalyticsModel
-		# self.analytics_model = analytics_model
-		# print(self.analytics_model.get_master_location())
+		self.analytics_model = analytics_model
 		
 		self._setup_warehouse_filters()
+		
 		#Khởi tạo các biến cần phải check để chạy lấy df, từ đó lấy được số pallet để đưa lên dashboard
 		#Mục đích để chạy hàm tổng hợp 1 lần tránh phải chạy 2 lần khi chương trình được chạy
-		self.df_mixup = pd.DataFrame
-		self.df_empty_loc = pd.DataFrame
-		self.df_combinebin = pd.DataFrame
+		self.df_mixup = pd.DataFrame()
+		self.df_empty_loc = pd.DataFrame()
+		self.df_combinebin = pd.DataFrame()
 
 	def _setup_warehouse_filters(self) -> None:
 		"""
@@ -210,28 +214,38 @@ class WarehouseAnalyzer(DataProcessor):
 		"""Lấy số lượng bin mixup đưa lên dashboard sau khi đã lấy df_mixup
 		"""
 		df_mixup = self.get_mixup()
-		results = {}
+		result = {}
 		location_mixup = df_mixup['location'].nunique() if not df_mixup.empty else 0
-		results['pallet_mixup'] = location_mixup
+		result['pallet_mixup'] = location_mixup
 
-		return results
+		return result
 
-	def get_empty_location(self, df_masterloc) -> pd.DataFrame:
+	def get_empty_location(self) -> pd.DataFrame:
 		"""Lấy vị trí trong theo data frame hiện tại.
 			Args:
 				dataframe masterlocion lấy từ analytics_controller
 		"""
 		if self.df_empty_loc.empty:
-			df_empty_loc = EmptyLocation(df_data=self.df, df_masterloc=df_masterloc).get_empty_location()
-			return df_empty_loc
+			df_masterloc = self.analytics_model.get_master_location()
+			self.df_empty_loc = EmptyLocation(df_data=self.df, df_masterloc=df_masterloc).get_empty_location()
+			return self.df_empty_loc
 		else:
-			return df_empty_loc
+			return self.df_empty_loc
 	
-	# def count_pallet_bin_empty(self) -> int:
-	# 	"""Lấy số pallet còn trống trong wh1, wh2, wh2
-	# 	"""
-	# 	df_empty_loc = self.get_empty_location()
-	# 	print(df_empty_loc)
+	def count_pallet_bin_empty(self) -> int:
+		"""Lấy số pallet còn trống trong wh1, wh2, wh2
+		"""
+		df = self.get_empty_location()
+		df['num_pallet'] = pd.to_numeric(df['num_pallet'], downcast='integer')
+		mask = pd.Series(True, df.index)
+		mask &= df['name_wh'].isin(['wh1', 'wh2', 'wh3'])
+		df_empty_loc = df[mask]
+		pallet_emptybin = df_empty_loc['num_pallet'].sum() if not df_empty_loc.empty else 0
+
+		result = {}
+		result['pallet_emptybin'] = pallet_emptybin
+		
+		return result
 
 	
 	def get_combinebin(self) -> pd.DataFrame:
@@ -573,6 +587,10 @@ class WarehouseAnalyzer(DataProcessor):
 		#Count bin cần combine
 		pallet_combinebin = self.count_bin_combine()
 		results.update(pallet_combinebin)
+
+		#Count bin empty
+		pallet_emptybin = self.count_pallet_bin_empty()
+		results.update(pallet_emptybin)
 
 		return results
 	

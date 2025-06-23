@@ -236,7 +236,7 @@ class TabDashboardView:
                     c5.metric(**obj_chart.block_rpm)
                     c6.metric(**obj_chart.block_lb)
                     c7.metric(**obj_chart.pallet_jit)
-                    # c8.metric()
+                    c8.metric(**obj_chart.pallet_emptybin)
                     c9.metric(**obj_chart.pallet_combinebin)
                     c10.metric(**obj_chart.pallet_mixup)
 

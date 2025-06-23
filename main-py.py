@@ -22,12 +22,11 @@ def main():
         #Khỏi tạo Model
         inventory_model = InventoryModel()
         analytics_model = AnalyticsModel(inventory_model)
-        # services = WarehouseAnalyzer()
+        analytics_services = WarehouseAnalyzer(analytics_model)
 
         #Khỏi tạo controller
         inventory_controller = InventoryController(inventory_model)
-        analytics_controller = AnalyticsController(analytics_model)
-        # analytics_services = WarehouseAnalyzer(analytics_model)
+        analytics_controller = AnalyticsController(analytics_model,analytics_services)
 
         #Khỏi tạo view
         dashboard = DashboardView(inventory_controller, analytics_controller)

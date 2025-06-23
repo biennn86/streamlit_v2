@@ -29,7 +29,8 @@ class AnalyticsController:
     def get_all_chart(self) -> Dict[str, Any]:
         if "dict_all_chart" not in st.session_state:
             df = self.anlytics.get_merge_data()
-            self.services = WarehouseAnalyzer(df)
+            self.services.set_df(df)
+            # self.services = WarehouseAnalyzer(df)
             dict_all_chart = self.services.get_chart_for_dashboard()
             st.session_state.dict_all_chart = dict_all_chart
             return dict_all_chart
@@ -47,8 +48,7 @@ class AnalyticsController:
     
     def get_empty_location(self) -> pd.DataFrame:
         if "df_empty_loc" not in st.session_state:
-            df_master_loc = self.anlytics.get_master_location()
-            df_empty_loc = self.services.get_empty_location(df_master_loc)
+            df_empty_loc = self.services.get_empty_location()
             st.session_state.df_empty_loc = df_empty_loc
             return df_empty_loc
         else:
