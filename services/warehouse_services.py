@@ -22,15 +22,21 @@ class DataProcessor:
 	"""
 	def __init__(self, df_merge: Optional[pd.DataFrame]=None):
 		self.df = df_merge
-		# if isinstance(df_merge, pd.DataFrame):
-		# 	#Sử dụng .copy(deep=True) để đảm bảo không bị ảnh hưởng tới DataFrame gốc
-		# 	self.df =df_merge.copy(deep=True)
-		# 	#Chuyển tất cả giá trị cột text về chữ thường để tránh các vấn đề về case-sensitivity
-		# 	self._normalize_data()
 
-	def set_df(self, df_merge: Optional[pd.DataFrame]=None):
+	def set_df_merge(self, df_merge: Optional[pd.DataFrame]=None):
+		"""	Df lúc khởi tạo là empty or None
+			Khi đã phân tích xong file import sẽ set df đã merge và class để phân tích
+		"""
+		#Sử dụng .copy(deep=True) để đảm bảo không bị ảnh hưởng tới DataFrame gốc
 		self.df =df_merge.copy(deep=True)
+		#Chuyển tất cả giá trị cột text về chữ thường để tránh các vấn đề về case-sensitivity
 		self._normalize_data()
+	
+	def get_df_merge(self) ->pd.DataFrame:
+		"""Trả về df đã merge nếu class khác có inject WarehoseAnalytics
+		"""
+		if any(self.df):
+			return self.df
 
 	def _normalize_data(self) -> None:
 		"""Chuẩn hóa dữ liệu chuyển các cột text về lowrcase
@@ -269,14 +275,6 @@ class WarehouseAnalyzer(DataProcessor):
 
 		return results
 	
-	def get_current_df_data(self) -> pd.DataFrame:
-		"""Lấy data frame đấ merge đang hiện hành
-			Cung cấp cho view để dùng cho chức năng data viewer
-		"""
-		if not self.df.empty:
-			return self.df.copy(deep=True)
-		else:
-			return pd.DataFrame
 	
 	def count_block_pallet(self) -> Dict[str, float]:
 		"""

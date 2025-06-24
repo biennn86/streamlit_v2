@@ -143,4 +143,5 @@ class TabDataViewer:
                 data=csv,
                 file_name=f"inventory_data_{selected_warehouse.lower() if selected_warehouse != 'All' else 'all'}_{pd.Timestamp.now().strftime('%Y%m%d%H%M')}.csv",
                 mime="text/csv",
+                # icon=":material/download:",
             )

@@ -17,6 +17,7 @@ class DatabaseManager:
         self.table = None
         self.connection = None
         self.cursor = None
+        self.df_import = None
 
     def connect(self) -> None:
         """Thiết lập kết nối tới database"""

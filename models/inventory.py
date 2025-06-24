@@ -24,6 +24,7 @@ class InventoryModel:
         #data trên ram trả về
         self.df_location = pd.DataFrame()
         self.df_masterdata = pd.DataFrame()
+        self.df_current = pd.DataFrame()
     
     def process_inventory(self, uploaded_files: List) -> pd.DataFrame:
         """
@@ -65,22 +66,28 @@ class InventoryModel:
             Boolean indicating success
         """
         try:
-            processed_df = self.process_inventory(uploaded_files)
-            self.inventory.insert_dataframe(processed_df)
-            logger.info(f"Saved {len(processed_df)} inventory records to database")
-            return True, processed_df
+            self.df_current = self.process_inventory(uploaded_files)
+            self.inventory.insert_dataframe(self.df_current)
+            logger.info(f"Saved {len(self.df_current)} inventory records to database")
+            return True, self.df_current
         except Exception as e:
             logger.error(f"Error saving inventory data: {e}")
             return False, pd.DataFrame()
-  
+        
     def get_inventory_data(self, date_time: Optional[str]=None) -> pd.DataFrame:
-        """Trích xuất inventory theo ngày hoặc lấy inventory lần import gần nhất
-        Return: DataFrame inventory
+        """ 1. Lấy df vừa xử lý khi import file hay là df current
+            2. Nếu df_current rỗng thì trích xuất inventory lần import gần nhất trong database
+            3. Nếu date_time được truyền thì lấy df theo ngày date_time được truyền trong database
+
+            Return: DataFrame inventory
         """
         try:
-            df = self.inventory.read_inventory_by_datetime(date_time)
-            logger.info(f"Retrieved {len(df)} inventory records from database")
-            return df
+            if not self.df_current.empty:
+                return self.df_current
+            else:
+                df = self.inventory.read_inventory_by_datetime(date_time)
+                logger.info(f"Retrieved {len(df)} inventory records from database")
+                return df
         except Exception as e:
             logger.error(f"Error retrieving inventory data: {e}")
             return pd.DataFrame()

@@ -28,8 +28,8 @@ class AnalyticsController:
     
     def get_all_chart(self) -> Dict[str, Any]:
         if "dict_all_chart" not in st.session_state:
-            df = self.anlytics.get_merge_data()
-            self.services.set_df(df)
+            df_merge = self.anlytics.get_merge_data()
+            self.services.set_df_merge(df_merge)
             dict_all_chart = self.services.get_chart_for_dashboard()
             st.session_state.dict_all_chart = dict_all_chart
             return dict_all_chart
@@ -69,7 +69,7 @@ class AnalyticsController:
             Phương thức này dùng để hiển thị cho tab dataviewer
         """
         if "df_data_curr" not in st.session_state:
-            df_curr = self.services.get_current_df_data()
+            df_curr = self.services.get_df_merge()
             st.session_state.df_data_curr = df_curr
             return df_curr
         else:
