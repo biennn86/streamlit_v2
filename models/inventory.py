@@ -137,26 +137,32 @@ class InventoryModel:
             df_location = self.get_location()
             df_masterdata = self.get_masterdata()
 
-            df_inventory['gcas'] = pd.to_numeric(df_inventory['gcas'], downcast='integer')
+            # df_inventory['gcas'] = pd.to_numeric(df_inventory['gcas'], downcast='integer')
+            df_inventory['gcas'] = df_inventory['gcas'].astype('int64')
             df_inventory['pallet'] = pd.to_numeric(df_inventory['pallet'], downcast='integer')
             df_inventory['qty'] = pd.to_numeric(df_inventory['qty'], downcast='float')
             df_inventory['batch'] = df_inventory['batch'].astype(str)
             df_inventory['vnl'] = df_inventory['vnl'].astype(str)
+
             #chuyển kiểu dữ liệu cột gcas trong masterdata về int. Kiểu mặc định đang là obj
-            df_masterdata['gcas'] = pd.to_numeric(df_masterdata['gcas'], downcast='integer')
+            # df_masterdata['gcas'] = pd.to_numeric(df_masterdata['gcas'], downcast='integer')
+            df_masterdata['gcas'] = df_masterdata['gcas'].astype('int64')
+            #khi update master data dùng method append để lấy được lịch sử thay đổi thông tin của gas (ví dụ như pallet pattern)
+            #nên khi lấy master data ra phân tích phải loại bỏ trùng để tránh duplicate data đi merge.
+            #khi dropduplicate giữ lại dòng cuối cùng để lấy thông tin data mới nhất
             df_masterdata = df_masterdata.drop_duplicates(subset=['gcas'], keep='last')
             
             # merge data của tồn kho, location, master data
-            dfInv_MtData = pd.merge(df_inventory, df_masterdata, left_on='gcas', right_on='gcas', how='left' )
-            dfInv_MtData_MtLoc = pd.merge(dfInv_MtData, df_location, left_on='location', right_on='location', how='left') #suffixes=('_inv', '_loc')
-            dfInv_MtData_MtLoc['num_pallet'] = pd.to_numeric(dfInv_MtData_MtLoc['num_pallet'], downcast='float')
-            dfInv_MtData_MtLoc['gcas'] = dfInv_MtData_MtLoc['gcas'].astype(str)
-            dfTonghop = dfInv_MtData_MtLoc
+            df_inv_mt = pd.merge(left=df_inventory, right=df_masterdata, left_on='gcas', right_on='gcas', how='left' )
+            df_inv_mt_loc = pd.merge(left=df_inv_mt, right=df_location, left_on='location', right_on='location', how='left') #suffixes=('_inv', '_loc')
+            df_inv_mt_loc['num_pallet'] = pd.to_numeric(df_inv_mt_loc['num_pallet'], downcast='integer')
+            df_inv_mt_loc['gcas'] = df_inv_mt_loc['gcas'].astype(str)
+            df_final = df_inv_mt_loc
 
-            # dfTonghop.to_excel('data_tonghop.xlsx', index=False)
-            logger.info(f"Merged {len(dfTonghop)} records inventory, location, masterdata")
+            # df_final.to_excel('data_tonghop.xlsx', index=False)
+            logger.info(f"Merged {len(df_final)} records inventory, location, masterdata")
             
-            return dfTonghop
+            return df_final
         except Exception as e:
             logger.error(f"Error merge data: {e}")
             return pd.DataFrame()

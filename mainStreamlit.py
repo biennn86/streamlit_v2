@@ -1,7 +1,7 @@
 import streamlit as st
 from dashboard.dashboardTonkho import *
 
-#https://pfw.youtube.com/watch?v=pWxDxhWXJos&t=5744s
+#https://www.youtube.com/watch?v=Mrwgkra33Ko&t=803s
 
 #Tồn kho
 st.set_page_config(page_title='Dashboard P&G', page_icon='📊', layout='wide')

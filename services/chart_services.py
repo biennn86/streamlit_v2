@@ -4,10 +4,11 @@ import streamlit as st
 # import matplotlib.pyplot as plt
 
 class GaugeChart():
-    def __init__(self, title, value, capa=1):
+    def __init__(self, title, value, capa=1, height=120):
         self.title = title
         self.value = value
         self.capa = capa
+        self.height = height
         self.color_bar = None
        
     def create_fig(self):
@@ -22,21 +23,67 @@ class GaugeChart():
 
         #draw fig
         fig = go.Figure(go.Indicator(
-        domain = {'x': [0.1, 0.289], 'y': [0, 0]},
-        value = self.value,
         mode = "gauge+number",
+        value = self.value,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        # title = {
+        #     'text': self.title,
+        #     'font': {'color': '#00ff88', 'size': 20},
+        #     'align': 'center', # Căn giữa tiêu đề
+        #     },
         # delta = {'reference': 100},
-        number = {'valueformat': '.0f'},
-        title = {'text': self.title},
-        gauge = {'axis': {'range': [0, self.capa], 'tickvals': [0, self.capa], 'ticktext': ['0', self.capa], 'tickfont': {'size': 12}}, 
-        'bar': {'color': self.color_bar, 'thickness': 1.0},
-        'bordercolor': '#0E1117',
-        'bgcolor': 'lightgray',
-        }))
+        gauge = {
+            'axis': {
+                'range': [0, self.capa], # Phạm vi từ 0 đến 2000
+                'tickvals': [0, self.capa], # Chỉ hiển thị số 0 và 2000
+                'ticktext': ['0', self.capa], # Nhãn cho các tick
+                'tickfont': {'size': 15}}, # Kích thước font cho số trên trục
+            'bar': {
+                'color': self.color_bar,
+                'thickness': 1.0}, # Màu của thanh chỉ báo tiến trình
+            # 'bgcolor': 'rgba(0,0,0,0)', # Nền của gauge trong suốt (quan trọng cho nền đen)
+            'bordercolor': '#0E1117',
+            'bgcolor': 'lightgray',
+                },
+                
+        number = {
+            'valueformat': '.0f',
+            'font': {
+                'color': 'white',
+                'size': 30
+                }
+                },
+        ))
 
-        fig.update_layout(margin={'l': 0, 'r': 0, 'b': 0, 't': 0},
-                          height=70, width=600, #57; 500
-                          
+        # Danh sách chứa các annotations (chú thích)
+        annotations = []
+        # CHỈ THÊM ANNOTATION NẾU title_text KHÔNG RỖNG
+        if self.title:
+            annotations.append(
+                go.layout.Annotation(
+                   text=self.title,
+                    xref='paper', # Tham chiếu theo tọa độ của toàn bộ giấy (figure)
+                    yref='paper', # Tham chiếu theo tọa độ của toàn bộ giấy (figure)
+                    x=0.5,        # Căn giữa theo chiều ngang (0.5 là chính giữa)
+                    y=1.2,       # Đặt vị trí Y (0 là đáy, 1 là đỉnh của figure). 0.95 thường là trên cùng.
+                    showarrow=False, # Không hiển thị mũi tên
+                    font=dict(
+                        family='Open Sans, sans-serif', # Hoặc font bạn muốn
+                        size=22,        # Kích thước font cho tiêu đề
+                        color='#39FF14', # Màu xanh lá cho tiêu đề
+                        weight='bold'
+                    ),
+                    xanchor='center', # Căn giữa văn bản theo trục x
+                    yanchor='middle'  # Căn giữa văn bản theo trục y
+                        )
+                )
+
+        fig.update_layout(
+            height=self.height,
+            margin=dict(l=2, r=2, t=30, b=5),
+            # paper_bgcolor="black", # Đặt màu nền của toàn bộ biểu đồ là đen
+            # plot_bgcolor="black", # Đặt màu nền của vùng vẽ là đen
+            annotations=annotations # Gán danh sách annotations vào layout
                           )
 
         return fig
@@ -75,13 +122,32 @@ class Metric:
             'help' : self.help
             # **self.kwargs
             }
-        return dict_metric
         
-
+        # return dict_metric
+    
     def update_value(self, new_value):
         self.value = new_value
         self.delta = new_value - self.value_old
         self.value_old = new_value
+
+    # Hàm tạo metric card custom
+    def create_metric_card(self):
+        delta_html = ""
+        if self.delta:
+            delta_color = "#00ff88" if self.delta >= 0 else "#ff4444"
+            delta_symbol = "↗" if self.delta >= 0 else "↘"
+            delta_html = f'<div style="color: {delta_color}; font-size: 12px;">{delta_symbol} {abs(self.delta)}</div>'
+        
+        card_html = f"""
+        <div class="metric-grid" id="{None or self.label.lower().replace(' ', '-')}">
+            <div style="color: #000066; font-size: 13px; font-weight: bold; margin-bottom: 5px; text-align: center;">{self.label}</div>
+            <div style="color: #174C4F; font-size: 22px; font-weight: bold; margin-bottom: 0px; text-align: center;">{self.value}</div>
+            {delta_html}
+        </div>
+        """
+        return card_html
+        
+
 
 #============================
 # import plotly.graph_objects as go

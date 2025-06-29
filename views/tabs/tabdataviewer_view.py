@@ -35,9 +35,17 @@ class TabDataViewer:
         
                 
         with dataviewer:
-            st.html(f"<span class='data_viewer'</span>")
-            st.html(f"<span class='title_dataviewer'</span>")
-            st.subheader(f"CURRENT INVENTORY DATA {date_time}")
+            # Header với container có thể control
+            header_html  = f"""
+            <div class="main-header" id="main-header">
+                <div class="header-title">CURRENT INVENTORY DATA {date_time}</div>
+            </div>
+            """
+            st.markdown(header_html, unsafe_allow_html=True)
+
+            # st.html(f"<span class='data_viewer'</span>")
+            # st.html(f"<span class='title_dataviewer'</span>")
+            # st.subheader(f"CURRENT INVENTORY DATA {date_time}")
             
             
             self.df.index = range(1, len(self.df)+1)
@@ -76,7 +84,15 @@ class TabDataViewer:
             self.download_data_display(df_display, selected_wh)
 
         with datasumary:
-            st.subheader(f"SUMMARY DATA  {date_time}")
+            # Header với container có thể control
+            header_html  = f"""
+            <div class="main-header" id="main-header">
+                <div class="header-title">SUMMARY DATA {date_time}</div>
+            </div>
+            """
+            st.markdown(header_html, unsafe_allow_html=True)
+
+            # st.subheader(f"SUMMARY DATA  {date_time}")
             st.table(self.df_sum)
             st.divider()
 
@@ -120,18 +136,20 @@ class TabDataViewer:
                 df_sm[column_to_format] = df_sm[column_to_format].apply(format_number_with_comma)
 
             #Rename index và columns của df sau khi pivot_table
+            df_sm = df_sm.rename_axis('Category', axis=0)
             df_sm = df_sm.rename(index={'eo': 'EO',
                                         'fg': 'FG',
-                                        'rpm': 'RPM'}, level=0)
+                                        'rpm': 'RPM', 'cat_inv': 'aaaaa'}, level=0)
             
             df_sm = df_sm.rename(columns={'pallet': 'Pallet',
                                           'gcas': 'Gcas',
                                           'qty': 'Qty'}, level=0)
 
-            df_sm = df_sm.rename(columns={'hd': 'HD',
+            df_sm = df_sm.rename(columns={'cat_inv': 'Category',
+                                        'hd': 'HD',
                                         'rl': 'RL',
                                         'qu': 'QU'}, level=1)
-
+            
             return df_sm
     
     def download_data_display(self, filtered_df, selected_warehouse):
@@ -143,5 +161,5 @@ class TabDataViewer:
                 data=csv,
                 file_name=f"inventory_data_{selected_warehouse.lower() if selected_warehouse != 'All' else 'all'}_{pd.Timestamp.now().strftime('%Y%m%d%H%M')}.csv",
                 mime="text/csv",
-                # icon=":material/download:",
+                icon=":material/download:",
             )

@@ -322,11 +322,22 @@ class VariableContainer:
 			#any([key.find("_total")!=-1, key.find("wh")!=-1])
 			if key in use_chart_gauge:
 				type_chart = 1
-				dict_data[key] = DataChartType(
-					pallet=getattr(self, key),
-					type_chart=type_chart,
-					capa_chart=CAPACITY_WAREHOUSE.get(str_name[0], 1).get(str_name[1], 1)
-					)
+				if key in ("wh1_total", "wh2_total", "wh3_total", "cool_total", "pf_total", "wh_total", "lb_total", "eo_total"):
+					name_wh = key.split("_")[0]
+					title = name_wh.upper() + " CU: "
+					dict_data[key] = DataChartType(
+						pallet=getattr(self, key),
+						type_chart=type_chart,
+						title_chart=title,
+						capa_chart=CAPACITY_WAREHOUSE.get(str_name[0], 1).get(str_name[1], 1)
+						)
+				else:
+					dict_data[key] = DataChartType(
+						pallet=getattr(self, key),
+						type_chart=type_chart,
+						capa_chart=CAPACITY_WAREHOUSE.get(str_name[0], 1).get(str_name[1], 1)
+						)
+					
 			elif key.startswith("cu_"):
 				type_chart = 3
 				dict_data[key] = DataChartType(type_chart=type_chart, cu_chart=self.__dict__.get(key, 0))

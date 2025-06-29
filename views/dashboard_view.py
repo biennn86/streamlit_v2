@@ -44,7 +44,7 @@ class DashboardView:
 
     def render(self) -> None:
         self.init_page_config()
-        st.title("🏭 Warehouse Inventory Management System")
+        # st.title("🏭 Warehouse Inventory Management System")
         #show sidebar menu
         creare_location = self.menuapp.create_location()
         upload_files = self.menuapp.import_files_inventory()

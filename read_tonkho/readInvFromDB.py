@@ -1,6 +1,5 @@
 # SELECT date FROM inventory ORDER BY rowid DESC LIMIT 1;
 import pandas as pd
-import numpy as np
 from read_tonkho.read_rpm import *
 from controllers.masterdata import MasterData
 from controllers.location_new import LocationNew
@@ -32,9 +31,9 @@ class CreateDfToDB():
         self.dfmasterData = self.dfmasterData.drop_duplicates(subset=['gcas'], keep='last')
         
         # merge data của tồn kho, location, master data
-        self.dfTonkhoMtData = pd.merge(self.dfTonkho, self.dfmasterData, left_on='gcas', right_on='gcas', how='left' )
+        self.dfTonkhoMtData = pd.merge(left=self.dfTonkho, right=self.dfmasterData, on='gcas', how='left' )
         self.dfTonkhoMtDataMtLoc = pd.merge(self.dfTonkhoMtData, self.masterLocation, left_on='location', right_on='location', how='left') #suffixes=('_inv', '_loc')
-        self.dfTonkhoMtDataMtLoc['num_pallet'] = pd.to_numeric(self.dfTonkhoMtDataMtLoc['num_pallet'], downcast='float')
+        self.dfTonkhoMtDataMtLoc['num_pallet'] = pd.to_numeric(self.dfTonkhoMtDataMtLoc['num_pallet'], downcast='integer')
         self.dfTonkhoMtDataMtLoc['gcas'] = self.dfTonkhoMtDataMtLoc['gcas'].astype(str)
         self.dfTonghop = self.dfTonkhoMtDataMtLoc
 

@@ -17,10 +17,18 @@ class CombineBinView:
         combinebin = cont_combinebin.container(border=StatusBorder.BORDER.value)
 
         with title_combinebin:
-            col1, col2, col3 = title_combinebin.columns([1, 10, 1])
-            with col2:
-                st.html(f"<span class='title_commbinebin'</span>")
-                st.subheader(f"COMBINE BIN {date_time}")
+            # Header với container có thể control
+            header_html  = f"""
+            <div class="main-header" id="main-header">
+                <div class="header-title">COMBINE BIN {date_time}</div>
+            </div>
+            """
+            st.markdown(header_html, unsafe_allow_html=True)
+
+            # col1, col2, col3 = title_combinebin.columns([1, 10, 1])
+            # with col2:
+            #     st.html(f"<span class='title_commbinebin'</span>")
+            #     st.subheader(f"COMBINE BIN {date_time}")
                 
         with combinebin:
             st.html(f"<span class='df_combinebin'</span>")

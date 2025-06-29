@@ -16,10 +16,18 @@ class TabMixupView:
         mixup = cont_mixup.container(border=StatusBorder.BORDER.value)
 
         with title_mixup:
-            col1, col2, col3 = title_mixup.columns([1, 10, 1])
-            with col2:
-                st.html(f"<span class='title_mixup'</span>")
-                st.subheader(f"BIN MIXUP {date_time}")
+            # Header với container có thể control
+            header_html  = f"""
+            <div class="main-header" id="main-header">
+                <div class="header-title">BIN MIXUP {date_time}</div>
+            </div>
+            """
+            st.markdown(header_html, unsafe_allow_html=True)
+
+            # col1, col2, col3 = title_mixup.columns([1, 10, 1])
+            # with col2:
+            #     st.html(f"<span class='title_mixup'</span>")
+            #     st.subheader(f"BIN MIXUP {date_time}")
                 
         with mixup:
             st.html(f"<span class='df_mixup'</span>")

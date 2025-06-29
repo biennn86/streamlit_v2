@@ -607,7 +607,7 @@ class WarehouseAnalyzer(DataProcessor):
 				fig = GaugeChart(pallet_type.title_chart, pallet_type.pallet, pallet_type.capa_chart).create_fig()
 				dict_all_chart[name] = fig
 			elif  pallet_type.type_chart == 2:
-				fig = Metric(pallet_type.title_chart, pallet_type.pallet).get_info_metric()
+				fig = Metric(pallet_type.title_chart, pallet_type.pallet).create_metric_card()
 				dict_all_chart[name] = fig
 			elif  pallet_type.type_chart == 3:
 				dict_all_chart[name] = pallet_type.cu_chart

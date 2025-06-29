@@ -17,10 +17,17 @@ class TabEmptyLocView:
         emptyloc = cont_emptyloc.container(border=StatusBorder.BORDER.value)
 
         with title_emptyloc:
-            col1, col2, col3 = title_emptyloc.columns([1, 10, 1])
-            with col2:
-                st.html(f"<span class='title_emp'</span>")
-                st.subheader(f"EMPTY LOCATION {date_time}")
+            # Header với container có thể control
+            header_html  = f"""
+            <div class="main-header" id="main-header">
+                <div class="header-title">EMPTY LOCATION {date_time}</div>
+            </div>
+            """
+            st.markdown(header_html, unsafe_allow_html=True)
+            # col1, col2, col3 = title_emptyloc.columns([1, 10, 1])
+            # with col2:
+            #     st.html(f"<span class='title_emp'</span>")
+            #     st.subheader(f"EMPTY LOCATION {date_time}")
                 
         with emptyloc:
             st.html(f"<span class='df_emp'</span>")
@@ -79,6 +86,7 @@ class TabEmptyLocView:
         )
 
         #Rename index và columns của df sau khi pivot_table
+        df_sm = df_sm.rename_axis('WH NAME', axis=0)
         df_sm = df_sm.rename(index={'wh1': 'WH1',
                                     'wh2': 'WH2',
                                     'wh3': 'WH3'}, level=0)

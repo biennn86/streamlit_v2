@@ -325,14 +325,14 @@ class CoutPlDetailLoc():
     '''
     def __init__(self):
         self.dfInv = None
-        try:
-            self.obj_dftonkho = ImportInvToDf().ImportInv()
-            self.dfInv = self.obj_dftonkho.mainReadTonkho()
-            if self.dfInv is not None:
-                self.StringDataTime = self.dfInv.iloc[0, 0]
-        except Exception as err:
-            print('error cls countpldetailloc: ' + str(err))
-            print('File Import Không Tồn Tại!')
+        # try:
+        self.obj_dftonkho = ImportInvToDf().ImportInv()
+        self.dfInv = self.obj_dftonkho.mainReadTonkho()
+        if self.dfInv is not None:
+            self.StringDataTime = self.dfInv.iloc[0, 0]
+        # except Exception as err:
+        #     print('error cls countpldetailloc: ' + str(err))
+        #     print('File Import Không Tồn Tại!')
 
         self.CAT = ('eo', 'fg', 'rpm')
 
