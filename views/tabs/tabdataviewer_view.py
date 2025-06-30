@@ -93,7 +93,7 @@ class TabDataViewer:
             st.markdown(header_html, unsafe_allow_html=True)
 
             # st.subheader(f"SUMMARY DATA  {date_time}")
-            st.table(self.df_sum)
+            st.dataframe(self.df_sum, use_container_width=True)
             st.divider()
 
 

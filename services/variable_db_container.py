@@ -273,6 +273,19 @@ class VariableContainer:
 		cu_wh = {f"cu_{name}": f"{self.__dict__.get(f'{name}_total')/capa_wh.get(f'capa_{name}',1):.0%}" for name in name_wh_need_capa}
 		for key, value in cu_wh.items():
 			setattr(self, key, value)
+		
+	def create_title_for_chart(self):
+		self.dict_title: Dict[str, str] = {}
+		self.dict_title = {
+			'wh1_total': f"WH1 CU: {self.cu_wh1}",
+			'wh2_total': f"WH2 CU: {self.cu_wh2}",
+			'wh3_total': f"WH3 CU: {self.cu_wh3}",
+			'cool_total': f"COOLING: {self.cu_cool}",
+			'pf_total': f"PERFUME: {self.cu_pf}",
+			'lb_total': f"WH LABEL: {self.cu_lb}",
+			'eo_total': f"EO & CONS: {self.cu_eo}",
+			'wh_total': f"BDWH#123(Ex EO,Cons): {self.cu_wh}"
+		}
 
 	def get_comprehensive_data_chart(self):
 		"""
@@ -303,6 +316,7 @@ class VariableContainer:
 		self._get_pallet_steam()
 		self._get_pallet_scanout()
 		self.get_cu_for_chart()
+		self.create_title_for_chart()
 		#Xóa thuộc tính "variables_dict" đã gán trên init để lấy số lượng pallet EO tính WH2
 		self.delete_attribute('variables_dict')
 
@@ -318,19 +332,45 @@ class VariableContainer:
 				"wh1_floor", "wh1_pf", "wh1_hr", "wh1_total",
 				"wh2_floor", "wh2_pf", "wh2_hr", "wh2_total",
 				"wh3_floor", "wh3_pf", "wh3_hr", "wh3_total",
-				"cool_total", "pf_total", "lb_total", "eo_total", "wh_total")
+				"cool_total", "pf_total", "lb_total", "eo_total",
+				"wh_total"
+				)
+			
+			chart_need_title = (
+				"wh1_total",
+				"wh2_total",
+				"wh3_total",
+				"cool_total",
+				"pf_total",
+				"wh_total",
+				"lb_total",
+				"eo_total"
+				)
+			
 			#any([key.find("_total")!=-1, key.find("wh")!=-1])
 			if key in use_chart_gauge:
 				type_chart = 1
-				if key in ("wh1_total", "wh2_total", "wh3_total", "cool_total", "pf_total", "wh_total", "lb_total", "eo_total"):
-					name_wh = key.split("_")[0]
-					title = name_wh.upper() + " CU: "
-					dict_data[key] = DataChartType(
-						pallet=getattr(self, key),
-						type_chart=type_chart,
-						title_chart=title,
-						capa_chart=CAPACITY_WAREHOUSE.get(str_name[0], 1).get(str_name[1], 1)
-						)
+				if key in chart_need_title:
+					if key in ('wh_total',):
+						name_wh = key.split("_")[0]
+						title = self.dict_title.get(key, None)
+						height_chart = 140
+						dict_data[key] = DataChartType(
+							pallet=getattr(self, key),
+							type_chart=type_chart,
+							title_chart=title,
+							capa_chart=CAPACITY_WAREHOUSE.get(str_name[0], 1).get(str_name[1], 1),
+							height_chart=height_chart
+							)
+					else:
+						name_wh = key.split("_")[0]
+						title = self.dict_title.get(key, None)
+						dict_data[key] = DataChartType(
+							pallet=getattr(self, key),
+							type_chart=type_chart,
+							title_chart=title,
+							capa_chart=CAPACITY_WAREHOUSE.get(str_name[0], 1).get(str_name[1], 1),
+							)
 				else:
 					dict_data[key] = DataChartType(
 						pallet=getattr(self, key),
@@ -382,13 +422,15 @@ class DataChartType:
 	capa_chart: Optional[int] = None
 	title_chart: Optional[str] = None
 	cu_chart: Optional[Any] = None
+	height_chart: Optional[int] = None
 
 	def to_dict(self):
 		return {
 			"pallet": self.pallet,
 			'type_chart': self.type_chart,
 			'capa_chart': self.capa_chart,
-			'title_chart': self.title_chart
+			'title_chart': self.title_chart,
+			'height_chart': self.height_chart
 		}
 
 CAPACITY_WAREHOUSE = {

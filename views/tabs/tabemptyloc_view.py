@@ -31,7 +31,7 @@ class TabEmptyLocView:
                 
         with emptyloc:
             st.html(f"<span class='df_emp'</span>")
-            st.table(self._get_summary_emptyloc())
+            st.dataframe(self._get_summary_emptyloc(), use_container_width=True)
             st.divider()
             st.dataframe(self._edit_display_dfemptyloc_view(), hide_index=True, height=700, use_container_width=True)
     

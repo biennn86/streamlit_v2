@@ -4,7 +4,7 @@ import streamlit as st
 # import matplotlib.pyplot as plt
 
 class GaugeChart():
-    def __init__(self, title, value, capa=1, height=120):
+    def __init__(self, title, value, capa=1, height=None):
         self.title = title
         self.value = value
         self.capa = capa
@@ -20,6 +20,12 @@ class GaugeChart():
             self.color_bar = '#FFFF00'
         else:
             self.color_bar = '#EE0000'
+
+        #set height_chart
+        if self.height is None:
+            self.height = 120
+        else:
+            self.height = 145
 
         #draw fig
         fig = go.Figure(go.Indicator(
@@ -37,13 +43,14 @@ class GaugeChart():
                 'range': [0, self.capa], # Phạm vi từ 0 đến 2000
                 'tickvals': [0, self.capa], # Chỉ hiển thị số 0 và 2000
                 'ticktext': ['0', self.capa], # Nhãn cho các tick
-                'tickfont': {'size': 15}}, # Kích thước font cho số trên trục
+                'tickfont': {'size': 15, 'weight': 'normal'} # Kích thước font cho số trên trục
+                }, 
             'bar': {
-                'color': self.color_bar,
-                'thickness': 1.0}, # Màu của thanh chỉ báo tiến trình
-            # 'bgcolor': 'rgba(0,0,0,0)', # Nền của gauge trong suốt (quan trọng cho nền đen)
-            'bordercolor': '#0E1117',
-            'bgcolor': 'lightgray',
+                'color': self.color_bar, # Màu của thanh chỉ báo tiến trình
+                'thickness': 1.0}, # kích thước thanh tiến trình bằng với viền ngoài
+                # 'bgcolor': 'rgba(0,0,0,0)', # Nền của gauge trong suốt (quan trọng cho nền đen)
+                'bordercolor': '#0E1117',
+                'bgcolor': 'lightgray',
                 },
                 
         number = {
@@ -68,10 +75,10 @@ class GaugeChart():
                     y=1.2,       # Đặt vị trí Y (0 là đáy, 1 là đỉnh của figure). 0.95 thường là trên cùng.
                     showarrow=False, # Không hiển thị mũi tên
                     font=dict(
-                        family='Open Sans, sans-serif', # Hoặc font bạn muốn
-                        size=22,        # Kích thước font cho tiêu đề
-                        color='#39FF14', # Màu xanh lá cho tiêu đề
-                        weight='bold'
+                        family='Open Sans, sans-serif', # font chữ title
+                        size=20,        # Kích thước font cho tiêu đề
+                        color="#39FF14", # Màu xanh lá cho tiêu đề #39FF14
+                        weight='bold' # chữ đậm
                     ),
                     xanchor='center', # Căn giữa văn bản theo trục x
                     yanchor='middle'  # Căn giữa văn bản theo trục y

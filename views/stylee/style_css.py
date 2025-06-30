@@ -97,17 +97,19 @@ def load_custom_css():
     
     /* CSS cho header */
     .main-header {
-        background: linear-gradient(90deg, #1e2329 0%, #2d3748 100%);
-        padding: 5px;
-        border-radius: 8px;
-        margin-bottom: 5px;
-        border-left: 3px solid #00ff88;
+        # background: linear-gradient(90deg, #1e2329 0%, #2d3748 100%);
+        padding: 2px;
+        # border: 1px solid #CCCCCC;
+        border-radius: 12px;
+        margin-bottom: 2px;
+        # border-left: 4px solid #00ff88;
         text-align: center;
+        box-shadow: 10px 0px 20px rgba(4, 12, 226, 0.2);
     }
     
     .header-title {
-        color: #00ff88;
-        font-size: 28px;
+        color: #39FF14; /*#00ff88*/
+        font-size: 36px;
         font-weight: bold;
         margin: 0px;
     }
@@ -131,6 +133,15 @@ def load_custom_css():
         grid-template-columns: 1fr;
         grid-gap: 5px;
         }
+    }
+                
+    /*-------------Căn giữa data trong df---------------*/
+    .stDataFrame th {
+        text-align: center !important;
+    }
+    
+    .stDataFrame td {
+        text-align: center !important;
     }
     </style>
     """, unsafe_allow_html=True)

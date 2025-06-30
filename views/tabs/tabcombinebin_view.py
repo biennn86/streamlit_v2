@@ -32,9 +32,13 @@ class CombineBinView:
                 
         with combinebin:
             st.html(f"<span class='df_combinebin'</span>")
-            st.dataframe(self._edit_display_dfemptyloc_view(), hide_index=True, height=600, use_container_width=True)
+            df_combinebin = self._edit_display_dfcombinebin_view()
+            hight = 700
+            if len(df_combinebin)<=15:
+                hight = None
+            st.dataframe(df_combinebin, hide_index=True, height=hight, use_container_width=True)
 
-    def _edit_display_dfemptyloc_view(self) -> pd.DataFrame:
+    def _edit_display_dfcombinebin_view(self) -> pd.DataFrame:
         #Lấy cột cần hiển thị
         df = self.df[['date', 'gcas', 'description', 'batch', 'status', 'qty', 'pallet', 'location', 'to_location']].copy()
         #đánh lại stt
