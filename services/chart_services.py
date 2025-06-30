@@ -25,41 +25,41 @@ class GaugeChart():
         if self.height is None:
             self.height = 120
         else:
-            self.height = 145
+            self.height = 140
 
         #draw fig
         fig = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = self.value,
-        domain = {'x': [0, 1], 'y': [0, 1]},
-        # title = {
-        #     'text': self.title,
-        #     'font': {'color': '#00ff88', 'size': 20},
-        #     'align': 'center', # Căn giữa tiêu đề
-        #     },
-        # delta = {'reference': 100},
-        gauge = {
-            'axis': {
-                'range': [0, self.capa], # Phạm vi từ 0 đến 2000
-                'tickvals': [0, self.capa], # Chỉ hiển thị số 0 và 2000
-                'ticktext': ['0', self.capa], # Nhãn cho các tick
-                'tickfont': {'size': 15, 'weight': 'normal'} # Kích thước font cho số trên trục
-                }, 
-            'bar': {
-                'color': self.color_bar, # Màu của thanh chỉ báo tiến trình
-                'thickness': 1.0}, # kích thước thanh tiến trình bằng với viền ngoài
-                # 'bgcolor': 'rgba(0,0,0,0)', # Nền của gauge trong suốt (quan trọng cho nền đen)
-                'bordercolor': '#0E1117',
-                'bgcolor': 'lightgray',
-                },
-                
-        number = {
-            'valueformat': '.0f',
-            'font': {
-                'color': 'white',
-                'size': 30
-                }
-                },
+            mode = "gauge+number",
+            value = self.value,
+            domain = {'x': [0, 1], 'y': [0, 1]},
+            # title = {
+            #     'text': self.title,
+            #     'font': {'color': '#00ff88', 'size': 20},
+            #     'align': 'center', # Căn giữa tiêu đề
+            #     },
+            # delta = {'reference': 100},
+            gauge = {
+                'axis': {
+                    'range': [0, self.capa], # Phạm vi từ 0 đến 2000
+                    'tickvals': [0, self.capa], # Chỉ hiển thị số 0 và 2000
+                    'ticktext': ['0', str(self.capa)], # Nhãn cho các tick
+                    'tickfont': {'size': 15, 'weight': 'normal'} # Kích thước font cho số trên trục
+                    }, 
+                'bar': {
+                    'color': self.color_bar, # Màu của thanh chỉ báo tiến trình
+                    'thickness': 1.0}, # kích thước thanh tiến trình bằng với viền ngoài
+                    # 'bgcolor': 'rgba(0,0,0,0)', # Nền của gauge trong suốt (quan trọng cho nền đen)
+                    'bordercolor': '#0E1117',
+                    'bgcolor': 'lightgray',
+                    },
+                    
+            number = {
+                'valueformat': '.0f',
+                'font': {
+                    'color': 'white',
+                    'size': 30
+                    }
+                    },
         ))
 
         # Danh sách chứa các annotations (chú thích)

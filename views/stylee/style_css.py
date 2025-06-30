@@ -21,7 +21,7 @@ def load_custom_css():
     /* Các components như st.write(), st.plotly_chart(), etc. */
     .block-container {
         width: 100% !important; /* Chiếm toàn bộ chiều rộng */
-        padding: 1rem 1rem 1rem !important; /* Padding: top=2rem, left/right=1rem, bottom=5rem */
+        padding: 1rem 2rem 1rem !important; /* Padding: top=2rem, left/right=1rem, bottom=5rem */
         max-width: initial !important;  /* Không giới hạn chiều rộng tối đa */
         min-width: auto !important; /* Chiều rộng tối thiểu tự động */
     }
