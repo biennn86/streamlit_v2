@@ -65,9 +65,10 @@ class DatabaseManager:
             df: Pandas DataFrame containing the data to insert
         """
         try:
-            # self.connect()
-            # # Drop the table if it exists and recreate it
-            # self.cursor.execute(f"DROP TABLE IF EXISTS 'inventory'")
+            # Drop the table if it exists and recreate it
+            self.connect()
+            self.cursor.execute(f"DROP TABLE IF EXISTS 'inventory'")
+            self.disconnect()
 
             #chuyển toàn bộ df cần import sang string
             df = df.astype('string')

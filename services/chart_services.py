@@ -23,9 +23,9 @@ class GaugeChart():
 
         #set height_chart
         if self.height is None:
-            self.height = 120
+            self.height = 100
         else:
-            self.height = 140
+            self.height = 110
 
         #draw fig
         fig = go.Figure(go.Indicator(
@@ -43,21 +43,21 @@ class GaugeChart():
                     'range': [0, self.capa], # Phạm vi từ 0 đến 2000
                     'tickvals': [0, self.capa], # Chỉ hiển thị số 0 và 2000
                     'ticktext': ['0', str(self.capa)], # Nhãn cho các tick
-                    'tickfont': {'size': 15, 'weight': 'normal'} # Kích thước font cho số trên trục
+                    'tickfont': {'size': 12, 'weight': 'normal'} # Kích thước font cho số trên trục
                     }, 
                 'bar': {
                     'color': self.color_bar, # Màu của thanh chỉ báo tiến trình
                     'thickness': 1.0}, # kích thước thanh tiến trình bằng với viền ngoài
                     # 'bgcolor': 'rgba(0,0,0,0)', # Nền của gauge trong suốt (quan trọng cho nền đen)
-                    'bordercolor': '#0E1117',
-                    'bgcolor': 'lightgray',
+                    'bordercolor': '#0E1117', #Màu đường viền gauge
+                    'bgcolor': 'lightgray', # Màu nền vòng cung trong gauge
                     },
                     
             number = {
                 'valueformat': '.0f',
                 'font': {
                     'color': 'white',
-                    'size': 30
+                    'size': 26
                     }
                     },
         ))
@@ -72,11 +72,11 @@ class GaugeChart():
                     xref='paper', # Tham chiếu theo tọa độ của toàn bộ giấy (figure)
                     yref='paper', # Tham chiếu theo tọa độ của toàn bộ giấy (figure)
                     x=0.5,        # Căn giữa theo chiều ngang (0.5 là chính giữa)
-                    y=1.2,       # Đặt vị trí Y (0 là đáy, 1 là đỉnh của figure). 0.95 thường là trên cùng.
+                    y=1.15,       # Đặt vị trí Y (0 là đáy, 1 là đỉnh của figure). 0.95 thường là trên cùng.
                     showarrow=False, # Không hiển thị mũi tên
                     font=dict(
                         family='Open Sans, sans-serif', # font chữ title
-                        size=20,        # Kích thước font cho tiêu đề
+                        size=14,        # Kích thước font cho tiêu đề
                         color="#39FF14", # Màu xanh lá cho tiêu đề #39FF14
                         weight='bold' # chữ đậm
                     ),
@@ -87,7 +87,7 @@ class GaugeChart():
 
         fig.update_layout(
             height=self.height,
-            margin=dict(l=2, r=2, t=30, b=5),
+            margin=dict(l=2, r=2, t=24, b=5),
             # paper_bgcolor="black", # Đặt màu nền của toàn bộ biểu đồ là đen
             # plot_bgcolor="black", # Đặt màu nền của vùng vẽ là đen
             annotations=annotations # Gán danh sách annotations vào layout
@@ -147,8 +147,8 @@ class Metric:
         
         card_html = f"""
         <div class="metric-grid" id="{None or self.label.lower().replace(' ', '-')}">
-            <div style="color: #000066; font-size: 13px; font-weight: bold; margin-bottom: 5px; text-align: center;">{self.label}</div>
-            <div style="color: #174C4F; font-size: 22px; font-weight: bold; margin-bottom: 0px; text-align: center;">{self.value}</div>
+            <div style="color: #000066; font-size: 10px; font-weight: bold; margin-bottom: 0px; text-align: center;">{self.label}</div>
+            <div style="color: #174C4F; font-size: 18px; font-weight: bold; margin-bottom: 0px; text-align: center;">{self.value}</div>
             {delta_html}
         </div>
         """

@@ -21,24 +21,32 @@ def load_custom_css():
     /* Các components như st.write(), st.plotly_chart(), etc. */
     .block-container {
         width: 100% !important; /* Chiếm toàn bộ chiều rộng */
-        padding: 1rem 2rem 1rem !important; /* Padding: top=2rem, left/right=1rem, bottom=5rem */
+        padding: 1rem 2rem 10rem !important; /* Padding: top=2rem, left/right=1rem, bottom=5rem */
         max-width: initial !important;  /* Không giới hạn chiều rộng tối đa */
         min-width: auto !important; /* Chiều rộng tối thiểu tự động */
     }
-                
+    
     /* Điều chỉnh khoảng cách giữa các gauge streamlit */
     .stPlotlyChart {
         margin-bottom: -30px !important;
         margin-top: -18px !important;
     }
                 
+    /* Điều chỉnh zoom, màu bg của sidebar */
+    .stSidebar {
+        background-color: #1e2329;
+        border-radius: 8px;
+        border: 2px solid burlywood;
+        zoom: 85%;
+    }
+    
     /* CSS cho metric cards */
     [data-testid="metric-container"] {
         background-color: #1e2329;
         border: 1px solid #333;
         border-radius: 8px;
         padding: 15px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        box-shadow: 4px 2px 4px rgba(0,0,0,0.3);
     }
     
     /* CSS cho từng container có thể customize riêng */
@@ -54,7 +62,7 @@ def load_custom_css():
         background-color: burlywood;
         border: 2px solid #CCCCCC;
         border-left: 6px solid #00ff88;
-        border-radius: 8px;
+        border-radius: 4px;
         padding: 2px;
         margin: 2px; #(theo thứ tự kim đồng hồ: trên, phải, dưới, trái)
     }
@@ -88,7 +96,7 @@ def load_custom_css():
     }
     
     .middle-section {
-        margin: 20px 0;
+        margin: 20px;
     }
     
     .bottom-section {
@@ -98,10 +106,11 @@ def load_custom_css():
     /* CSS cho header */
     .main-header {
         # background: linear-gradient(90deg, #1e2329 0%, #2d3748 100%);
-        padding: 2px;
+        padding: 6px;
         # border: 1px solid #CCCCCC;
         border-radius: 12px;
         margin-bottom: 2px;
+        margin-top: -20px;
         # border-left: 4px solid #00ff88;
         text-align: center;
         box-shadow: 10px 0px 20px rgba(4, 12, 226, 0.2);
@@ -109,7 +118,7 @@ def load_custom_css():
     
     .header-title {
         color: #39FF14; /*#00ff88*/
-        font-size: 36px;
+        font-size: 30px;
         font-weight: bold;
         margin: 0px;
     }

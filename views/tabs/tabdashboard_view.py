@@ -40,9 +40,9 @@ class TabDashboardView:
             #     # st.html(f"<span class='title_dashboard'</span>")
             #     st.subheader(f"INVENTOTY BY SUB WAREHOUSE {date_time}")
 
+        # Top section - Gauge charts
+        # st.markdown('<div class="top-section" id="top-section">', unsafe_allow_html=True)
         with cont_dashboard:
-            # Top section - Gauge charts
-            st.markdown('<div class="top-section" id="top-section">', unsafe_allow_html=True)
             with cont_wh1:
                 #WH1 Total
                 st.markdown('<div class="gauge-container" id="wh1-total">', unsafe_allow_html=True)
@@ -168,11 +168,10 @@ class TabDashboardView:
                     st.markdown('<div class="gauge-container" id="wh-eocons">', unsafe_allow_html=True)
                     st.plotly_chart(obj_chart.eo_total, use_container_width=True, key="wh_eocons")
                     st.markdown('</div>', unsafe_allow_html=True)
-            #Top section
-            st.markdown('</div>', unsafe_allow_html=True)
+        
 
-            # Middle section - Metrics grid
-            st.markdown('<div class="middle-section" id="middle-section">', unsafe_allow_html=True)
+        # # Middle section - Metrics grid
+        # st.markdown('<div class="middle-section" id="middle-section">', unsafe_allow_html=True)
             with cont_metric:
                 with st.container(border=StatusBorder.BORDER.value):
                     a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 = st.columns([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
@@ -244,12 +243,14 @@ class TabDashboardView:
                         c9.markdown(obj_chart.pallet_combinebin, unsafe_allow_html=True)
                     with c10:
                         c10.markdown(obj_chart.pallet_mixup, unsafe_allow_html=True)
+        #Top section
+        # st.markdown('</div>', unsafe_allow_html=True)
+        #Mid section
+        # st.markdown('</div>', unsafe_allow_html=True)
 
-            st.markdown('</div>', unsafe_allow_html=True)
-
-            # Bottom section
-            st.markdown('<div class="bottom-section" id="bottom-section">', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+        # Bottom section
+        # st.markdown('<div class="bottom-section" id="bottom-section">', unsafe_allow_html=True)
+        # st.markdown('</div>', unsafe_allow_html=True)
 
     def _init_style(self):
         st.html("./views/style/style_wh123.html")
