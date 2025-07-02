@@ -7,6 +7,9 @@ from utils.constants import PAGE_CONFIG
 from views.menu_appview import *
 from controllers.inventory_controller import InventoryController
 from controllers.analytics_controller import AnalyticsController
+from controllers.location_controller import LocationController
+from controllers.masterdata_controller import MasterdataController
+
 from views.tabs.tabdashboard_view import TabDashboardView
 from views.tabs.tabmixup_view import TabMixupView
 from views.tabs.tabemptyloc_view import TabEmptyLocView
@@ -47,6 +50,14 @@ class DashboardView:
         # st.title("🏭 Warehouse Inventory Management System")
         #show sidebar menu
         creare_location = self.menuapp.create_location()
+
+        if creare_location:
+            LocationController().create_location()
+        
+        update_masterdata =self.menuapp.update_masterdata()
+        if update_masterdata:
+            MasterdataController().import_masterdata(update_masterdata)
+
         upload_files = self.menuapp.import_files_inventory()
         st.session_state.len_uploaded_files = len(upload_files)
        
@@ -74,18 +85,12 @@ class DashboardView:
             self.dashboard_view.render()
         
         with tab2:
-            # st.toggle("On/Off", key="togg_empty")
-            # if st.session_state.togg_empty:
             self.emptyloc_view.render()
             
         with tab3:
-            # st.toggle("On/Off", key="togg_mixup")
-            # if st.session_state.togg_mixup:
             self.mixup_view.render()
         
         with tab4:
-            # st.toggle("On/Off", key="togg_combine")
-            # if st.session_state.togg_combine:
             self.combinebin_view.render()
         
         with tab5:

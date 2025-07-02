@@ -78,7 +78,7 @@ class GaugeChart():
                         family='Open Sans, sans-serif', # font chữ title
                         size=14,        # Kích thước font cho tiêu đề
                         color="#39FF14", # Màu xanh lá cho tiêu đề #39FF14
-                        weight='bold' # chữ đậm
+                        weight='bold', # chữ đậm
                     ),
                     xanchor='center', # Căn giữa văn bản theo trục x
                     yanchor='middle'  # Căn giữa văn bản theo trục y
