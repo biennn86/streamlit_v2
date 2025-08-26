@@ -47,7 +47,7 @@ class Pattern(Enum):
     VN07 = r'(VN07)'
     TWO_SPACE = r'\s{2,}'
     ONE_SPACE = r'\s{1,}'
-    STATUS = r'(RL|QU|HD)'
+    STATUS = r'(?<=\s|;)(?:RL|HD|QU)(?=\s|;)' 
 
 class Columns(Enum):
     COLUMNS_FILE_EO = ['stt', 'barcode', 'lot#', 'po#', 'owner', 'gcas', 'description', 'supply_chain', 'type', 'status', 'created_by', 'created_date', 'wh_date', 'bin', 'assignment#', 'qty', 'remained_qty']

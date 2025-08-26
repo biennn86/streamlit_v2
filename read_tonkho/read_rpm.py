@@ -90,7 +90,7 @@ def read_data_file(data):
             data_line = line
             data_line = re.sub(r'(VN07)', "", data_line)
             data_line = re.sub(r'\s{2,}', ";", data_line)
-            scile = re.search(r'(RL|QU|HD)', data_line).span()[0]
+            scile = re.search(r'(?<=\s|;)(?:RL|HD|QU)(?=\s|;)', data_line).span()[0]
             data_line_left = data_line[:scile]
             data_line_right = data_line[scile:]
             data_line_left =  re.sub(r'\s{1,}', ";", data_line_left)
