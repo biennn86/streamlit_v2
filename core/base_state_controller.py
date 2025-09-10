@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from .state import AppState
 
-class BaseController(ABC):
+class BaseStateController(ABC):
     '''Base controller với AppState tích hợp'''
     def __init__(self):
         # Khởi tạo state với các giá trị mặc định của app

@@ -1,4 +1,4 @@
-from models.masterdata import MasterdataModel
+from models.masterdata_model import MasterdataModel
 
 class MasterdataController:
     def __init__(self):

@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 from typing import List, Tuple, Dict, Any, Optional
 
-from models.analytics import AnalyticsModel
+from models.analytics_model import AnalyticsModel
 from services.warehouse_services import WarehouseAnalyzer
 
 logging.basicConfig(level=logging.INFO)

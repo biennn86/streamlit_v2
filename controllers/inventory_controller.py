@@ -3,7 +3,7 @@ import re
 import pandas as pd
 from typing import List, Tuple, Dict, Any, Optional
 from utils.constants import ValidateFile, Pattern, Columns, VNL_CAT
-from models.inventory import InventoryModel
+from models.inventory_model import InventoryModel
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

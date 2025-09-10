@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 import pandas as pd
 import numpy as np
 
-from models.analytics import AnalyticsModel
+from models.analytics_model import AnalyticsModel
 
 from services.chart_services import GaugeChart, Metric
 from services.variable_db_container import VariableContainer

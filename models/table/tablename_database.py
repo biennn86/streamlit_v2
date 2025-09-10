@@ -1,4 +1,4 @@
-from models.database import DatabaseManager
+from models.database_model import DatabaseManager
 
 class TableNameInventory(DatabaseManager):
     def __init__(self):
@@ -14,3 +14,8 @@ class TableNameLocation(DatabaseManager):
     def __init__(self):
         super().__init__()
         self.table = "master_location_new"
+
+class TableNameUser(DatabaseManager):
+    def __init__(self):
+        super().__init__()
+        self.table = "user"

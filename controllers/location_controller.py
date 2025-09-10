@@ -1,4 +1,4 @@
-from models.location import *
+from models.location_model import *
 
 class LocationController:
     def __init__(self):

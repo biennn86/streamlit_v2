@@ -9,8 +9,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import project components
-from models.inventory import InventoryModel
-from models.analytics import AnalyticsModel
+from models.inventory_model import InventoryModel
+from models.analytics_model import AnalyticsModel
 from services.warehouse_services import WarehouseAnalyzer
 from controllers.inventory_controller import InventoryController
 from controllers.analytics_controller import AnalyticsController

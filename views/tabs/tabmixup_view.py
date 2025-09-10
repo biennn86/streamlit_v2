@@ -35,7 +35,7 @@ class TabMixupView:
 
     def _edit_display_df(self, df_mixup):
         #lấy cột cần hiển thị
-        df_mixup = df_mixup[['date', 'gcas', 'description', 'location', 'batch', 'status', 'qty', 'pallet']]
+        df_mixup = df_mixup[['date', 'location', 'gcas', 'batch', 'description', 'status', 'qty', 'pallet']]
         #viết hoa chữ cái đầu name columns
         df_mixup.columns = [str(col).capitalize() for col in df_mixup.columns]
         #Đánh lại số index
