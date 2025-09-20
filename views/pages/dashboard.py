@@ -42,11 +42,20 @@ class DashboardView:
         self.dashboard_controller = dashboard_controller
         # self.dashboard_controller = self.app_manager.get_controller(DashboardController)
 
+        #Lấy data cho dashboard
+        self.get_data_dashboard()
+        self.role_user = self.user_controller.state.user_role
 
-    def get_data(self):
+    def get_data_dashboard(self):
         self.dashboard_controller.get_dashboard_data()
-        data =  self.dashboard_controller.state.dashboard_data
-        return data
+        self.data =  self.dashboard_controller.state.dashboard_data
+        if self.data:
+            self.datetime_current = self.data.get('datetime_current', None)
+            self.data_chart = self.data.get('chart', {})
+            self.data_emptyloc = self.data.get('emptyloc', {})
+            self.data_mixup = self.data.get('mixup', {})
+            self.data_combinebin = self.data.get('combinebin', {})
+            self.data_current = self.data.get('current_data', {})
     
     def location(self):
         create_location = sidebar_create_location()
@@ -64,37 +73,58 @@ class DashboardView:
         if all([files_inventory_import, status_file_uploader]):
             is_valid, meesage, df = self.dashboard_controller.inventory_controller.import_file(files_inventory_import)
             st.toast(meesage, icon="ℹ️")
-            
 
             if not is_valid:
                 st.stop()
 
-    def render(self):
-        self.location()
-        self.import_masterdata()
-        self.import_inventory_files()
+    def render_tab_dashboard(self):
+        TabDashboardView(data_chart=self.data_chart, datetime_current=self.datetime_current).render()
+    
+    def render_tab_emptyloc(self):
+        TabEmptyLocView(data_emptyloc=self.data_emptyloc, datetime_current=self.datetime_current).render()
 
-        #====================================
-        data = self.get_data()
-        datetime_current = data.get('datetime_current', None)
-        data_chart = data.get('chart', {})
-        data_emptyloc = data.get('emptyloc', {})
-        data_mixup = data.get('mixup', {})
-        data_combinebin = data.get('combinebin', {})
-        data_current = data.get('current_data', {})
-        
+    def render_tab_mixup(self):
+        TabMixupView(data_mixup=self.data_mixup, datetime_current=self.datetime_current).render()
+
+    def render_tab_combinebin(self):
+        TabCombineBinView(data_combinebin=self.data_combinebin, datetime_current=self.datetime_current).render()
+
+    def render_tab_dataviewer(self):
+        TabDataViewer(data_current=self.data_current, datetime_current=self.datetime_current).render()
+    
+    def render_full_tab(self):
         tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🏠 DashBoard", "📋 Empty Loc", "🔢 Mixup", "⚙️ Combine Bin", "📊 Analytics", "📋 Data Viewer"])
-
         with tab1:
-            TabDashboardView(data_chart=data_chart, datetime_current=datetime_current).render()
+            self.render_tab_dashboard()
         with tab2:
-            TabEmptyLocView(data_emptyloc=data_emptyloc, datetime_current=datetime_current).render()
+            self.render_tab_emptyloc()
         with tab3:
-            TabMixupView(data_mixup=data_mixup, datetime_current=datetime_current).render()
+            self.render_tab_mixup()
         with tab4:
-            TabCombineBinView(data_combinebin=data_combinebin, datetime_current=datetime_current).render()
+            self.render_tab_combinebin()
         with tab5:
             pass
         with tab6:
-            TabDataViewer(data_current=data_current, datetime_current=datetime_current).render()
+            self.render_tab_dataviewer()
+
+    def render(self):
+        if self.role_user in ['guest']:
+            tab1,  = st.tabs(["🏠 DashBoard"])
+            with tab1:
+                self.render_tab_dashboard()
+        elif self.role_user in ['viewer']:
+            tab1, tab2 = st.tabs(["🏠 DashBoard", "🔢 Mixup"])
+            with tab1:
+                self.render_tab_dashboard()
+            with tab2:
+                self.render_tab_mixup()
+        elif self.role_user in ['edit']:
+            self.import_masterdata()
+            self.import_inventory_files()
+            self.render_full_tab()
+        elif self.role_user in ['admin']:
+            self.location()
+            self.import_masterdata()
+            self.import_inventory_files()
+            self.render_full_tab()
 

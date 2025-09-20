@@ -24,9 +24,14 @@ def render_sidebar():
 
             st.markdown("---")
 
+            # Phân quyền được vào page theo role
+            role_user = user_controller.state.user_role
+            if role_user in ['guest', 'viewer', 'edit']:
+                pages = ["Dashboard"]
+            elif role_user in ['admin']:
+                pages = ["Dashboard", "Profile", "Settings", "Registry User"]
 
             # Navigation menu
-            pages = ["Dashboard", "Profile", "Settings", "Registry User"]
             if user_controller.has_role('admin'):
                 pages.append("Admin")
 
