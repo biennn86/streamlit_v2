@@ -22,6 +22,9 @@ class UserController(BaseStateController):
     def login(self, username, password) -> bool:
         """Xử lý đăng nhập"""
         if self.user_model.validate_credentials(username, password):
+            #Update ngày giờ last_login
+            self.user_model.update_last_login(username=username)
+            #Lấy data user trong database
             user_info = self.user_model.get_user_info(username)
 
             # Cập nhật state
@@ -61,6 +64,12 @@ class UserController(BaseStateController):
         if self.user_model.update_user_profile(username, profile_data):
             # Cập nhật state
             self.state.user_profile.update(profile_data)
+            return True
+        return False
+    
+    def register_user(self, profile_user) -> bool:
+        """Đăng ký user mới"""
+        if self.user_model.insert_user(profile_user):
             return True
         return False
 

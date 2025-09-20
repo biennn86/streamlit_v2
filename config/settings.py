@@ -20,6 +20,7 @@ class AppConfig:
         FILTERS = 'filters'
         USER_PROFILE = 'user_profile'
         DASHBOARD_DATA = 'dashboard_data'
+        FILE_UPLOADER = 'file_uploader'
 
     # Default values
     DEFAULT_STATE = {
@@ -33,7 +34,8 @@ class AppConfig:
         StateKeys.SELECTED_DATA: None,
         StateKeys.FILTERS: {},
         StateKeys.USER_PROFILE: {},
-        StateKeys.DASHBOARD_DATA: {}
+        StateKeys.DASHBOARD_DATA: {},
+        StateKeys.FILE_UPLOADER: False
     }
 
     # App settings

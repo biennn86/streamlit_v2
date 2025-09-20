@@ -19,47 +19,26 @@ class AnalyticsController:
     def get_datetime_current(self) -> str:
         """Lấy date time hiện tại trong analytics đã lấy
         """
-        if "date_time_curr" not in st.session_state:
-            date_time_curr = self.anlytics.get_datatime_current()
-            st.session_state.date_time_curr = date_time_curr
-            return date_time_curr
-        else:
-            return st.session_state.date_time_curr
+        date_time_curr = self.anlytics.get_datatime_current()
+        return date_time_curr
     
     def get_all_chart(self) -> Dict[str, Any]:
-        if "dict_all_chart" not in st.session_state:
-            df_merge = self.anlytics.get_merge_data()
-            self.services.set_df_merge(df_merge)
-            dict_all_chart = self.services.get_chart_for_dashboard()
-            st.session_state.dict_all_chart = dict_all_chart
-            return dict_all_chart
-        else:
-            return st.session_state.dict_all_chart
-
+        df_merge = self.anlytics.get_merge_data()
+        self.services.set_df_merge(df_merge)
+        dict_all_chart = self.services.get_chart_for_dashboard()
+        return dict_all_chart
     
     def get_mixup(self) -> pd.DataFrame:
-        if "df_mixup" not in st.session_state:
-            df_mixup = self.services.get_mixup()
-            st.session_state.df_mixup = df_mixup
-            return df_mixup
-        else:
-            return st.session_state.df_mixup
+        df_mixup = self.services.get_mixup()
+        return df_mixup
     
     def get_empty_location(self) -> pd.DataFrame:
-        if "df_empty_loc" not in st.session_state:
-            df_empty_loc = self.services.get_empty_location()
-            st.session_state.df_empty_loc = df_empty_loc
-            return df_empty_loc
-        else:
-            return st.session_state.df_empty_loc
+        df_empty_loc = self.services.get_empty_location()
+        return df_empty_loc
     
     def get_combinebin(self) -> pd.DataFrame:
-        if "df_combinebin" not in st.session_state:
-            df_combinebin = self.services.get_combinebin()
-            st.session_state.df_combinebin = df_combinebin
-            return df_combinebin
-        else:
-            return st.session_state.df_combinebin
+        df_combinebin = self.services.get_combinebin()
+        return df_combinebin
     
     def get_current_df_data(self) -> pd.DataFrame:
         """Lưu ý: df_data trong services đã được chuẩn hóa.
@@ -68,9 +47,5 @@ class AnalyticsController:
 
             Phương thức này dùng để hiển thị cho tab dataviewer
         """
-        if "df_data_curr" not in st.session_state:
-            df_curr = self.services.get_df_merge()
-            st.session_state.df_data_curr = df_curr
-            return df_curr
-        else:
-            return st.session_state.df_data_curr
+        df_curr = self.services.get_df_merge()
+        return df_curr

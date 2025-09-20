@@ -39,7 +39,7 @@ class DatabaseManager:
 
     def create_table(self, create_table_sql) -> None:
         try:
-            self.connect
+            self.connect()
             self.cursor.execute(create_table_sql)
             self.connection.commit()
             logger.info(f"Table '{self.table}' created or confirmed existing")
@@ -56,7 +56,7 @@ class DatabaseManager:
             self.connect()
             columns = ', '.join(list(data.keys()))
             values = tuple(data.values())
-            sql = "INSERT INTO {2}({0}) VALUES ({1})".format(columns, ', '.join(['%s'] * len(list(data.keys()))), self.table)
+            sql = "INSERT INTO {2}({0}) VALUES ({1})".format(columns, ', '.join(['?'] * len(list(data.keys()))), self.table)
             self.cursor.execute(sql, values)
             self.connection.commit()
         except sqlite3.Error as e:
@@ -73,10 +73,10 @@ class DatabaseManager:
             values = list(data.values())
             dataupdates = []
             for key in data.keys():
-                dataupdates.append('{} = %s'.format(key))
+                dataupdates.append('{} = ?'.format(key))
             values.append(username)
             values = tuple(values)
-            sql = "UPDATE {0} SET {1} WHERE username=%s".format(self.table, ', '.join(dataupdates))
+            sql = "UPDATE {0} SET {1} WHERE username=?".format(self.table, ', '.join(dataupdates))
             self.cursor.execute(sql, values)
             self.connection.commit()
         except sqlite3.Error as e:
@@ -90,7 +90,7 @@ class DatabaseManager:
     def delete_user(self, username) -> None:
         try:
             self.connect()
-            sql = "DELETE FROM {0} WHERE username=%s".format(self.table)
+            sql = "DELETE FROM {0} WHERE username=?".format(self.table)
             self.cursor.execute(sql, (username, ))
             self.connection.commit()
         except sqlite3.Error as e:
@@ -108,17 +108,24 @@ class DatabaseManager:
             # và tên cột (như dict)
             self.connection.row_factory = sqlite3.Row # Dòng code quan trọng
             self.cursor = self.connection.cursor()
-            sql = "SELECT * FROM {0} WHERE username=%s".format(self.table)
+            sql = "SELECT * FROM {0} WHERE username=?".format(self.table)
             self.cursor.execute(sql, (username, ))
-            
             result = self.cursor.fetchone()
+
+            #Nếu không không có data trong table thì dict() sẽ báo lỗi vì kết quả trả về Nonetype
+            #Nên phải bắt lỗi đó
+            if result is not None:
+                result = dict(result)
+            
             if result is None:
+                logger.warning(f"User '{username}' không có data trong database.")
                 return None
             return result
         except sqlite3.Error as e:
             logger.error(f"Error get data from table {self.table}: {e}")
             raise
         except Exception as e:
+            logger.error(f"Error get data from table {self.table}: {e}")
             return None
         finally:
             self.disconnect()

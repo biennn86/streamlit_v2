@@ -1,6 +1,6 @@
 import streamlit as st
 from utils.constants import StatusBorder
-from views.stylee.style_css import load_custom_css
+from views.style.style_css import load_custom_css
 from controllers.analytics_controller import AnalyticsController
 
 class TabDashboardView:

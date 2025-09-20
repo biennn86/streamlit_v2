@@ -7,8 +7,9 @@ from models.table.tablename_database import *
 class UserModel:
     '''Model xử lý dữ liệu người dùng'''
     def __init__(self):
-        self._create_table_user()
         self.obj_user = TableNameUser()
+        #Tạo table user và user admin
+        # self._create_table_user()
     
     def _create_table_user(self) -> None:
         create_table_sql = f"""
@@ -19,9 +20,12 @@ class UserModel:
                 email varchar(100) NOT NULL UNIQUE,
                 fullname varchar(100),
                 position varchar(100),
+                address varchar(300),
                 phone_number varchar(15),
                 role varchar(20),
                 is_active BOOLEAN,
+                udf1 varchar(1000),
+                udf2 varchar(1000),
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 last_login_at DATETIME
@@ -29,6 +33,22 @@ class UserModel:
             """
         
         self.obj_user.create_table(create_table_sql)
+
+        create_user_admin = {
+            'username': 'admin',
+            'password_hash': 'admin',
+            'email': 'biennn86@gmail.com',
+            'fullname': 'Nguyen Ngoc Bien',
+            'position': 'OPS',
+            'address': 'WH PG',
+            'phone_number': '0908336586',
+            'role': 'admin',
+            'is_active': 1,
+            'udf1': 'Ngày 13/03/2023 qua PG làm việc với vai trò hỗ trợ viết jobaid cho Nghi. Đến 05/2023 bắt đầu làm việc ở vị trí suppervisor'
+
+        }
+
+        self.insert_user(create_user_admin)
         
         # create_trigger_sql = f"""
         #     CREATE TRIGGER IF NOT EXISTS update_updated_at_trigger
