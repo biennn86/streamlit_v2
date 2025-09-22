@@ -17,7 +17,7 @@ class DashboardController(BaseStateController):
             AppConfig.StateKeys.DASHBOARD_DATA: {},
         }
 
-    def get_dashboard_data(self):
+    def get_data_dashboard(self):
         """Lấy dữ liệu cho dashboard"""
         #Sau khi chọn upload file mới thì sự kiện on_change sẽ đổi status của file_uploader trong state thành True
         #Hàm sẽ vào để lấy data mới nhất, sau đó đổi status file_uploader thành False để lấy data trong state

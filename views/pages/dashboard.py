@@ -27,6 +27,19 @@ from views.components.sidebar_menu import sidebar_create_location, sidebar_impor
 class DashboardView:
     def __init__(self):
         #Khỏi tạo Model
+        """ Lấy data cho dashboard từ controller
+            Hiển thị các chức năng và các tab theo role của từng user
+            Đặc biệt lưu ý:
+            Phương thức self.get_data() lúc nào cũng phải nằm phía dưới phương thức self.import_inventory_files()
+            Vì khi phương thức self.import_inventory_files() được kích hoạt thì sự kiện on_change trong st.file_uploader() được thực thi
+            Sự kiện này sẽ đổi status file_upload trong sesson_state từ False thành True
+            Và streamlit sẽ chạy lại toàn bộ code lại từ đầu, bắt đầu từ file main
+            Nên để phương thức self.import_inventory_files() trước để chạy hết chức năng import_file vì lúc đó status file_upload đang là True
+            Sau đó sẽ chạy tới phương thức self.get_data() trong phương thức này sẽ đổi status file_upload từ True thành False
+            Để không chạy tiếp vào phương thức self.import_inventory_files() hoặc self.get_data() ở các lần rerun sau.
+            Đấy là lý do phương thức self.import_inventory_files() lúc nào cũng phải ở trước phương thức self.get_data,
+            mục đích để self.import_inventory_files() xử lý tiếp tục đưa data vào database hoàn tất quá trình xử lý của phương thức như đã thiết kế.
+        """
         inventory_model = InventoryModel()
         analytics_model = AnalyticsModel(inventory_model)
         analytics_services = WarehouseAnalyzer(analytics_model)
@@ -43,12 +56,14 @@ class DashboardView:
         # self.dashboard_controller = self.app_manager.get_controller(DashboardController)
 
         #Lấy data cho dashboard
-        self.get_data_dashboard()
+        # self.get_data()
+        #Get role for user
         self.role_user = self.user_controller.state.user_role
 
-    def get_data_dashboard(self):
-        self.dashboard_controller.get_dashboard_data()
-        self.data =  self.dashboard_controller.state.dashboard_data
+
+    def get_data(self):
+        self.dashboard_controller.get_data_dashboard()
+        self.data =  self.dashboard_controller.state.get(AppConfig.StateKeys.DASHBOARD_DATA, {})
         if self.data:
             self.datetime_current = self.data.get('datetime_current', None)
             self.data_chart = self.data.get('chart', {})
@@ -109,10 +124,12 @@ class DashboardView:
 
     def render(self):
         if self.role_user in ['guest']:
+            self.get_data()
             tab1,  = st.tabs(["🏠 DashBoard"])
             with tab1:
                 self.render_tab_dashboard()
         elif self.role_user in ['viewer']:
+            self.get_data()
             tab1, tab2 = st.tabs(["🏠 DashBoard", "🔢 Mixup"])
             with tab1:
                 self.render_tab_dashboard()
@@ -121,10 +138,12 @@ class DashboardView:
         elif self.role_user in ['edit']:
             self.import_masterdata()
             self.import_inventory_files()
+            self.get_data()
             self.render_full_tab()
         elif self.role_user in ['admin']:
             self.location()
             self.import_masterdata()
             self.import_inventory_files()
+            self.get_data()
             self.render_full_tab()
 

@@ -2,14 +2,15 @@ import streamlit as st
 from core.app_manager import AppManager
 from config.settings import AppConfig
 
-def change_status_file_uploader():
-    return AppManager().state.set(AppConfig.StateKeys.FILE_UPLOADER, True)
+def on_file_change():
+    AppManager().state.set(AppConfig.StateKeys.FILE_UPLOADER, True)
+    # print(f"Status file_uploader sau khi onchange: {AppManager().state.get(AppConfig.StateKeys.FILE_UPLOADER, 'Bien')}")
+    
 
 def sidebar_import_files_inventory():
     with st.sidebar:
         with st.expander('Import Files Inventory'):
-            # st.session_state.uploaded_files
-            return st.file_uploader('Choose Files Inventory FG-RPM-EO', accept_multiple_files=True, on_change=change_status_file_uploader)
+            return st.file_uploader('Choose Files Inventory FG-RPM-EO', accept_multiple_files=True, on_change=on_file_change)
 
 def sidebar_create_location():
     with st.sidebar:
