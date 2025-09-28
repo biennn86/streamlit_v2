@@ -62,6 +62,9 @@ if __name__ == "__main__":
     #pip freeze > requirements.txt
     #cài module thông qua requirements.txt
     #pip install -r requirements.txt
+    #=====================
+    #cài menu tạo biến môi trường ảo trước
+     # pip install virtualenv
     #tạo biến môi trường ảo
     #python -m venv myproject_env
     #truy cap bien moi truong ao
