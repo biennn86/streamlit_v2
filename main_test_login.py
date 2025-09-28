@@ -78,4 +78,19 @@ if __name__ == "__main__":
     #git clone https://github.com/biennn86/streamlit_v2.git
     #git pull origin master
 
-    #toi them vao de test git
+    #=====config ngrok=============
+    #1.tải ngrok về chép vào biến môi trường path. Cách kiểm tra biến môi trường path trong win
+    #Lưu ý phải mở cmd bằng chuột phải trên màn hình desktop
+    #$env:Path
+    #2. tạo tài khoản và lấy authtoken trên trang chủ ngrok
+    #https://dashboard.ngrok.com/
+    #3. kết nối với ngrok thông qua authtoken
+    #ngrok authtoken 33JWi624uby1xwd7chKORZB6qgU_2ok7K7My6RGE7BMaCUzHi
+    #4. sử dụng
+    #mỏ cmd gõ
+    #ngrok http [cổng cần kết nối với internet: streamlit đang dùng cổng 8501]
+    #5. Note
+    #Địa chỉ lưu ngrok trên máy tính của tôi
+    #C:\Users\Admin\AppData\Local\Programs\Python\Python311
+    #địa chỉ lưu token
+    # Authtoken saved to configuration file: C:\Users\Admin\AppData\Local/ngrok/ngrok.yml

@@ -15,3 +15,13 @@ textColor = '#FFFFFF'
 # Accepted values (serif | sans serif | monospace) 
 # Default: "sans serif"
 font = "sans serif"
+
+#======ngrok===========
+[server]
+port = 8501
+# Bắt buộc Streamlit sử dụng cùng một host cho kết nối websocket
+# Tuy nhiên, trong tunnel, điều này có thể bị bỏ qua để giải quyết lỗi
+# Nhưng nếu bạn có firewall, hãy đảm bảo cổng này được mở.
+headless = true
+enableCORS = true
+enableXsrfProtection = true
