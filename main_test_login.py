@@ -57,12 +57,15 @@ def main():
 
 if __name__ == "__main__":
     main()
+    #======================
     #lấy file requirements.xtx
     #pip freeze > requirements.txt
     #cài module thông qua requirements.txt
     #pip install -r requirements.txt
     #tạo biến môi trường ảo
     #python -m venv myproject_env
+    #truy cap bien moi truong ao
+    #.\myproject_env\Scripts\activate
     #====config git==========
     #git config --global user.name "Your Name"
     #git config --global user.email "your.email@example.com"
