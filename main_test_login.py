@@ -50,13 +50,27 @@ def main():
             # render_setting()
             st.markdown("---")
             st.write(vars(user_controller))
-            st.markdown("---")
+            st.markdown("---") 
             st.write(vars(user_controller.state)['_state'])
             st.markdown("---")
             st.write(vars(user_controller.user_model))
 
 if __name__ == "__main__":
     main()
+    #======================
+    #lấy file requirements.xtx
     #pip freeze > requirements.txt
+    #cài module thông qua requirements.txt
     #pip install -r requirements.txt
+    #tạo biến môi trường ảo
     #python -m venv myproject_env
+    #truy cap bien moi truong ao
+    #.\myproject_env\Scripts\activate
+    #====config git==========
+    #git config --global user.name "Your Name"
+    #git config --global user.email "your.email@example.com"
+    #git init
+    #git remote add https://github.com/biennn86/my_repository
+    #==========một máy khác lấy repository để sủ dụng===========
+    #git clone https://github.com/biennn86/streamlit_v2.git
+    #git pull origin master
