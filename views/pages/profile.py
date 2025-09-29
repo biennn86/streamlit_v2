@@ -71,7 +71,7 @@ def render_profile():
                 label="Active",
                 min_value=0,
                 max_value=1,
-                value=user_profile.get('is_active', ''),
+                value=int(user_profile.get('is_active', '')),
                 placeholder="Activate"
             )
 

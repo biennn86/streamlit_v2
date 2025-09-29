@@ -23,7 +23,8 @@ class UserModel:
                 address varchar(300),
                 phone_number varchar(15),
                 role varchar(20),
-                is_active BOOLEAN,
+                is_active varchar(1),
+                is_online varchar(1),
                 udf1 varchar(1000),
                 udf2 varchar(1000),
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -33,7 +34,7 @@ class UserModel:
             """
         
         self.obj_user.create_table(create_table_sql)
-
+        #Tạo user admin
         create_user_admin = {
             'username': 'admin',
             'password_hash': 'admin',
@@ -44,12 +45,63 @@ class UserModel:
             'phone_number': '0908336586',
             'role': 'admin',
             'is_active': 1,
+            'is_online': 0,
             'udf1': 'Ngày 13/03/2023 qua PG làm việc với vai trò hỗ trợ viết jobaid cho Nghi. Đến 05/2023 bắt đầu làm việc ở vị trí suppervisor'
 
         }
-
         self.insert_user(create_user_admin)
-        
+
+        #Tạo user edit
+        create_user_edit = {
+            'username': 'edit',
+            'password_hash': 'edit123',
+            'email': 'edit@gmail.com',
+            'fullname': 'Nguyen Van Edit',
+            'position': 'OPS',
+            'address': 'WH PG',
+            'phone_number': '0123456789',
+            'role': 'edit',
+            'is_active': 1,
+            'is_online': 0,
+            'udf1': 'User này có quyền edit'
+
+        }
+        self.insert_user(create_user_edit)
+
+        #Tạo user edit
+        create_user_view = {
+            'username': 'view',
+            'password_hash': 'view123',
+            'email': 'view@gmail.com',
+            'fullname': 'Nguyen Van View',
+            'position': 'OPS',
+            'address': 'WH PG',
+            'phone_number': '0123456789',
+            'role': 'viewer',
+            'is_active': 1,
+            'is_online': 0,
+            'udf1': 'User này có quyền view'
+
+        }
+        self.insert_user(create_user_view)
+
+        #Tạo user demo
+        create_user_demo = {
+            'username': 'demo',
+            'password_hash': 'demo123',
+            'email': 'demo@gmail.com',
+            'fullname': 'Nguyen Van Chi Xem',
+            'position': 'OPS',
+            'address': 'WH PG',
+            'phone_number': '0123456789',
+            'role': 'guest',
+            'is_active': 1,
+            'is_online': 0,
+            'udf1': 'User này có quyền xem tab Dashboard'
+
+        }
+        self.insert_user(create_user_demo)
+
         # create_trigger_sql = f"""
         #     CREATE TRIGGER IF NOT EXISTS update_updated_at_trigger
         #     AFTER UPDATE ON user
