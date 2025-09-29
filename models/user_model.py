@@ -144,6 +144,18 @@ class UserModel:
             return True
         return False
     
+    def update_is_online(self, username) -> None:
+        if username:
+            self.obj_user.update_user(username=username, data={'is_online': 1})
+            return True
+        return False
+    
+    def update_is_offline(self, username) -> None:
+        if username:
+            self.obj_user.update_user(username=username, data={'is_online': 0})
+            return True
+        return False
+    
     
     def delete_user(self, username) -> bool:
         user = self.obj_user.get_user_info(username)

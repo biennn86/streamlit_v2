@@ -29,6 +29,7 @@ def render_profile():
         st.info(f"**Full Name:** {user_profile.get('fullname', 'Chưa cập nhật')}")
         st.info(f"**Email:** {user_profile.get('email', 'Chưa cập nhật')}")
         st.info(f"**Role:** {user_profile.get('role', 'user')}")
+        st.info(f"**Online:** {user_profile.get('is_online', '0')}")
         st.info(f"**Created at:** {user_profile.get('created_at', 'N/A')}")
         st.info(f"**Updated at:** {user_profile.get('updated_at', 'N/A')}")
         st.info(f"**Last login:** {user_profile.get('last_login_at', '')}")

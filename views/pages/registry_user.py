@@ -91,7 +91,7 @@ def render_registry_user():
 
             if submitted:
                 profile_data = {
-                    'username': username,
+                    'username': username.lower(),
                     'password_hash': password,
                     'email': email,
                     'fullname': fullname,

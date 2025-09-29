@@ -19,6 +19,8 @@ def render_login():
         with st.form("login_form", clear_on_submit=False):
             username = st.text_input("👤 Username", placeholder="Enter username")
             password = st.text_input("🔑 Password", type="password", placeholder="Enter password")
+            #Validate username
+            username = username.lower()
 
             col_btn1, col_btn2 = st.columns(2)
             with col_btn1:

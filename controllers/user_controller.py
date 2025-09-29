@@ -24,6 +24,8 @@ class UserController(BaseStateController):
         if self.user_model.validate_credentials(username, password):
             #Update ngày giờ last_login
             self.user_model.update_last_login(username=username)
+            #Update trạng thái online
+            self.user_model.update_is_online(username=username)
             #Lấy data user trong database
             user_info = self.user_model.get_user_info(username)
 
@@ -42,6 +44,9 @@ class UserController(BaseStateController):
 
     def logout(self) -> None:
         """Xử lý đăng xuất"""
+        #update trạng thái offline
+        self.user_model.update_is_offline(username=self.state.get(AppConfig.StateKeys.USERNAME, False))
+        #xử lý state logout
         self.state.is_logged_in = False
         self.state.username = ''
         self.state.user_role = 'guest'
