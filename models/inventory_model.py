@@ -1,11 +1,14 @@
+import datetime
 import streamlit as st
 import logging
 from typing import List, Tuple, Dict, Any, Optional
 import re 
 import pandas as pd
+import numpy as np
 from utils.constants import ValidateFile, Pattern, Columns, VNL_CAT
 from io import StringIO
 from models.table.tablename_database import *
+from utils.state_utils import get_state_everywhere
 
 
 
@@ -43,6 +46,8 @@ class InventoryModel:
 
                 if duoi_file in ValidateFile.LIST_DUOI_FILE_EO.value:
                     list_df.append(self._read_file_eo(value))
+                    #import description EO to masterdata in database
+                    self.import_masterdata_eo_to_masterdata_db(value)
                 else:
                     cat_file = re.search(Pattern.CATEGORY_FILE.value, value.getvalue(), re.MULTILINE).group()
                     if cat_file in CAT_FG:
@@ -51,14 +56,24 @@ class InventoryModel:
 
         if list_df is not None:
             df_data_final = pd.concat(list_df, ignore_index=True)
+            #Chèn thêm cột datetime ở vị trí đầu tiên trong df
             df_data_final.insert(0, 'date', date_time)
+            #lấy user
+            state = get_state_everywhere()
+            user = state.get('username', None)
+            # Lấy ngày giờ hiện tại
+            current_datetime = datetime.datetime.now()
+            # Định dạng đối tượng datetime thành chuỗi
+            formatted_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            df_data_final['created_at'] = formatted_string
+            df_data_final['user'] = user
             logger.info(f"Processed {len(df_data_final)} inventory records")
             return df_data_final
         else:
-            logger.error(f"Processed error")
+            logger.error(f"Processed read inventory error")
             return None
         
-    def save_inventory(self, uploaded_files: List) -> Tuple[bool, Optional[pd.DataFrame]]:
+    def save_inventory(self, uploaded_files: List) -> Tuple[bool, int, Optional[pd.DataFrame]]:
         """Lưu file inventory vào database
         Args:
             df: DataFrame tổng hợp của EO, FG, RPM đã được xử lý done
@@ -67,12 +82,46 @@ class InventoryModel:
         """
         try:
             self.df_current = self.process_inventory(uploaded_files)
-            self.inventory.insert_dataframe(self.df_current)
+            number_row_insert = self.inventory.insert_dataframe_new_only(self.df_current)
             logger.info(f"Saved {len(self.df_current)} inventory records to database")
-            return True, self.df_current
+            return True, number_row_insert, self.df_current
         except Exception as e:
             logger.error(f"Error saving inventory data: {e}")
-            return False, pd.DataFrame()
+            return False, 0, pd.DataFrame()
+        
+    def import_masterdata_eo_to_masterdata_db(self, df_eo: pd.DataFrame) -> None:
+        """ Thêm cột type1 là EO để phân biệt với masterdata RPM
+            Thêm cột quy cách 'bd_plt_pat' là 9999 để lọc trùng data của sql được chạy chính xác
+            Vì trong sql cột NULL với NULL trả về FALSE, nên khi insert vào sẽ bị trùng data
+            Chi tiết đọc method insert_dataframe() để hiểu hơn.
+        """
+        try:
+            name_columns_masterdata = ['gcas', 'description', 'cat', 'type1', 'type2', 'vendor_name', 'source', 'jit', 'bd_plt_pat', 'history_storeLocation', 'latest_gr', 'created_at', 'user']
+            df_masterdata_eo = pd.DataFrame(columns=name_columns_masterdata)
+            df_eo_import = df_eo.copy(deep=True)
+            df_eo_import.columns = [re.sub("[ -]", "_", string).lower().strip() for string in df_eo_import.columns]
+
+            df_masterdata_eo['gcas'] = df_eo_import['gcas']
+            df_masterdata_eo['description'] = df_eo_import['description']
+            df_masterdata_eo['cat'] = df_eo_import['supply_chain']
+            df_masterdata_eo['type1'] = 'eo'
+            df_masterdata_eo['bd_plt_pat'] = 9999
+            df_masterdata_eo['type2'] = df_eo_import['type']
+
+            #lấy user
+            state = get_state_everywhere()
+            user = state.get('username', None)
+            # Lấy ngày giờ hiện tại
+            current_datetime = datetime.datetime.now()
+            # Định dạng đối tượng datetime thành chuỗi
+            formatted_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            df_masterdata_eo['created_at'] = formatted_string
+            df_masterdata_eo['user'] = user
+
+            result = self.masterdata.insert_dataframe_new_only(df_new=df_masterdata_eo)
+            logger.info(f"Insert {result} masterdata EO to database")
+        except Exception as e:
+            raise e
         
     def get_inventory_data(self, date_time: Optional[str]=None) -> pd.DataFrame:
         """ 1. Lấy df vừa xử lý khi import file hay là df current

@@ -68,7 +68,8 @@ class UserController(BaseStateController):
         username = self.state.username
         if self.user_model.update_user_profile(username, profile_data):
             # Cập nhật state
-            self.state.user_profile.update(profile_data)
+            # self.state.user_profile.update(profile_data)
+            self.state.user_profile = profile_data
             return True
         return False
     

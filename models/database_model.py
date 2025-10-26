@@ -1,4 +1,6 @@
 import sqlite3
+import os
+from sqlalchemy import create_engine, text
 import pandas as pd
 from typing import List, Dict, Any, Optional
 import logging
@@ -7,8 +9,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class DatabaseManager:
-    ''' Quản lý kết nối và hoạt động của database '''
-    __PATH_DB = "database/pg.db"
+    ''' Quản lý kết nối và hoạt động của database
+        Sử dụng kết nối bằng module sqlalchemy
+    '''
+    __PATH_DB_ON_SOURCE = "database/pg.db"
+    __PATH_DB_OUT_DISK = "D:/database_pg/db_pg.db"
+    __PATH_DB = None
     def __init__(self):
         """Khỏi tạo quản lý database
         Args:
@@ -16,16 +22,36 @@ class DatabaseManager:
         """
         self.table = None
         self.connection = None
-        self.cursor = None
-        self.df_import = None
+        # self.cursor = None
+        # self.df_import = None
 
     def connect(self) -> None:
-        """Thiết lập kết nối tới database"""
+        """ Thiết lập kết nối tới database
+            Tối ưu SQLite connection để tăng tốc
+        """
         try:
-            self.connection = sqlite3.connect(self.__PATH_DB)
-            self.cursor = self.connection.cursor()
+            #Lấy path database trên máy nếu chạy local, lấy trong file nguồn nếu chạy streamlit could
+            if os.path.exists(self.__PATH_DB_OUT_DISK):
+                self.__PATH_DB = self.__PATH_DB_OUT_DISK
+            else:
+                self.__PATH_DB = self.__PATH_DB_ON_SOURCE
+
+            engine = create_engine(f'sqlite:///{self.__PATH_DB}', 
+                          connect_args={
+                              'check_same_thread': False,
+                              'timeout': 30
+                          })
+            # Tối ưu SQLite settings
+            with engine.connect() as conn:
+                conn.execute(text("PRAGMA journal_mode = WAL"))
+                conn.execute(text("PRAGMA synchronous = NORMAL"))
+                conn.execute(text("PRAGMA cache_size = 100000"))
+                conn.execute(text("PRAGMA temp_store = MEMORY"))
+
+            self.connection = engine.connect()
+
             logger.info(f"Connected to database with table {self.table}")
-        except sqlite3.Error as e:
+        except Exception as e:
             logger.error(f"Database connection error: {e}")
             raise
 
@@ -35,18 +61,17 @@ class DatabaseManager:
             self.connection.close()
             logger.info(f"Database connection closed with table {self.table}")
             self.connection = None
-            self.cursor = None
+            # self.cursor = None
 
     def create_table(self, create_table_sql) -> None:
         try:
             self.connect()
-            self.cursor.execute(create_table_sql)
+            self.connection.execute(text(create_table_sql))
             self.connection.commit()
             logger.info(f"Table '{self.table}' created or confirmed existing")
-        except sqlite3.Error as e:
-            logger.error(f"Error creating table: {e}")
-            raise
+            return True
         except Exception as e:
+            logger.error(f"Error creating table: {e}")
             return None
         finally:
             self.disconnect()
@@ -55,34 +80,33 @@ class DatabaseManager:
         try:
             self.connect()
             columns = ', '.join(list(data.keys()))
-            values = tuple(data.values())
-            sql = "INSERT INTO {2}({0}) VALUES ({1})".format(columns, ', '.join(['?'] * len(list(data.keys()))), self.table)
-            self.cursor.execute(sql, values)
+            placeholders = ', '.join([f':{col}' for col in data.keys()])
+            sql = f"INSERT INTO {self.table}({columns}) VALUES ({placeholders})"
+            self.connection.execute(text(sql), data)
             self.connection.commit()
-        except sqlite3.Error as e:
-            logger.error(f"Error insert data to table {self.table}: {e}")
-            raise
         except Exception as e:
+            logger.error(f"Error insert data to table {self.table}: {e}")
             return None
         finally:
             self.disconnect()
 
     def update_user(self, username, data) -> None:
+        # SQL được tạo ra:
+        # UPDATE user SET email = :email, phone_number = :phone_number WHERE username = :username
+
+        # values truyền vào:
+        # {'email': 'newemail@example.com', 'phone_number': '0987654321', 'username': 'admin'}
         try:
             self.connect()
-            values = list(data.values())
-            dataupdates = []
+            data_updates = []
             for key in data.keys():
-                dataupdates.append('{} = ?'.format(key))
-            values.append(username)
-            values = tuple(values)
-            sql = "UPDATE {0} SET {1} WHERE username=?".format(self.table, ', '.join(dataupdates))
-            self.cursor.execute(sql, values)
+                data_updates.append(f"{key} = :{key}")
+            data['username'] = username
+            sql = f"UPDATE {self.table} SET {', '.join(data_updates)} WHERE username = :username"
+            self.connection.execute(text(sql), data)
             self.connection.commit()
-        except sqlite3.Error as e:
-            logger.error(f"Error update data to table {self.table}: {e}")
-            raise
         except Exception as e:
+            logger.error(f"Error update data to table {self.table}: {e}")
             return None
         finally:
             self.disconnect()
@@ -90,13 +114,11 @@ class DatabaseManager:
     def delete_user(self, username) -> None:
         try:
             self.connect()
-            sql = "DELETE FROM {0} WHERE username=?".format(self.table)
-            self.cursor.execute(sql, (username, ))
+            sql = f"DELETE FROM {self.table} WHERE username = :username"
+            self.connection.execute(text(sql), {'username': username})
             self.connection.commit()
-        except sqlite3.Error as e:
-            logger.error(f"Error delete data {self.table}: {e}")
-            raise
         except Exception as e:
+            logger.error(f"Error delete data {self.table}: {e}")
             return None
         finally:
             self.disconnect()
@@ -104,26 +126,15 @@ class DatabaseManager:
     def get_user_info(self, username) -> Dict[any, any]:
         try:
             self.connect()
-            # sqlite3.Row là một lớp giống như tuple nhưng cho phép bạn truy cập các cột bằng cả chỉ mục (như tuple)
-            # và tên cột (như dict)
-            self.connection.row_factory = sqlite3.Row # Dòng code quan trọng
-            self.cursor = self.connection.cursor()
-            sql = "SELECT * FROM {0} WHERE username=?".format(self.table)
-            self.cursor.execute(sql, (username, ))
-            result = self.cursor.fetchone()
+            sql = f"SELECT * FROM {self.table} WHERE username = :username"
+            result = self.connection.execute(text(sql), {"username": username}).mappings().first()
 
             #Nếu không không có data trong table thì dict() sẽ báo lỗi vì kết quả trả về Nonetype
             #Nên phải bắt lỗi đó
-            if result is not None:
-                result = dict(result)
-            
             if result is None:
                 logger.warning(f"User '{username}' không có data trong database.")
                 return None
             return result
-        except sqlite3.Error as e:
-            logger.error(f"Error get data from table {self.table}: {e}")
-            raise
         except Exception as e:
             logger.error(f"Error get data from table {self.table}: {e}")
             return None
@@ -142,51 +153,82 @@ class DatabaseManager:
             df = pd.read_sql_query(QUERY, self.connection)
             logger.info(f"Read {len(df)} rows form table {self.table}")
             return df
-        except sqlite3.Error as e:
-            logger.error(f"Error reading table: {e}")
-            raise
         except Exception as e:
+            logger.error(f"Error reading table: {e}")
             return None
         finally:
             self.disconnect()
 
-    def insert_dataframe(self, df: pd.DataFrame) -> None:
-        """Insert a pandas DataFrame into a database table.
-        
-        Args:
-            table_name: Name of the target table
-            df: Pandas DataFrame containing the data to insert
+    def insert_dataframe_new_only(self, df_new: pd.DataFrame) -> None:
+        """
+            Chỉ insert những dòng chưa tồn tại - nhanh nhất
+            key_columns: list các cột dùng làm key để check duplicate
         """
         try:
             # Drop the table if it exists and recreate it
-            self.connect()
-            self.cursor.execute(f"DROP TABLE IF EXISTS 'inventory'")
-            self.disconnect()
+            # self.connect()
+            # self.connection.execute(f"DROP TABLE IF EXISTS 'inventory'")
+            # self.disconnect()
 
-            #chuyển toàn bộ df cần import sang string
-            df = df.astype('string')
-            # #lấy data đang có trong database
-            df_old = self.read_to_dataframe()
-            if df_old is not None:
-                df_old = df_old.astype('string')
-            # #Nối 2 dataframe. axis=0 là nối theo chiều dọc
-            df_new = pd.concat([df_old, df], axis=0)
-            # #lấy tổng số hàng bị trùng lặp trong df
-            duplicates = df_new.duplicated().sum()
-
+            #tên bảng tạm
+            temp_table = f"{self.table}_temp"
+            # Import vào bảng tạm
             self.connect()
-            if (duplicates == 0):
-                df.to_sql(self.table, self.connection, if_exists= 'append', index=False)
-                logger.info(f"Inserted {len(df)} rows into table {self.table}")
-                self.connection.commit()
-            elif duplicates > 0:
-                df_renew = pd.concat([df_new, df_old], axis=0).drop_duplicates(keep=False)
-                df_renew.to_sql(self.table, self.connection, if_exists= 'append', index=False)
-                self.connection.commit()
-                logger.info(f"Inserted {len(df_renew)} rows into table {self.table}. Số dòng duplicates {duplicates}.")
-            # self.conn.close() #6874, 6843
+            df_new.to_sql(temp_table, self.connection, if_exists='replace', 
+                  index=False, method='multi', chunksize=1000)
+            
+            #tên cột cần lọc trùng
+            key_columns = []
+            if self.table in ['inventory']:
+                key_columns = ['date']
+            elif self.table in ['master_data']:
+                key_columns = ['gcas', 'bd_plt_pat']
+            elif self.table in ['master_location_new', 'master_location']:
+                key_columns = ['location']
+
+            # Tạo index cho bảng tạm
+            for col in key_columns:
+                self.connection.execute(text(f"CREATE INDEX IF NOT EXISTS idx_{temp_table}_{col} ON {temp_table}({col})"))
+            
+            # Chỉ insert những dòng chưa tồn tại
+            join_condition = ' AND '.join([f"t.{col} = m.{col}" for col in key_columns])
+
+            query = f"""
+            INSERT INTO {self.table} 
+            SELECT t.* FROM {temp_table} t
+            LEFT JOIN {self.table} m ON {join_condition}
+            WHERE m.{key_columns[0]} IS NULL
+            """
+
+            result = self.connection.execute(text(query))
+
+             # Xóa bảng tạm
+            self.connection.execute(text(f"DROP TABLE {temp_table}"))
+            self.connection.commit()
+
+            return result.rowcount
+            
         except Exception as e:
             logger.error(f"Unexpected error during data insertion: {e}")
+            raise
+        finally:
+            self.disconnect()
+
+    def create_indexes(self, key_columns) -> None:
+        """
+        Tạo index trên các cột key
+        """
+        try:
+            self.connect()
+            for col in key_columns:
+                self.connection.execute(text(f"""
+                    CREATE INDEX IF NOT EXISTS idx_{self.table}_{col} 
+                    ON {self.table}({col})
+                """))
+            self.connection.commit()
+            logger.info(f"Created indexes for table: {self.table}")
+        except Exception as e:
+            logger.error(f"Create indexes error: {e}")
             raise
         finally:
             self.disconnect()
@@ -229,6 +271,29 @@ class DatabaseManager:
             return df
         except Exception as e:
             logger.error(f"Unexpected error during get data: {e}")
+            raise
+        finally:
+            self.disconnect()
+
+    def check_table_exists(self):
+        """Check 1 table có tồn tại trong database không"""
+        try:
+            self.connect()
+            query = f"""
+            SELECT name
+            FROM sqlite_master 
+            WHERE type='table' AND name='{self.table}'
+            """
+            RESULS_CHECK = False
+            result = self.connection.execute(text(query)).fetchone()
+            if result:
+                RESULS_CHECK = True
+            else:
+                RESULS_CHECK = False
+            logger.info(f"Check exists table {self.table}: {RESULS_CHECK} ")
+            return RESULS_CHECK
+        except Exception as e:
+            logger.error(f"Error check exists table: {e}")
             raise
         finally:
             self.disconnect()

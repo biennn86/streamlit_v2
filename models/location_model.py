@@ -1,5 +1,12 @@
+import logging
 import pandas as pd
+from typing import List, Tuple, Dict, Any, Optional
 from models.table.tablename_database import TableNameLocation
+from utils.state_utils import get_state_everywhere
+import datetime
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class LocationMethod():
     def __init__(self, namerack, vitri, tang, category_rack, name_wh, note):
@@ -839,6 +846,21 @@ def create_loc_pf_cool():
 
     return loc_pf + loc_cool
 
+def save_location(df: pd.DataFrame) -> Tuple[bool, int]:
+    """Lưu file inventory vào database
+    Args:
+        df: DataFrame tổng hợp của EO, FG, RPM đã được xử lý done
+    Returns:
+        Boolean indicating success
+    """
+    try:
+        number_row_insert = TableNameLocation().insert_dataframe_new_only(df)
+        logger.info(f"Saved {number_row_insert} location to database")
+        return True, number_row_insert
+    except Exception as e:
+        logger.error(f"Error saving location: {e}")
+        return False, 0
+
 # if __name__ == '__main__':
 def main_createloc():
     loc_3wh = []
@@ -858,6 +880,19 @@ def main_createloc():
     lst_dict = dict(zip(lst_columns, lst_zip))
 
     df = pd.DataFrame(lst_dict).drop_duplicates(keep=False)
-    TableNameLocation().insert_dataframe(df)
+    #lấy user
+    state = get_state_everywhere()
+    user = state.get('username', None)
+    # Lấy ngày giờ hiện tại
+    current_datetime = datetime.datetime.now()
+    # Định dạng đối tượng datetime thành chuỗi
+    formatted_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+    df['created_at'] = formatted_string
+    df['user'] = user
+
+    # df.to_excel('location.xlsx', index=False)
+
+    #Save to database
+    return save_location(df)
         
 

@@ -44,10 +44,14 @@ class DashboardView:
         analytics_model = AnalyticsModel(inventory_model)
         analytics_services = WarehouseAnalyzer(analytics_model)
 
-        #Khỏi tạo controller
+        #Khởi tạo controller
         inventory_controller = InventoryController(inventory_model)
         analytics_controller = AnalyticsController(analytics_model, analytics_services)
         dashboard_controller = DashboardController(inventory_controller, analytics_controller)
+
+        self.masterdata_controller = MasterdataController()
+        self.location_controller = LocationController()
+
 
         #Khởi tạo state
         self.app_manager = AppManager()
@@ -55,8 +59,6 @@ class DashboardView:
         self.dashboard_controller = dashboard_controller
         # self.dashboard_controller = self.app_manager.get_controller(DashboardController)
 
-        #Lấy data cho dashboard
-        # self.get_data()
         #Get role for user
         self.role_user = self.user_controller.state.user_role
 
@@ -75,12 +77,22 @@ class DashboardView:
     def location(self):
         create_location = sidebar_create_location()
         if create_location:
-            LocationController().create_location()
+            is_valid, meesage = self.location_controller.create_location()
+            if is_valid:
+                st.toast(meesage, icon="ℹ️")
+            else:
+                st.toast(meesage, icon="🚨")
 
     def import_masterdata(self):
+        # icon="⚠️"
+        # icon="🚨"
         file_maserdata = sidebar_update_masterdata()
         if file_maserdata:
-            MasterdataController().import_masterdata(file_maserdata)
+            is_valid, meesage = self.masterdata_controller.import_masterdata(file_maserdata)
+            if is_valid:
+                st.toast(meesage, icon="ℹ️")
+            else:
+                st.toast(meesage, icon="🚨")
 
     def import_inventory_files(self):
         files_inventory_import = sidebar_import_files_inventory()

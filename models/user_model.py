@@ -8,7 +8,7 @@ class UserModel:
     '''Model xử lý dữ liệu người dùng'''
     def __init__(self):
         self.obj_user = TableNameUser()
-        #Tạo table user và user admin
+        # Tạo table user và user admin
         # self._create_table_user()
     
     def _create_table_user(self) -> None:

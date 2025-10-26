@@ -58,9 +58,12 @@ class InventoryController:
            return is_valid, f"{message}", None
         
         #gọi inventory_model để xử lý và import file vào database
-        success, df = self.inventory_model.save_inventory(uploaded_files)
+        success, number_rows_insert, df = self.inventory_model.save_inventory(uploaded_files)
         if success:
-            return True,  f"Successfully imported {len(df):,} inventory records", df
+            if number_rows_insert == 0:
+                return True, f"You have inserted duplicate data", df
+            else:
+                return True,  f"Successfully imported {number_rows_insert:,} inventory records", df
         else:
             return False, f"Failed to save inventory data to database", None
         

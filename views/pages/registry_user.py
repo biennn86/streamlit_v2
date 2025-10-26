@@ -67,10 +67,11 @@ def render_registry_user():
                 placeholder='Enter phone number'
             )
 
-            role = st.text_input(
+            role = st.selectbox(
                 label='Role',
-                value='',
-                placeholder='Enter role'
+                options=('edit', 'viewer', 'guest'),
+                index=None,
+                placeholder='Choose role'
             )
 
             is_active = st.number_input(
