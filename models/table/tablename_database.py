@@ -103,7 +103,9 @@ class TableNameUser(DatabaseManager):
         super().__init__()
         self.table = "user"
         if not self.check_table_exists():
+            from models.user_model import UserModel
             self._create_table_user()
+            self.user_mode = UserModel()
             self.create_default()
 
     def _create_table_user(self) -> None:
@@ -146,7 +148,7 @@ class TableNameUser(DatabaseManager):
             'udf1': 'Ngày 13/03/2023 qua PG làm việc với vai trò hỗ trợ viết jobaid cho Nghi. Đến 05/2023 bắt đầu làm việc ở vị trí suppervisor'
 
         }
-        self.insert_user(create_user_admin)
+        self.user_mode.insert_user(create_user_admin)
 
         #Tạo user edit
         create_user_edit = {
@@ -163,7 +165,7 @@ class TableNameUser(DatabaseManager):
             'udf1': 'User này có quyền edit'
 
         }
-        self.insert_user(create_user_edit)
+        self.user_mode.insert_user(create_user_edit)
 
         #Tạo user edit
         create_user_view = {
@@ -180,7 +182,7 @@ class TableNameUser(DatabaseManager):
             'udf1': 'User này có quyền view'
 
         }
-        self.insert_user(create_user_view)
+        self.user_mode.insert_user(create_user_view)
 
         #Tạo user demo
         create_user_demo = {
@@ -197,4 +199,4 @@ class TableNameUser(DatabaseManager):
             'udf1': 'User này có quyền xem tab Dashboard'
 
         }
-        self.insert_user(create_user_demo)
+        self.user_mode.insert_user(create_user_demo)

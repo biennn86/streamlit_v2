@@ -13,7 +13,7 @@ class DatabaseManager:
         Sử dụng kết nối bằng module sqlalchemy
     '''
     __PATH_DB_ON_SOURCE = "database/pg.db"
-    __PATH_DB_OUT_DISK = "D:/database_pg/db_pg.db"
+    __PATH_DB_OUT_DISK = "C:/my_database/db_pg.db"
     __PATH_DB = None
     def __init__(self):
         """Khỏi tạo quản lý database
