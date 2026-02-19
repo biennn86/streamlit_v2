@@ -130,10 +130,14 @@ class TableNameUser(DatabaseManager):
         super().__init__()
         self.table = "user"
         if not self.check_table_exists():
+            '''
+                Dùng self.user_mode.insert_user() để tạo user thì password sẽ ĐƯỢC hash
+                Nếu dùng self.insert_user() để tạo user thì password sẽ KHÔNG được hash
+            '''
             from models.user_model import UserModel
             self._create_table_user()
             self.user_mode = UserModel()
-            self.create_default()
+            self.create_default_user()
 
     def _create_table_user(self) -> None:
         create_table_sql = f"""
@@ -159,11 +163,11 @@ class TableNameUser(DatabaseManager):
         
         return self.create_table(create_table_sql)
 
-    def create_default(self):
+    def create_default_user(self):
         #Tạo user admin
         create_user_admin = {
             'username': 'admin',
-            'password_hash': 'admin',
+            'password_hash': 'admin.123',
             'email': 'biennn86@gmail.com',
             'fullname': 'Nguyen Ngoc Bien',
             'position': 'OPS',
@@ -183,6 +187,56 @@ class TableNameUser(DatabaseManager):
             'password_hash': 'edit123',
             'email': 'edit@gmail.com',
             'fullname': 'Nguyen Van Edit',
+            'position': 'OPS',
+            'address': 'WH PG',
+            'phone_number': '0123456789',
+            'role': 'edit',
+            'is_active': 1,
+            'is_online': 0,
+            'udf1': 'User này có quyền edit'
+
+        }
+        self.user_mode.insert_user(create_user_edit)
+        #Tạo user biennn
+        create_user_edit = {
+            'username': 'biennn',
+            'password_hash': 'Biennn@pg',
+            'email': 'bien.nn@pg.com',
+            'fullname': 'Nguyen Ngoc Bien',
+            'position': 'OPS',
+            'address': 'WH PG',
+            'phone_number': '0123456789',
+            'role': 'admin',
+            'is_active': 1,
+            'is_online': 0,
+            'udf1': 'User này có quyền admin'
+
+        }
+        self.user_mode.insert_user(create_user_edit)
+
+        #Tạo user lochh
+        create_user_edit = {
+            'username': 'lochh',
+            'password_hash': 'Lochh123',
+            'email': 'loc.hh@pg.com',
+            'fullname': 'Ho Huu Loc',
+            'position': 'OPS',
+            'address': 'WH PG',
+            'phone_number': '0123456789',
+            'role': 'edit',
+            'is_active': 1,
+            'is_online': 0,
+            'udf1': 'User này có quyền edit'
+
+        }
+        self.user_mode.insert_user(create_user_edit)
+
+        #Tạo user hoenh
+        create_user_edit = {
+            'username': 'hoenh',
+            'password_hash': 'Hoenh123',
+            'email': 'hoe.nh@pg.com',
+            'fullname': 'Nguyen Huu Hoe',
             'position': 'OPS',
             'address': 'WH PG',
             'phone_number': '0123456789',

@@ -37,7 +37,7 @@ class UserModel:
         #Tạo user admin
         create_user_admin = {
             'username': 'admin',
-            'password_hash': 'admin',
+            'password_hash': 'admin.123',
             'email': 'biennn86@gmail.com',
             'fullname': 'Nguyen Ngoc Bien',
             'position': 'OPS',
@@ -57,6 +57,56 @@ class UserModel:
             'password_hash': 'edit123',
             'email': 'edit@gmail.com',
             'fullname': 'Nguyen Van Edit',
+            'position': 'OPS',
+            'address': 'WH PG',
+            'phone_number': '0123456789',
+            'role': 'edit',
+            'is_active': 1,
+            'is_online': 0,
+            'udf1': 'User này có quyền edit'
+
+        }
+        self.insert_user(create_user_edit)
+        #Tạo user biennn
+        create_user_edit = {
+            'username': 'biennn',
+            'password_hash': 'Biennn@pg',
+            'email': 'bien.nn@pg.com',
+            'fullname': 'Nguyen Ngoc Bien',
+            'position': 'OPS',
+            'address': 'WH PG',
+            'phone_number': '0123456789',
+            'role': 'admin',
+            'is_active': 1,
+            'is_online': 0,
+            'udf1': 'User này có quyền admin'
+
+        }
+        self.insert_user(create_user_edit)
+
+        #Tạo user lochh
+        create_user_edit = {
+            'username': 'lochh',
+            'password_hash': 'Lochh123',
+            'email': 'loc.hh@pg.com',
+            'fullname': 'Ho Huu Loc',
+            'position': 'OPS',
+            'address': 'WH PG',
+            'phone_number': '0123456789',
+            'role': 'edit',
+            'is_active': 1,
+            'is_online': 0,
+            'udf1': 'User này có quyền edit'
+
+        }
+        self.insert_user(create_user_edit)
+
+        #Tạo user hoenh
+        create_user_edit = {
+            'username': 'hoenh',
+            'password_hash': 'Hoenh123',
+            'email': 'hoe.nh@pg.com',
+            'fullname': 'Nguyen Huu Hoe',
             'position': 'OPS',
             'address': 'WH PG',
             'phone_number': '0123456789',
