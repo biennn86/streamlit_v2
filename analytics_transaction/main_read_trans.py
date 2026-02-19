@@ -2,10 +2,10 @@ import datetime
 import pandas as pd
 from readtrans.read_trans_rtcis import *
 from readtrans.analysis_data import *
-from controllers.datatrans import DataTrans
-from controllers.location import Location
+# from controllers.datatrans import DataTrans
+# from controllers.location import Location
 from version_1.controllers.masterdata import MasterData
-from controllers.data_after_analy import DataAnalys
+# from controllers.data_after_analy import DataAnalys
 from utils.any_extend import *
 
 from version_1.models.create_loc import *
