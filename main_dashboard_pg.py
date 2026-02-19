@@ -61,7 +61,7 @@ if __name__ == "__main__":
     #Truy cập vào biến môi trường
     #.\env\Scripts\activate
     #======================
-    #lấy file requirements.xtx
+    #lấy file requirements.txt
     #pip freeze > requirements.txt
     #cài module thông qua requirements.txt
     #pip install -r requirements.txt
