@@ -49,25 +49,36 @@ class TabEmptyLocView:
         """ Edit lại các cột cần hiển thị lên dashboard
             Và upper lại datafame
         """
-        df_view = self.df[['location', 'name_wh', 'type_rack', 'level', 'num_pallet']].reset_index(drop=False).copy()
+        df_view = self.df[['location', 'name_warehouse', 'location_usage_type', 'rack_usage_type', 'level', 'pallet_capacity']].reset_index(drop=False).copy()
         #Chèn thêm cột note
         df_view.insert(len(df_view.columns.to_list()), 'note', 'Empty')
         #đổi hr = Hight Rack, pf = Level A
-        df_view['type_rack'] = df_view['type_rack'].map(
+        df_view['location_usage_type'] = df_view['location_usage_type'].map(
             {
                 'hr': 'Hight Rack',
                 'pf': 'Level A',
                 'mk': 'Marking'
             }
         )
+        #đổi tên rack_usage_type. DB = double deep, ST = Selective, FL = Floor, SV=Sheving
+        df_view['rack_usage_type'] = df_view['rack_usage_type'].map(
+            {
+                'db': 'Double Deep',
+                'st': 'Selective',
+                'fl': 'Floor',
+                'sv': 'Shelving',
+                'ob': 'Obiter'
+            }
+        )
         #đổi tên cột
         df_view.rename(columns={
             'index': 'No',
             'location': 'Location',
-            'type_rack': 'Type Rack',
+            'location_usage_type': 'Level Code',
+            'rack_usage_type': 'Type Location',
             'level': 'Level',
-            'name_wh': 'WH Name',
-            'num_pallet': 'Number Pallet',
+            'name_warehouse': 'WH Name',
+            'pallet_capacity': 'Number Pallet',
             'note': 'Status'
         }, inplace=True)
 
@@ -80,15 +91,15 @@ class TabEmptyLocView:
         """Lấy summary empty loc wh1, wh2, wh3 của hightrack và levelA
         """
         mask = pd.Series(True, self.df.index)
-        mask &= self.df['name_wh'].isin(['wh1', 'wh2', 'wh3'])
+        mask &= self.df['name_warehouse'].isin(['wh1', 'wh2', 'wh3'])
         df  = self.df[mask].copy()
      
-        df['num_pallet'] = pd.to_numeric(df['num_pallet'], downcast='integer')
+        df['pallet_capacity'] = pd.to_numeric(df['pallet_capacity'], downcast='integer')
         df_sm  = pd.pivot_table(
             df,
-            columns=['type_rack', 'type_loc'],
-            index=['name_wh'],
-            values=['num_pallet'],
+            columns=['location_usage_type', 'rack_usage_type'],
+            index=['name_warehouse'],
+            values=['pallet_capacity'],
             aggfunc='sum',
             fill_value=0,
             margins=True,
@@ -101,12 +112,12 @@ class TabEmptyLocView:
                                     'wh2': 'WH2',
                                     'wh3': 'WH3'}, level=0)
         
-        df_sm = df_sm.rename(columns={'num_pallet': 'Pallet'}, level=0)
+        df_sm = df_sm.rename(columns={'pallet_capacity': 'Pallet'}, level=0)
         df_sm = df_sm.rename(columns={'hr': 'Hight Rack',
                                       'pf': 'Level A'}, level=1)
         df_sm = df_sm.rename(columns={'db': 'Double Deep',
                                       'st': 'Selective',
                                       'ob': 'Rack DA',
                                       'ho': 'Hand Off',
-                                      'sv': 'Sheving'}, level=2)
+                                      'sv': 'Shelving'}, level=2)
         return df_sm

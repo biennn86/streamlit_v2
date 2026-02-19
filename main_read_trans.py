@@ -4,11 +4,11 @@ from readtrans.read_trans_rtcis import *
 from readtrans.analysis_data import *
 from controllers.datatrans import DataTrans
 from controllers.location import Location
-from controllers.masterdata import MasterData
+from version_1.controllers.masterdata import MasterData
 from controllers.data_after_analy import DataAnalys
-from extend.any_extend import *
+from utils.any_extend import *
 
-from create_location.create_loc import *
+from version_1.models.create_loc import *
 
 def read_file_trans_tosql():
     starttime = datetime.now()

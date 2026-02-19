@@ -13,7 +13,7 @@ class DatabaseManager:
         Sử dụng kết nối bằng module sqlalchemy
     '''
     __PATH_DB_ON_SOURCE = "database/pg.db"
-    __PATH_DB_OUT_DISK = "C:/my_database/db_pg.db"
+    __PATH_DB_LOCAL_ON_DISK = "D:\P&G\dashboard\my_database\db_pg.db"
     __PATH_DB = None
     def __init__(self):
         """Khỏi tạo quản lý database
@@ -31,8 +31,8 @@ class DatabaseManager:
         """
         try:
             #Lấy path database trên máy nếu chạy local, lấy trong file nguồn nếu chạy streamlit could
-            if os.path.exists(self.__PATH_DB_OUT_DISK):
-                self.__PATH_DB = self.__PATH_DB_OUT_DISK
+            if os.path.exists(self.__PATH_DB_LOCAL_ON_DISK):
+                self.__PATH_DB = self.__PATH_DB_LOCAL_ON_DISK
             else:
                 self.__PATH_DB = self.__PATH_DB_ON_SOURCE
 

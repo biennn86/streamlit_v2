@@ -78,16 +78,16 @@ class DataProcessor:
 class WarehouseFilter:
 	"""Lớp chứa các thông tin về bộ lọc cho mỗi kho hàng
 	"""
-	name_wh: List[str]
-	type_rack: List[str]
+	name_warehouse: List[str]
+	location_usage_type: List[str]
 	cat_inv: List[str] = field(default_factory=lambda: ["eo", 'fg', 'rpm'])
 
 	def get_filter_dict(self) -> Dict[str, List[str]]:
 		"""Trả về bộ lọc dưới dạng dictionary
 		"""
 		return {
-			"name_wh": self.name_wh,
-			"type_rack": self.type_rack,
+			"name_warehouse": self.name_warehouse,
+			"location_usage_type": self.location_usage_type,
 			"cat_inv": self.cat_inv
 		}
 	
@@ -113,43 +113,43 @@ class WarehouseAnalyzer(DataProcessor):
 		"""
 		self.warehouse_filters = {
 			"wh1": WarehouseFilter(
-				name_wh=["wh1"],
-				type_rack=["hr", "pf", "ww", "in"]
+				name_warehouse=["wh1"],
+				location_usage_type=["hr", "pf", "ww", "in"]
 			),
 			"wh2": WarehouseFilter(
-				name_wh=["wh2"],
-				type_rack=["hr", "pf", "ww", "in", "pick", "rework", "return", "scanout"]
+				name_warehouse=["wh2"],
+				location_usage_type=["hr", "pf", "ww", "in", "pick", "rework", "return", "scanout"]
 			),
 			"wh3": WarehouseFilter(
-				name_wh=["wh3"],
-				type_rack=["hr", "pf", "ww", "in"]
+				name_warehouse=["wh3"],
+				location_usage_type=["hr", "pf", "ww", "in"]
 			),
 			"lsl": WarehouseFilter(
-				name_wh=["lsl"],
-				type_rack=["in", "lslpm", "lslrm", "lrt"]
+				name_warehouse=["lsl"],
+				location_usage_type=["in", "lslpm", "lslrm", "lrt"]
 			),
 			"lb": WarehouseFilter(
-				name_wh=["lb"],
-				type_rack=["hr", "pf", "ww"]
+				name_warehouse=["lb"],
+				location_usage_type=["hr", "pf", "ww"]
 			),
 			"cool": WarehouseFilter(
-				name_wh=["cool1", "cool2", "cool3"],
-				type_rack=["mk", "ww"]
+				name_warehouse=["cool1", "cool2", "cool3"],
+				location_usage_type=["mk", "ww"]
 			),
 			"pf": WarehouseFilter(
-				name_wh=["pf1", "pf2", "pf3", "pf4", "pf5"],
-				type_rack=["mk", "ww"]
+				name_warehouse=["pf1", "pf2", "pf3", "pf4", "pf5"],
+				location_usage_type=["mk", "ww"]
 			),
 			 "steam": WarehouseFilter(
-				name_wh=["rej"], # Giả định 'rej' là tên kho cho loại 'steam'
-				type_rack=["reject"]
+				name_warehouse=["rej"], # Giả định 'rej' là tên kho cho loại 'steam'
+				location_usage_type=["reject"]
 			)
 			# Có thể thêm các cấu hình kho khác tại đây
 		}
 
 	def analyze_warehouse(self, warehouse_key: str) -> Dict[str, float]:
 		"""
-		Phân tích một kho hàng cụ thể và trả về kết quả chi tiết theo tổ hợp name_wh_type_rack_cat_inv.
+		Phân tích một kho hàng cụ thể và trả về kết quả chi tiết theo tổ hợp name_warehouse_location_usage_type_cat_inv.
 		"""
 		if warehouse_key not in self.warehouse_filters:
 			#Trả về dictionary rỗng thay vì raise lỗi để get_comprohensive_analysis không bị dừng
@@ -159,33 +159,33 @@ class WarehouseAnalyzer(DataProcessor):
 		filter_dict = wh_filter.get_filter_dict()
 
 		results = {}
-		#Lọc data theo bộ lọc chung của nhóm kho (name_wh, type_rack, cat_inv)
+		#Lọc data theo bộ lọc chung của nhóm kho (name_warehouse, location_usage_type, cat_inv)
 		group_filtered_df = self.filter_data(filter_dict)
 
-		#Tính toán kết quả cho mỗi name_wh, type_rack và cat_inv CÓ TRONG DỮ LIỆU ĐÃ LỌC
-		# Duyệt qua các giá trị name_wh, type_rack, cat_inv CÓ TRONG group_filter_df
+		#Tính toán kết quả cho mỗi name_warehouse, location_usage_type và cat_inv CÓ TRONG DỮ LIỆU ĐÃ LỌC
+		# Duyệt qua các giá trị name_warehouse, location_usage_type, cat_inv CÓ TRONG group_filter_df
 		#để tránh tạo ra các key cho tổ hợp không tồn tại
-		actual_name_whs = group_filtered_df['name_wh'].unique()
-		actual_type_racks = group_filtered_df['type_rack'].unique()
-		actual_cat_invs = group_filtered_df['cat_inv'].unique()
+		actual_name_warehouses = group_filtered_df["name_warehouse"].unique()
+		actual_location_usage_types = group_filtered_df["location_usage_type"].unique()
+		actual_cat_invs = group_filtered_df["cat_inv"].unique()
 
-		for wh in wh_filter.name_wh:
-			if wh not in actual_name_whs: continue # Chỉ xử lý nếu kho này có trong dữ liệu đã lọc
+		for wh in wh_filter.name_warehouse:
+			if wh not in actual_name_warehouses: continue # Chỉ xử lý nếu kho này có trong dữ liệu đã lọc
 
-			wh_df = group_filtered_df[group_filtered_df["name_wh"] == wh]
-			actual_wh_type_racks = wh_df['type_rack'].unique()
+			wh_df = group_filtered_df[group_filtered_df["name_warehouse"] == wh]
+			actual_wh_location_usage_types = wh_df["location_usage_type"].unique()
 
-			for type_rack in wh_filter.type_rack:
-				if type_rack not in actual_wh_type_racks: continue # Chỉ xử lý nếu loại kệ này có trong dữ liệu của kho đang xét
+			for location_usage_type in wh_filter.location_usage_type:
+				if location_usage_type not in actual_wh_location_usage_types: continue # Chỉ xử lý nếu loại kệ này có trong dữ liệu của kho đang xét
 
-				type_rack_df = wh_df[wh_df["type_rack"] == type_rack]
-				actual_wh_type_rack_cat_invs = type_rack_df['cat_inv'].unique()
+				location_usage_type_df = wh_df[wh_df["location_usage_type"] == location_usage_type]
+				actual_wh_location_usage_type_cat_invs = location_usage_type_df['cat_inv'].unique()
 
 				for cat_inv in wh_filter.cat_inv:
-					if cat_inv not in actual_wh_type_rack_cat_invs: continue # Chỉ xử lý nếu danh mục này có trong dữ liệu của tổ hợp đang xét
+					if cat_inv not in actual_wh_location_usage_type_cat_invs: continue # Chỉ xử lý nếu danh mục này có trong dữ liệu của tổ hợp đang xét
 
-					sub_df = type_rack_df[type_rack_df["cat_inv"] == cat_inv]
-					result_key = f"{wh}_{type_rack}_{cat_inv}"
+					sub_df = location_usage_type_df[location_usage_type_df["cat_inv"] == cat_inv]
+					result_key = f"{wh}_{location_usage_type}_{cat_inv}"
 					results[result_key] = sub_df["pallet"].sum() if not sub_df.empty else 0
 		
 		return results
@@ -242,11 +242,11 @@ class WarehouseAnalyzer(DataProcessor):
 		"""Lấy số pallet còn trống trong wh1, wh2, wh2
 		"""
 		df = self.get_empty_location()
-		df['num_pallet'] = pd.to_numeric(df['num_pallet'], downcast='integer')
+		df['pallet_capacity'] = pd.to_numeric(df['pallet_capacity'], downcast='integer')
 		mask = pd.Series(True, df.index)
-		mask &= df['name_wh'].isin(['wh1', 'wh2', 'wh3'])
+		mask &= df['name_warehouse'].isin(['wh1', 'wh2', 'wh3'])
 		df_empty_loc = df[mask]
-		pallet_emptybin = df_empty_loc['num_pallet'].sum() if not df_empty_loc.empty else 0
+		pallet_emptybin = df_empty_loc['pallet_capacity'].sum() if not df_empty_loc.empty else 0
 
 		result = {}
 		result['pallet_emptybin'] = pallet_emptybin
@@ -278,18 +278,18 @@ class WarehouseAnalyzer(DataProcessor):
 	
 	def count_block_pallet(self) -> Dict[str, float]:
 		"""
-			Tính tổng pallet có status HD và trừ vị trí stream có name_wh là REJ và EOL có name_wh LSL
+			Tính tổng pallet có status HD và trừ vị trí stream có name_warehouse là REJ và EOL có name_warehouse LSL
 			Tính riêng pallet block của fg, rpm, lable và rm
 			Trong pallet block_rpm vẫn có block_rm. Block_rm tính riêng ra đề trừ đi số pallet NORM. RM
 			Tổng pallet Block sẽ được tính trong VariableContainer
 		"""
 		if "status" not in self.df.columns:
-			logger.warning(f"Cột 'status' không tồn tại. Không thể tính pallet bị khóa.")
+			logger.warning(f"Cột 'status' không tồn tại. Không thể tính pallet bị block.")
 			return {}
 		#Tạo bộ lọc
 		filtered_df = self.df[self.df['status'] == "hd"].copy()
 		mask = pd.Series(True, filtered_df.index)
-		mask = (filtered_df['name_wh'] != 'rej')&(filtered_df['name_wh'] != 'lsl')
+		mask = (filtered_df['name_warehouse'] != 'rej')&(filtered_df['name_warehouse'] != 'lsl')
 		filtered_df = filtered_df[mask]
 
 		results = {}
@@ -302,7 +302,7 @@ class WarehouseAnalyzer(DataProcessor):
 
 		#Tính pallet block raw_mat và label
 		block_rm_df = filtered_df[filtered_df['type1'] == 'raw_mat']
-		block_lb_df = filtered_df[filtered_df['name_wh'] == 'lb']
+		block_lb_df = filtered_df[filtered_df['name_warehouse'] == 'lb']
 		results['block_plrm'] = block_rm_df['pallet'].sum() if not block_rm_df.empty else 0
 		results['block_pllb'] = block_lb_df['pallet'].sum() if not block_lb_df.empty else 0
 
@@ -331,7 +331,7 @@ class WarehouseAnalyzer(DataProcessor):
 	
 	def count_pallet_fg_with_cat(self) -> Dict[str, float]:
 		"""	Count Pallet theo Cat dwn, febz, hdl dựa vào cat_inv là FG và cột cat (masterdata)
-			Không lấy pallet ở steam và lsl có name_wh lần lượt là rej, lsl
+			Không lấy pallet ở steam và lsl có name_warehouse lần lượt là rej, lsl
 			Pallet FG_Other sẽ được tính trong VariableContainer. Lấy tổng FG trừ 3 cái còn lại
 		"""
 		if "cat" not in self.df.columns:
@@ -339,7 +339,7 @@ class WarehouseAnalyzer(DataProcessor):
 			return {}
 		
 		mask = pd.Series(True, self.df.index)
-		mask &= (self.df['name_wh'] != 'rej')&(self.df['name_wh'] != 'lsl')
+		mask &= (self.df['name_warehouse'] != 'rej')&(self.df['name_warehouse'] != 'lsl')
 		mask &= self.df['cat_inv'] == 'fg'
 		mask &= self.df['cat'].isin(['dwn', 'febz', 'hdl'])
 
@@ -355,7 +355,7 @@ class WarehouseAnalyzer(DataProcessor):
 		return results
 	
 	def count_pallet_jit(self) -> Dict[str, float]:
-		"""	Không lấy pallet ở steam và lsl có name_wh lần lượt là rej, lsl
+		"""	Không lấy pallet ở steam và lsl có name_warehouse lần lượt là rej, lsl
 			Lấy tổng pallet ở cột jit có nội dung là jit và cat_inv là rpm
 		"""
 		if "jit" not in self.df.columns:
@@ -364,7 +364,7 @@ class WarehouseAnalyzer(DataProcessor):
 		
 		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
 		mask = pd.Series(True, filtered_df.index)
-		mask = (filtered_df['name_wh'] != 'rej')&(filtered_df['name_wh'] != 'lsl')
+		mask = (filtered_df['name_warehouse'] != 'rej')&(filtered_df['name_warehouse'] != 'lsl')
 		mask &= filtered_df['jit'] == 'jit'
 		filtered_df = filtered_df[mask]
 
@@ -377,7 +377,7 @@ class WarehouseAnalyzer(DataProcessor):
 		return results
 	
 	def count_pallet_rpm_with_type2(self) -> Dict[str, float]:
-		"""	Không lấy pallet ở steam và lsl có name_wh lần lượt là rej, lsl
+		"""	Không lấy pallet ở steam và lsl có name_warehouse lần lượt là rej, lsl
 			Cout pallet theo cat_inv và type2 shipper, pouch, bottle.
 			Muốn tính được other phải lấy tổng trừ đi 3 cái còn lại
 		"""
@@ -387,7 +387,7 @@ class WarehouseAnalyzer(DataProcessor):
 		
 		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
 		mask = pd.Series(True, filtered_df.index)
-		mask &= (filtered_df['name_wh'] != 'rej')&(filtered_df['name_wh'] != 'lsl')
+		mask &= (filtered_df['name_warehouse'] != 'rej')&(filtered_df['name_warehouse'] != 'lsl')
 		mask &= filtered_df['type2'].isin(['shipper', 'pouch', 'bottle'])
 
 		filtered_df = filtered_df[mask]
@@ -402,33 +402,33 @@ class WarehouseAnalyzer(DataProcessor):
 		return results
 	
 	def count_pallet_rack_da(self) -> Dict[str, float]:
-		"""	Cout pallet có cột type_loc là ob
+		"""	Cout pallet có cột location_usage_type là ob
 		"""
-		filtered_df = self.df[self.df['type_loc'] == 'ob'].copy()
+		filtered_df = self.df[self.df['location_usage_type'] == 'ob'].copy()
 
 		results = {}
 
-		for type_rack in ['pf', 'hr']:
-			df_type_rack = filtered_df[filtered_df['type_rack'] == type_rack]
+		for location_usage_type in ['pf', 'hr']:
+			df_location_usage_type = filtered_df[filtered_df['location_usage_type'] == location_usage_type]
 			for cat_inv in ['fg', 'rpm', 'eo']:
-				df_cat_inv = df_type_rack[df_type_rack['cat_inv'] == cat_inv]
-				key_result = f"da_{type_rack}_{cat_inv}"
+				df_cat_inv = df_location_usage_type[df_location_usage_type['cat_inv'] == cat_inv]
+				key_result = f"da_{location_usage_type}_{cat_inv}"
 				results[key_result] = df_cat_inv['pallet'].sum() if not df_cat_inv.empty else 0
 
 		return results
 	
 	def count_pallet_rack_ho(self) -> Dict[str, float]:
-		"""	Cout pallet có cột type_loc là ho
+		"""	Cout pallet có cột location_usage_type là ho
 		"""
-		filtered_df = self.df[self.df['type_loc'] == 'ho'].copy()
+		filtered_df = self.df[self.df['location_usage_type'] == 'ho'].copy()
 
 		results = {}
 
-		for type_rack in ['pf']:
-			df_type_rack = filtered_df[filtered_df['type_rack'] == type_rack]
+		for location_usage_type in ['pf']:
+			df_location_usage_type = filtered_df[filtered_df['location_usage_type'] == location_usage_type]
 			for cat_inv in ['fg', 'rpm', 'eo']:
-				df_cat_inv = df_type_rack[df_type_rack['cat_inv'] == cat_inv]
-				key_result = f"ho_{type_rack}_{cat_inv}"
+				df_cat_inv = df_location_usage_type[df_location_usage_type['cat_inv'] == cat_inv]
+				key_result = f"ho_{location_usage_type}_{cat_inv}"
 				results[key_result] = df_cat_inv['pallet'].sum() if not df_cat_inv.empty else 0
 
 		return results
@@ -441,7 +441,7 @@ class WarehouseAnalyzer(DataProcessor):
 
 		filtered_df = self.df[self.df['cat_inv'] == 'fg'].copy()
 		mask = pd.Series(True, filtered_df.index)
-		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3', ''])
+		mask &= filtered_df['name_warehouse'].isin(['wh1', 'wh2', 'wh3', ''])
 		filtered_df = filtered_df[mask]
 
 		results = {}
@@ -453,7 +453,7 @@ class WarehouseAnalyzer(DataProcessor):
 	
 	def count_pallet_total_pm(self) -> Dict[str, float]:
 		"""	Tính tổng cột pallet có cat_inv là rpm.
-			Không lấy pallet ở steam và lsl có name_wh lần lượt là rej, lsl, label.
+			Không lấy pallet ở steam và lsl có name_warehouse lần lượt là rej, lsl, label.
 			Sở dĩ không lọc trong wh1,2,3 vì có trường hợp pm sẽ đem vào lưu cooling3, cooling1 trong những ngày kho đầy
 			Cột type1 khác raw_mat
 		"""
@@ -461,7 +461,7 @@ class WarehouseAnalyzer(DataProcessor):
 		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
 		mask = pd.Series(True, filtered_df.index)
 		mask &= filtered_df['type1'] != 'raw_mat'
-		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3', ''])
+		mask &= filtered_df['name_warehouse'].isin(['wh1', 'wh2', 'wh3', ''])
 		filtered_df = filtered_df[mask]
 
 		results = {}
@@ -482,7 +482,7 @@ class WarehouseAnalyzer(DataProcessor):
 		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
 		mask = pd.Series(True, filtered_df.index)
 		mask &= filtered_df['type1'] == 'raw_mat'
-		mask &= filtered_df['name_wh'].isin(['wh1', 'wh2', 'wh3', ''])
+		mask &= filtered_df['name_warehouse'].isin(['wh1', 'wh2', 'wh3', ''])
 		filtered_df = filtered_df[mask]
 
 		results = {}
@@ -512,10 +512,10 @@ class WarehouseAnalyzer(DataProcessor):
 		"""
 		potential_keys = set()
 		for wh_key, wh_filter in self.warehouse_filters.items():
-			for wh in wh_filter.name_wh:
-				for type_rack in wh_filter.type_rack:
+			for wh in wh_filter.name_warehouse:
+				for location_usage_type in wh_filter.location_usage_type:
 					for cat_inv in wh_filter.cat_inv:
-						potential_keys.add(f"{wh}_{type_rack}_{cat_inv}")
+						potential_keys.add(f"{wh}_{location_usage_type}_{cat_inv}")
 
 		# Chuyển set sang list và sắp xếp để kết quả luôn nhất quán
 		return sorted(list(potential_keys), reverse=True)
@@ -593,7 +593,7 @@ class WarehouseAnalyzer(DataProcessor):
 		return results
 	
 	def get_chart_for_dashboard(self):
-		"""Từ Dict name_wh_type_rack_cat_inv biến đổi thành name_wh_type_rack.
+		"""Từ Dict name_warehouse_location_usage_type_cat_inv biến đổi thành name_warehouse_location_usage_type.
 			Đưa gọi chart trả về obj để view lên dashboard
 		"""
 		#Get Dict sau khi tổng hợp từ config warehouse

@@ -29,10 +29,10 @@ class FindMixup:
 		mask_duplicate = mask
 
 		wh_mk = [f"pf{i}" for i in range(1, 6)] + [f"cool{i}" for i in range(1, 4)]
-		mask_mk = df_mixup['name_wh'].isin(wh_mk)
+		mask_mk = df_mixup['name_warehouse'].isin(wh_mk)
 
-		mask_wh = df_mixup['type_rack'].isin(['hr', 'pf'])
-		mask_wh &= ~(df_mixup['type_loc'].isin(['ho']))
+		mask_wh = df_mixup['location_system_type'].isin(['hr', 'pf'])
+		mask_wh &= ~(df_mixup['location_usage_type'].isin(['ho']))
 
 		mask_duplicate = df_mixup.duplicated(subset='location', keep=False)
 

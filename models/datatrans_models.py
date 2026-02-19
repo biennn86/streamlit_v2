@@ -1,1 +1,0 @@
-#Class lấy thông ti element trong từng table của database

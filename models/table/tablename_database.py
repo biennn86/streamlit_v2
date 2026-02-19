@@ -77,21 +77,48 @@ class TableNameLocation(DatabaseManager):
     def _create_table_location(self):
         create_table_sql = f"""
         CREATE TABLE IF NOT EXISTS {self.table} (
-            location        TEXT,
-            type_rack       TEXT,
-            cat_rack        TEXT,
-            type_loc        TEXT,
-            name_wh         TEXT,
-            name_rack       TEXT,
-            level           TEXT,
-            num_pallet      INTEGER,
-            stack_limit     TEXT,
-            foot_print      INTEGER,
-            note            TEXT,
-            created_at      DATETIME,
-            user            TEXT
+            location                   TEXT,
+            location_system_type       TEXT,
+            location_usage_type        TEXT,
+            rack_system_type           TEXT,
+            rack_usage_type            TEXT,
+            location_storage_type      TEXT,
+            zone                       TEXT,
+            location_category          TEXT,
+            location_product_category  TEXT,
+            name_rack                  TEXT,
+            bayslot                    INTEGER,
+            level                      TEXT,
+            location_hight             TEXT,
+            name_warehouse             TEXT,
+            pallet_capacity            INTEGER,
+            stack_limit                INTEGER,
+            foot_print                 INTEGER,
+            is_active                  INTEGER,
+            status_location            TEXT,
+            note                       TEXT,
+            created_at                 DATETIME,
+            user                       TEXT
         );
         """
+    # def _create_table_location(self):
+    #     create_table_sql = f"""
+    #     CREATE TABLE IF NOT EXISTS {self.table} (
+    #         location        TEXT,
+    #         type_rack       TEXT,
+    #         cat_rack        TEXT,
+    #         type_loc        TEXT,
+    #         name_wh         TEXT,
+    #         name_rack       TEXT,
+    #         level           TEXT,
+    #         num_pallet      INTEGER,
+    #         stack_limit     TEXT,
+    #         foot_print      INTEGER,
+    #         note            TEXT,
+    #         created_at      DATETIME,
+    #         user            TEXT
+    #     );
+    #     """
         return self.create_table(create_table_sql)
 
     def ensure_indexes(self):

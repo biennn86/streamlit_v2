@@ -8,7 +8,7 @@ class CombineBin:
 
     def _cover_tonumeric_df(self) -> None:
         self.df['pallet'] = pd.to_numeric(self.df['pallet'], downcast='integer')
-        self.df['num_pallet'] = pd.to_numeric(self.df['num_pallet'], downcast='integer')
+        self.df['pallet_capacity'] = pd.to_numeric(self.df['pallet_capacity'], downcast='integer')
 
 
     def get_combinebin(self) -> pd.DataFrame:
@@ -27,21 +27,21 @@ class CombineBin:
         """
         #Lọc df1 với các tiêu chí như dưới. df1 là df đi dò tìm
         mask = pd.Series(True, self.df.index)
-        mask &= self.df['name_wh'].isin(['wh1', 'wh2', 'wh3'])
+        mask &= self.df['name_warehouse'].isin(['wh1', 'wh2', 'wh3'])
         mask &= self.df['cat_inv'].isin(['fg', 'rpm'])
-        mask &= self.df['type_rack'].isin(['hr', 'pf', 'ww'])
-        mask &= (self.df['type_loc'] != 'sv')
+        mask &= self.df['location_system_type'].isin(['hr', 'pf', 'ww'])
+        mask &= (self.df['location_usage_type'] != 'sv')
         mask &= self.df['pallet'] == 1
         df1 = self.df[mask].copy()
         df1.insert(len(df1.columns.to_list()), 'to_location', None)
 
         #Lọc df1 với các tiêu chí như dưới. df1 bị dò tìm
         mask_1 = pd.Series(True, self.df.index)
-        mask_1 &= self.df['name_wh'].isin(['wh1', 'wh2', 'wh3'])
+        mask_1 &= self.df['name_warehouse'].isin(['wh1', 'wh2', 'wh3'])
         mask_1 &= self.df['cat_inv'].isin(['fg', 'rpm'])
         mask_1 &= (self.df['level'] != '0')&(self.df['level'] != 'a')
         mask_1 &= self.df['pallet'] == 1
-        mask_1 &= self.df['num_pallet'] == 2
+        mask_1 &= self.df['pallet_capacity'] == 2
 
         df2 = self.df[mask_1]
         df2 = df2[['gcas', 'batch', 'status', 'location']].copy().sort_values(by='location')

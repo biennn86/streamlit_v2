@@ -66,7 +66,7 @@ class TabDataViewer:
             with col1:
                 search_query = st.text_input("Search (e.g., by GCAS, Location, Description)", "")
             with col2:
-                unique_namewh = filtered_df['name_wh'].unique().tolist()
+                unique_namewh = filtered_df['name_warehouse'].unique().tolist()
                 unique_namewh = [str(name).upper() for name in unique_namewh if name != '']
                 unique_namewh.sort()
                 selected_wh = st.selectbox("Filter by Warehouse", ["All"] + unique_namewh)
@@ -79,7 +79,7 @@ class TabDataViewer:
 
                 if selected_wh != "All":
                     selected_wh =selected_wh.lower()
-                    filtered_df = filtered_df[filtered_df['name_wh'].isin([selected_wh])]
+                    filtered_df = filtered_df[filtered_df['name_warehouse'].isin([selected_wh])]
 
                 self.df_sum = self.get_summary_filter(filtered_df)
 
@@ -110,7 +110,7 @@ class TabDataViewer:
 
     def _edit_df_display(self, df):
         df_dislay = df.copy()
-        df_dislay = df_dislay[['gcas', 'description', 'batch', 'location', 'status', 'qty', 'pallet', 'name_wh']]
+        df_dislay = df_dislay[['gcas', 'description', 'batch', 'location', 'status', 'qty', 'pallet', 'name_warehouse']]
         df_dislay.columns = [re.sub(r'[ _-]', ' ', name).title().strip() for name in df_dislay.columns]
         df_dislay = normalize_data_upper(df_dislay)
 

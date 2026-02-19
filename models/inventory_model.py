@@ -204,7 +204,7 @@ class InventoryModel:
             # merge data của tồn kho, location, master data
             df_inv_mt = pd.merge(left=df_inventory, right=df_masterdata, left_on='gcas', right_on='gcas', how='left' )
             df_inv_mt_loc = pd.merge(left=df_inv_mt, right=df_location, left_on='location', right_on='location', how='left') #suffixes=('_inv', '_loc')
-            df_inv_mt_loc['num_pallet'] = pd.to_numeric(df_inv_mt_loc['num_pallet'], downcast='integer')
+            df_inv_mt_loc['pallet_capacity'] = pd.to_numeric(df_inv_mt_loc['pallet_capacity'], downcast='integer')
             df_inv_mt_loc['gcas'] = df_inv_mt_loc['gcas'].astype(str)
             df_final = df_inv_mt_loc
 
