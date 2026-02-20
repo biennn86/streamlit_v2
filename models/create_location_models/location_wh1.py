@@ -903,7 +903,7 @@ def list_config_wh1() -> list:
 			),
 		#ST ĐƯỜNG LUỒNG KHO 1
 		FloorConfig(
-			location_name = ['WH1B1', 'WH1B2', 'WH1B3', 'WH1B4', 'WH1B5', 'WH1B6', 'WH1B7', 'WH1B7', 'WH1L1', 'WHL1',
+			location_name = ['WH1B1', 'WH1B2', 'WH1B3', 'WH1B4', 'WH1B5', 'WH1B6', 'WH1B7', 'WH1L1', 'WHL1',
                'HOB1', 'HOB2', 'HOB3', 'HOB4', 'HOB5', 'HOB6', 'HOB7', 'HOB8'],
 			location_system_type = KeyLoc.LocSystemType.WW,
 			rack_system_type = KeyLoc.RackSystemType.FL,

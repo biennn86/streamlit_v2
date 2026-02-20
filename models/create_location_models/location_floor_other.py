@@ -4,7 +4,7 @@ def list_config_floor_other() -> list:
 	configs_floor_other = [
 		#ST CẤP HÀNG PM CHO XƯỞNG
 		FloorConfig(
-			location_name = ['PL' + loc for loc in 'DX,DC,DM,DJ,AU,DK,DQ,DV,DF,AE,AK,PD,AM,DD,DW,DZ,DV,FE,DN,JA,FX,FC,FD,FR,CA,AT,AA'.split(',')],
+			location_name = ['PL' + loc for loc in 'DX,DC,DM,DJ,AU,DK,DQ,DF,AE,AK,PD,AM,DD,DW,DZ,DV,FE,DN,JA,FX,FC,FD,FR,CA,AT,AA'.split(',')],
 			location_system_type = KeyLoc.LocSystemType.LSLPM,
 			rack_system_type = KeyLoc.RackSystemType.FL,
 			location_storage_type = KeyLoc.LocStorageType.FLOOR,
@@ -20,7 +20,7 @@ def list_config_floor_other() -> list:
 			),
 		#ST XƯỞNG RA HÀNG FG
 		FloorConfig(
-			location_name = ['ST' + loc for loc in 'DX,DC,DM,DJ,AU,DK,DQ,DV,DF,AE,AK,PD,AM,DD,DW,DZ,DV,FE,DN,JA,FX,FC,FD,FR,CA,AT,AA'.split(',')],
+			location_name = ['ST' + loc for loc in 'DX,DC,DM,DJ,AU,DK,DQ,DF,AE,AK,PD,AM,DD,DW,DZ,DV,FE,DN,JA,FX,FC,FD,FR,CA,AT,AA'.split(',')],
 			location_system_type = KeyLoc.LocSystemType.IN,
 			rack_system_type = KeyLoc.RackSystemType.FL,
 			location_storage_type = KeyLoc.LocStorageType.FLOOR,
@@ -36,7 +36,7 @@ def list_config_floor_other() -> list:
 			),
 		#ST LSL RM
 		FloorConfig(
-			location_name = ['HO10', 'HO03', 'PLMA', 'PLMD', 'PLMF', 'PLMK'],
+			location_name = ['HO10', 'HO03', 'PLMA', 'PLMD', 'PLMF', 'PLMK', 'HDLHEAT'],
 			location_system_type = KeyLoc.LocSystemType.LSLRM,
 			rack_system_type = KeyLoc.RackSystemType.FL,
 			location_storage_type = KeyLoc.LocStorageType.FLOOR,

@@ -208,7 +208,7 @@ class InventoryModel:
             df_inv_mt_loc['gcas'] = df_inv_mt_loc['gcas'].astype(str)
             df_final = df_inv_mt_loc
 
-            # df_final.to_excel('data_tonghop.xlsx', index=False)
+            # df_final.to_excel('data_tonghop_20022026.xlsx', index=False)
             logger.info(f"Merged {len(df_final)} records inventory, location, masterdata")
             
             return df_final

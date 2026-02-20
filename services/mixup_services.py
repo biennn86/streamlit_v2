@@ -11,7 +11,7 @@ class FindMixup:
 			2. Chỉ lấy vị trí rack wh1, wh2, wh3 trừ vị trí HO
 			3. Chỉ lấy những dòng có duplicated location
 			Logic lấy vị trí mixup
-			1. Tạo 1 dict_loc chứa location vơi key là location và value là index df vừa lọc.
+			1. Tạo 1 dict_loc chứa location với key là location và value là index df vừa lọc.
 			Và 1 mask của df vừa lọc với giá trị là False
 			2. Nếu location đã tồn tại trong dict_loc thì kiểm tra gcas, lot của hàng đang chạy và hàng
 			trước đó
@@ -32,7 +32,7 @@ class FindMixup:
 		mask_mk = df_mixup['name_warehouse'].isin(wh_mk)
 
 		mask_wh = df_mixup['location_system_type'].isin(['hr', 'pf'])
-		mask_wh &= ~(df_mixup['location_usage_type'].isin(['ho']))
+		mask_wh &= ~(df_mixup['rack_usage_type'].isin(['ho']))
 
 		mask_duplicate = df_mixup.duplicated(subset='location', keep=False)
 

@@ -5,7 +5,7 @@ def list_config_cl2() -> list:
 		#CL2 FLOOR
 		FloorConfig(
 			location_name = ['PC' + str(i) + str(j) for i in [1, 31] for j in ['A']] +\
-			 ['PC' + str(i) + str(j) for i in [18] for j in ['A', 'B', 'C', 'D']] +\
+			 ['PC' + str(i) + str(j) for i in [18] for j in ['C', 'D']] +\
 			 ['PC' + str(i) + str(j) for i in range(2, 31) for j in ['A', 'B']],
 		 	location_system_type = KeyLoc.LocSystemType.MK,
 			rack_system_type = KeyLoc.RackSystemType.FL,
