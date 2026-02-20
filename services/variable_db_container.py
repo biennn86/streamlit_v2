@@ -71,7 +71,7 @@ class VariableContainer:
 		Kho 2 có những vị trí đặc biệt và cách tính toán khác với wh1, wh3
         Điểm chung tính total pallet hightrack, level A và Floor
         Điểm riêng:
-        - High Rack kho 2 cộng luôn tồn tầng A của rack DA
+        - High Rack kho 2 cộng luôn tồn tầng A của rack DA (nói chung lấy cả rack DA)
 		- Pickface của rack kho 2 trừ đi pf_da và trừ luôn HO
         - Floor: lấy tồn pallet các vị trí in (nhập 2,3,4), pick (fill hàng), vị trí HO, các vị trí đường luồng wh2_
         các vị trí STJP, FGDM, FGLS

@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union
 from dataclasses import dataclass, field
 from datetime import datetime
 import pandas as pd
@@ -9,8 +9,8 @@ import re
 @dataclass
 class RackConfig:
 	"""Cấu hình để generate rack locations"""
-	name_rack: str
-	from_bin: int
+	name_rack: Union[str, list]
+	from_bin: Union[int, list]
 	to_bin: int
 	level_config: Dict[str, int] # Mapping tầng -> level, VD: {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5}
 	rack_system_type: str
@@ -29,8 +29,9 @@ class RackConfig:
 	
 	
 	def __post_init__(self):
-		if self.from_bin > self.to_bin:
-			raise ValueError(f"from_bin '{self.from_bin}' lớn hơn to_bin '{self.to_bin}'")
+		if isinstance(self.from_bin, int):
+			if self.from_bin > self.to_bin:
+				raise ValueError(f"from_bin '{self.from_bin}' lớn hơn to_bin '{self.to_bin}'")
 			
 @dataclass
 class FloorConfig:
@@ -243,7 +244,7 @@ class LocationGenerator:
 				return 1
 
 	@staticmethod
-	def get_status_location(is_active: int, status_location: str) -> str:
+	def get_status(is_active: int, status_location: str) -> str:
 		"""
 		Xác định status_location location khi tạo
 		is_active ở đây là is_active sau khi đã get_is_activate()
@@ -265,59 +266,123 @@ class LocationGenerator:
 		return pallet_capacity * stack_limit
 		
 	def generate_from_rack_config(self, config_rack: RackConfig) -> List[Location]:
-		"""Generate locations từ một config_rack"""
+		"""	Generate locations từ một config_rack
+			Có 2 kiểu tạo location rack trong function này
+			Kiểu 1: Tạo theo kiểu đối với các rack đặc biệt như HO vì vị trí tạo không liền mạch nhau, ví dụ 10, 11, 20, 21
+			Kiểu này name_rack sẽ nhận vào 1 list tên rack
+			from_bin sẽ nhận vào 1 list bin
+			Và sẽ tạo vị trí như rack thông thường. Thay đổi nhỏ ở method name_rack và thuộc tính name_rack trong class Location
+			Kiểu 2: Tạo rack khi nhập rack, form_bin, to_bin như thiết kế ban đầu
+			Lưu ý: Phương thức check form_bin, to_bin trong class RackConfig có thêm 1 điều kiện if để check from_bin có phải là int không
+			tránh báo lỗi.
+			Khai báo Union[str, list] cho name_rack, Union[int, list] cho from bin ở RackConfig
+			Còn lại đều như thiết kế ban đầu
+		"""
 		generated_racks = []
 		
-		for rack_num in range(config_rack.from_bin, config_rack.to_bin + 1):
-			for str_level, num_level in config_rack.level_config.items():
-				#Xác định tầng location
-				level = self.get_str_level(str_level)
-				#Xác định name_rack
-				name_rack = self.get_name_rack(config_rack.list_bin_ho, level, rack_num, config_rack.name_rack)
-				#Tạo location code: FA01D, B102A
-				location_code = self.get_location_code(name_rack, rack_num, str_level)
-				#Xác định location_system_type
-				location_system_type = self.get_location_system_type(str_level)
-				#Xác định location_usage_type
-				location_usage_type = self.get_location_usage_type(config_rack.location_usage_type, rack_num, location_system_type)
-				#Xác định rack_usage_type
-				rack_usage_type = self.get_rack_usage_type(name_rack, config_rack.rack_system_type, str_level)
-				#Xác định bayslot
-				bayslot = self.get_bayslot(rack_num)
-				#Xác định pallet_capacity
-				pallet_capacity = self.get_pallet_capacity(config_rack.rack_system_type, rack_usage_type, str_level)
-				#Xác định foot_print
-				foot_print = self.get_footprint(pallet_capacity, config_rack.stack_limit)
-				#Xác định is_active
-				is_active = self.get_is_activate(config_rack.is_active, rack_num, str_level)
-				#Xác định status_location
-				status_location = self.get_status_location(is_active, config_rack.status_location)
+		if isinstance(config_rack.name_rack, list) and isinstance(config_rack.from_bin, list):
+			for name_rack_ho in config_rack.name_rack:
+				for rack_num in config_rack.from_bin:
+					for str_level, num_level in config_rack.level_config.items():
+						#Xác định tầng location
+						level = self.get_str_level(str_level)
+						#Xác định name_rack
+						name_rack = self.get_name_rack(config_rack.list_bin_ho, level, rack_num, name_rack_ho)
+						#Tạo location code: FA01D, B102A
+						location_code = self.get_location_code(name_rack, rack_num, str_level)
+						#Xác định location_system_type
+						location_system_type = self.get_location_system_type(str_level)
+						#Xác định location_usage_type
+						location_usage_type = self.get_location_usage_type(config_rack.location_usage_type, rack_num, location_system_type)
+						#Xác định rack_usage_type
+						rack_usage_type = self.get_rack_usage_type(name_rack, config_rack.rack_system_type, str_level)
+						#Xác định bayslot
+						bayslot = self.get_bayslot(rack_num)
+						#Xác định pallet_capacity
+						pallet_capacity = self.get_pallet_capacity(config_rack.rack_system_type, rack_usage_type, str_level)
+						#Xác định foot_print
+						foot_print = self.get_footprint(pallet_capacity, config_rack.stack_limit)
+						#Xác định is_active
+						is_active = self.get_is_activate(config_rack.is_active, rack_num, str_level)
+						#Xác định status
+						status_location = self.get_status(is_active, config_rack.status_location)
+
+						# Tạo location object
+						location = Location(
+							location = location_code,
+							location_system_type = location_system_type,
+							location_usage_type = location_usage_type,
+							rack_system_type = config_rack.rack_system_type,
+							rack_usage_type = rack_usage_type,
+							location_storage_type = config_rack.location_storage_type,
+							zone = config_rack.zone,
+							location_category = config_rack.location_category,
+							location_product_category = config_rack.location_product_category,
+							name_rack = name_rack_ho,
+							bayslot = bayslot,
+							level = level,
+							location_hight = config_rack.location_hight,
+							name_warehouse = config_rack.name_warehouse,
+							pallet_capacity = pallet_capacity,
+							stack_limit = config_rack.stack_limit,
+							foot_print = foot_print,
+							is_active = is_active,
+							status_location = status_location,
+							note = config_rack.note
+							)
+						generated_racks.append(location)
+						self.locations.append(location)
+		else:
+			for rack_num in range(config_rack.from_bin, config_rack.to_bin + 1):
+				for str_level, num_level in config_rack.level_config.items():
+					#Xác định tầng location
+					level = self.get_str_level(str_level)
+					#Xác định name_rack
+					name_rack = self.get_name_rack(config_rack.list_bin_ho, level, rack_num, config_rack.name_rack)
+					#Tạo location code: FA01D, B102A
+					location_code = self.get_location_code(name_rack, rack_num, str_level)
+					#Xác định location_system_type
+					location_system_type = self.get_location_system_type(str_level)
+					#Xác định location_usage_type
+					location_usage_type = self.get_location_usage_type(config_rack.location_usage_type, rack_num, location_system_type)
+					#Xác định rack_usage_type
+					rack_usage_type = self.get_rack_usage_type(name_rack, config_rack.rack_system_type, str_level)
+					#Xác định bayslot
+					bayslot = self.get_bayslot(rack_num)
+					#Xác định pallet_capacity
+					pallet_capacity = self.get_pallet_capacity(config_rack.rack_system_type, rack_usage_type, str_level)
+					#Xác định foot_print
+					foot_print = self.get_footprint(pallet_capacity, config_rack.stack_limit)
+					#Xác định is_active
+					is_active = self.get_is_activate(config_rack.is_active, rack_num, str_level)
+					#Xác định status
+					status_location = self.get_status(is_active, config_rack.status_location)
 				
-				# Tạo location object
-				location = Location(
-					location = location_code,
-					location_system_type = location_system_type,
-					location_usage_type = location_usage_type,
-					rack_system_type = config_rack.rack_system_type,
-					rack_usage_type = rack_usage_type,
-					location_storage_type = config_rack.location_storage_type,
-					zone = config_rack.zone,
-					location_category = config_rack.location_category,
-					location_product_category = config_rack.location_product_category,
-					name_rack = config_rack.name_rack,
-					bayslot = bayslot,
-					level = level,
-					location_hight = config_rack.location_hight,
-					name_warehouse = config_rack.name_warehouse,
-					pallet_capacity = pallet_capacity,
-					stack_limit = config_rack.stack_limit,
-					foot_print = foot_print,
-					is_active = is_active,
-					status_location = status_location,
-					note = config_rack.note
-					)
-				generated_racks.append(location)
-				self.locations.append(location)
+					# Tạo location object
+					location = Location(
+						location = location_code,
+						location_system_type = location_system_type,
+						location_usage_type = location_usage_type,
+						rack_system_type = config_rack.rack_system_type,
+						rack_usage_type = rack_usage_type,
+						location_storage_type = config_rack.location_storage_type,
+						zone = config_rack.zone,
+						location_category = config_rack.location_category,
+						location_product_category = config_rack.location_product_category,
+						name_rack = config_rack.name_rack,
+						bayslot = bayslot,
+						level = level,
+						location_hight = config_rack.location_hight,
+						name_warehouse = config_rack.name_warehouse,
+						pallet_capacity = pallet_capacity,
+						stack_limit = config_rack.stack_limit,
+						foot_print = foot_print,
+						is_active = is_active,
+						status_location = status_location,
+						note = config_rack.note
+						)
+					generated_racks.append(location)
+					self.locations.append(location)
 				
 		return generated_racks
 

@@ -282,6 +282,7 @@ def list_config_wh2() -> list:
 			status_location = KeyLoc.Stauts_Location.OK,
 			note = None
 			),
+		#=======================================================================================================================
 		#DA Obiter Old. is_active sẽ có giá trị = 0. Đưa vào để chạy tồn kho cũ
 		#khi chưa có location mới
 		RackConfig(
@@ -300,9 +301,128 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = 0,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Stauts_Location.LOCK,
 			note = None
 			),
+		#Rack HO Old. is_active sẽ có giá trị = 0. Đưa vào để chạy tồn kho cũ
+		#Rack HO này đã bỏ không sử dụng nữa
+		RackConfig(
+			name_rack = ['FA'],
+			from_bin = [9, 10, 20, 21],
+			to_bin = 0,
+			level_config = {key: ord(key[0])-64 for key in ['A']},
+			list_bin_ho = [9, 10, 20, 21],
+			location_usage_type = {},
+			rack_system_type = KeyLoc.RackSystemType.DB,
+			location_storage_type = KeyLoc.LocStorageType.RACK,
+			zone = KeyLoc.Zone.WH2_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			location_hight = KeyLoc.LocHight.HIGHT,
+			name_warehouse = KeyLoc.NameWarehouse.WH2,
+			stack_limit = 1,
+			is_active = 0,
+			status_location = KeyLoc.Stauts_Location.LOCK,
+			note = None
+			),
+		RackConfig(
+			name_rack = ['FB'],
+			from_bin = [10, 11, 22, 23],
+			to_bin = 0,
+			level_config = {key: ord(key[0])-64 for key in ['A']},
+			list_bin_ho = [10, 11, 22, 23],
+			location_usage_type = {},
+			rack_system_type = KeyLoc.RackSystemType.DB,
+			location_storage_type = KeyLoc.LocStorageType.RACK,
+			zone = KeyLoc.Zone.WH2_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			location_hight = KeyLoc.LocHight.HIGHT,
+			name_warehouse = KeyLoc.NameWarehouse.WH2,
+			stack_limit = 1,
+			is_active = 0,
+			status_location = KeyLoc.Stauts_Location.LOCK,
+			note = None
+			),
+		RackConfig(
+			name_rack = ['FC'],
+			from_bin = [12, 13, 23, 24],
+			to_bin = 0,
+			level_config = {key: ord(key[0])-64 for key in ['A']},
+			list_bin_ho = [12, 13, 23, 24],
+			location_usage_type = {},
+			rack_system_type = KeyLoc.RackSystemType.DB,
+			location_storage_type = KeyLoc.LocStorageType.RACK,
+			zone = KeyLoc.Zone.WH2_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			location_hight = KeyLoc.LocHight.HIGHT,
+			name_warehouse = KeyLoc.NameWarehouse.WH2,
+			stack_limit = 1,
+			is_active = 0,
+			status_location = KeyLoc.Stauts_Location.LOCK,
+			note = None
+			),
+		RackConfig(
+			name_rack = ['FD'],
+			from_bin = [13, 14, 25, 26],
+			to_bin = 0,
+			level_config = {key: ord(key[0])-64 for key in ['A']},
+			list_bin_ho = [13, 14, 25, 26],
+			location_usage_type = {},
+			rack_system_type = KeyLoc.RackSystemType.DB,
+			location_storage_type = KeyLoc.LocStorageType.RACK,
+			zone = KeyLoc.Zone.WH2_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			location_hight = KeyLoc.LocHight.HIGHT,
+			name_warehouse = KeyLoc.NameWarehouse.WH2,
+			stack_limit = 1,
+			is_active = 0,
+			status_location = KeyLoc.Stauts_Location.LOCK,
+			note = None
+			),
+		#Tách riêng FC ra vì FC là rack cao
+		RackConfig(
+			name_rack = ['FE', 'FG', 'FI', 'FL'],
+			from_bin = [12, 13, 23, 24],
+			to_bin = 0,
+			level_config = {key: ord(key[0])-64 for key in ['A']},
+			list_bin_ho = [12, 13, 23, 24],
+			location_usage_type = {},
+			rack_system_type = KeyLoc.RackSystemType.DB,
+			location_storage_type = KeyLoc.LocStorageType.RACK,
+			zone = KeyLoc.Zone.WH2_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			location_hight = KeyLoc.LocHight.MEDIUM,
+			name_warehouse = KeyLoc.NameWarehouse.WH2,
+			stack_limit = 1,
+			is_active = 0,
+			status_location = KeyLoc.Stauts_Location.LOCK,
+			note = None
+			),
+		#Tách riêng FD ra vì FD là rack cao
+		RackConfig(
+			name_rack = ['FF', 'FH', 'FK', 'FM'],
+			from_bin = [13, 14, 25, 26],
+			to_bin = 0,
+			level_config = {key: ord(key[0])-64 for key in ['A']},
+			list_bin_ho = [13, 14, 25, 26],
+			location_usage_type = {},
+			rack_system_type = KeyLoc.RackSystemType.DB,
+			location_storage_type = KeyLoc.LocStorageType.RACK,
+			zone = KeyLoc.Zone.WH2_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			location_hight = KeyLoc.LocHight.HIGHT,
+			name_warehouse = KeyLoc.NameWarehouse.WH2,
+			stack_limit = 1,
+			is_active = 0,
+			status_location = KeyLoc.Stauts_Location.LOCK,
+			note = None
+			),
+		#=======================================================================================================================
 		#ST KHO 2
 		#ST234
 		FloorConfig(
