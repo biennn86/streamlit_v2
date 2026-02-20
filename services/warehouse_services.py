@@ -402,9 +402,9 @@ class WarehouseAnalyzer(DataProcessor):
 		return results
 	
 	def count_pallet_rack_da(self) -> Dict[str, float]:
-		"""	Cout pallet có cột location_usage_type là ob
+		"""	Count pallet có cột rack_usage_type là ob
 		"""
-		filtered_df = self.df[self.df['location_usage_type'] == 'ob'].copy()
+		filtered_df = self.df[self.df['rack_usage_type'] == 'ob'].copy()
 
 		results = {}
 
