@@ -196,9 +196,21 @@ class InventoryModel:
             #chuyển kiểu dữ liệu cột gcas trong masterdata về int. Kiểu mặc định đang là obj
             # df_masterdata['gcas'] = pd.to_numeric(df_masterdata['gcas'], downcast='integer')
             df_masterdata['gcas'] = df_masterdata['gcas'].astype('int64')
-            #khi update master data dùng method append để lấy được lịch sử thay đổi thông tin của gas (ví dụ như pallet pattern)
-            #nên khi lấy master data ra phân tích phải loại bỏ trùng để tránh duplicate data đi merge.
-            #khi dropduplicate giữ lại dòng cuối cùng để lấy thông tin data mới nhất
+            ''' 1.Khi update master data dùng method append để lấy được lịch sử thay đổi thông tin của gas (ví dụ như pallet pattern)
+                2.Nên khi lấy master data ra phân tích phải loại bỏ trùng để tránh duplicate data đi merge.
+                Khi dropduplicate giữ lại dòng cuối cùng để lấy thông tin data mới nhất
+                3.Lưu ý khi merge các df với nhau, đôi khi sẽ xảy ra trường hợp kết quả merge được nhiều hơn kết quả ban đầu.
+                Số dòng của DataFrame kết quả vẫn có thể nhiều hơn số dòng của DataFrame bên trái (gốc) nếu cột dùng để merge (key) ở DataFrame bên phải bị trùng lặp (duplicate).
+                Đã từng xảy ra lỗi df_location có location trùng nhau (WH1B7, PC18A, PC18B, PLDV, STDV) nên khi merge xong kết quả df_final lúc nào cũng nhiều hơn df_inventory
+                Hiện tượng "Bùng nổ dữ liệu" (Cartesian Product)
+                Khi thực hiện left join, Pandas sẽ giữ lại tất cả các hàng từ bảng bên trái. Tuy nhiên, với mỗi hàng ở bảng trái,
+                nếu nó tìm thấy nhiều hơn một giá trị khớp ở bảng phải, nó sẽ tự động nhân bản (duplicate) hàng ở bảng trái đó để khớp với từng hàng ở bảng phải.
+                Giải pháp:
+                Check duplicate khi merge hoặc insert vào database
+                Có thể thêm tham số validate để Python báo lỗi ngay nếu dữ liệu không đúng cấu trúc bạn mong đợi:
+                # Báo lỗi nếu 1 dòng ở bảng trái khớp với nhiều dòng ở bảng phải (1-to-many)
+                pd.merge(df_left, df_right, on='ID', how='left', validate='many_to_one') 
+            '''
             df_masterdata = df_masterdata.drop_duplicates(subset=['gcas'], keep='last')
             
             # merge data của tồn kho, location, master data
