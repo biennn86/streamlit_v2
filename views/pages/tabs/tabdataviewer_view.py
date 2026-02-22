@@ -61,6 +61,11 @@ class TabDataViewer:
             
             self.df.index = range(1, len(self.df)+1)
             filtered_df = self.df.copy()
+            #Những dòng có name_warehouse là na thì thêm vào ký tự 'no location' để tìm cho dễ và quản lý
+            #Cách fill na này không sử dụng được vì trong hàm xử lý normalize_data_lower() đã đưa các giá trị na về ""
+            # filtered_df.fillna({'name_warehouse': 'no location'}, inplace=True)
+            #Áp dụng cách này. Thay thế các giá trị "" bằng chuổi mới, thêm regex để bắt lỗi " " có khoảng trắng
+            filtered_df['name_warehouse'] = filtered_df['name_warehouse'].replace(r'^\s*$', np.nan, regex=True).fillna('no location')
 
             col1, col2, col3, col4 = dataviewer.columns([1, 1, 1, 1])
             with col1:
