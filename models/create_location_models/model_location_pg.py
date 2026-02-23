@@ -440,18 +440,22 @@ class LocationGenerator:
 			raise ValueError(f"Lỗi khi tính foot_print floor")
 
 	@staticmethod
-	def get_is_active_floor(config_is_active: list, location: str) -> int:
+	def get_is_active_floor(config_is_active: list|int, location: str) -> int:
 		"""
 		agrs: Config_floor list locaton cần block
 		Nếu location có trong list config_is_active trả về 0 ngược lại trả về 1.
 		Nếu list config_is_active rỗng trả về 1
 		"""
+		if config_is_active == 1:
+			return 1
+		elif config_is_active == 0:
+			return 0
+		
 		if not config_is_active:
 			return 1
 
 		if location in config_is_active:
 			return 0
-		else: return 1
 
 	@staticmethod
 	def get_status_location_floor(is_active: int) -> str:
@@ -462,7 +466,7 @@ class LocationGenerator:
 		if is_active == 1:
 			return KeyLoc.Status_Location.OK
 		elif is_active == 0:
-			return KeyLoc.Status_Location.BLOCK
+			return KeyLoc.Status_Location.LOCK
 		else:
 			raise ValueError(f"Lỗi khi xác định status_location floor. Is_Active {is_active}")
 
