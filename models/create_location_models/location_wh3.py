@@ -20,7 +20,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#G1 Racks Sheving
@@ -40,7 +40,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#G2 Racks
@@ -60,7 +60,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#G3 Racks
@@ -80,7 +80,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#G4 Racks
@@ -100,7 +100,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#G5 Racks
@@ -120,7 +120,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -139,7 +139,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.WW_MID_WH
 			),
 		RackConfig(
@@ -158,7 +158,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#G6 Racks
@@ -178,7 +178,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -197,7 +197,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.VUONG_COT
 			),
 		RackConfig(
@@ -216,7 +216,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -235,7 +235,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.VUONG_COT
 			),
 		RackConfig(
@@ -254,7 +254,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -273,7 +273,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.VUONG_COT
 			),
 		RackConfig(
@@ -292,7 +292,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -311,7 +311,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.WW_MID_WH
 			),
 		RackConfig(
@@ -330,7 +330,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#G7 Racks
@@ -350,7 +350,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -369,7 +369,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.WW_MID_WH
 			),
 		RackConfig(
@@ -388,7 +388,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#G8 Racks
@@ -408,7 +408,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -427,7 +427,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.WW_MID_WH
 			),
 		RackConfig(
@@ -446,7 +446,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#G9 Racks
@@ -466,7 +466,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#G10 Racks
@@ -486,7 +486,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -505,7 +505,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.BIN_DAMAGE
 			),
 		RackConfig(
@@ -524,7 +524,7 @@ def list_config_wh3() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.BIN_DAMAGE
 			),
 		#ST KHO 3
@@ -542,7 +542,7 @@ def list_config_wh3() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 	]

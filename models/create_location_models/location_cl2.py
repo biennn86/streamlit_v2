@@ -17,7 +17,7 @@ def list_config_cl2() -> list:
 			pallet_capacity = 1,
 			stack_limit = 2,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#CL2 WW
@@ -33,7 +33,7 @@ def list_config_cl2() -> list:
 			pallet_capacity = 1,
 			stack_limit = 2,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.DUONG_LUONG
 			)
 	]

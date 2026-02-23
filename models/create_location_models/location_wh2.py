@@ -20,7 +20,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{9: ['A'], 10: ['A'], 20: ['A'], 21: ['A']}
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#FB Racks
@@ -40,7 +40,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{10: ['A'], 11: ['A'], 22: ['A'], 23: ['A']}
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#FC Racks
@@ -60,7 +60,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{12: ['A'], 13: ['A'], 23: ['A'], 24: ['A']},
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#FD Racks
@@ -80,7 +80,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{13: ['A'], 14: ['A'], 25: ['A'], 26: ['A']},
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -99,7 +99,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{13: ['A'], 14: ['A'], 25: ['A'], 26: ['A']},
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.EO_BIN
 			),
 		#FE Racks
@@ -119,7 +119,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{12: ['A'], 13: ['A'], 23: ['A'], 24: ['A']},
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#FF Racks
@@ -139,7 +139,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{13: ['A'], 14: ['A'], 25: ['A'], 26: ['A']},
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#FG Racks
@@ -159,7 +159,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{12: ['A'], 13: ['A'], 23: ['A'], 24: ['A']},
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#FH Racks
@@ -179,7 +179,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{13: ['A'], 14: ['A'], 25: ['A'], 26: ['A']},
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#FI Racks
@@ -199,7 +199,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{12: ['A'], 13: ['A'], 23: ['A'], 24: ['A']},
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#FK Racks
@@ -219,7 +219,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{13: ['A'], 14: ['A'], 25: ['A'], 26: ['A']},
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#FL Racks
@@ -239,7 +239,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{12: ['A'], 13: ['A'], 23: ['A'], 24: ['A']},
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#FM Racks
@@ -259,7 +259,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = {}, #{13: ['A'], 14: ['A'], 25: ['A'], 26: ['A']},
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#DA Obiter Current
@@ -279,7 +279,27 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
+			note = None
+			),
+		#Rack FBC chứa hàng tập kết để 901 cấp lên xưởng
+		RackConfig(
+			name_rack = "FBC",
+			from_bin = 1,
+			to_bin = 16,
+			level_config = {"AT": 1, "AN": 1},
+			list_bin_ho = [],
+			location_usage_type = {},
+			rack_system_type = KeyLoc.RackSystemType.DB,
+			location_storage_type = KeyLoc.LocStorageType.RACK,
+			zone = KeyLoc.Zone.WH2_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			location_hight = KeyLoc.LocHight.HIGHT,
+			name_warehouse = KeyLoc.NameWarehouse.WH2,
+			stack_limit = 1,
+			is_active = {},
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#=======================================================================================================================
@@ -301,7 +321,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = 0,
-			status_location = KeyLoc.Stauts_Location.LOCK,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		#Rack HO Old. is_active sẽ có giá trị = 0. Đưa vào để chạy tồn kho cũ
@@ -322,7 +342,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = 0,
-			status_location = KeyLoc.Stauts_Location.LOCK,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -341,7 +361,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = 0,
-			status_location = KeyLoc.Stauts_Location.LOCK,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -360,7 +380,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = 0,
-			status_location = KeyLoc.Stauts_Location.LOCK,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -379,7 +399,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = 0,
-			status_location = KeyLoc.Stauts_Location.LOCK,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		#Tách riêng FC ra vì FC là rack cao
@@ -399,7 +419,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = 0,
-			status_location = KeyLoc.Stauts_Location.LOCK,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		#Tách riêng FD ra vì FD là rack cao
@@ -419,7 +439,7 @@ def list_config_wh2() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
 			is_active = 0,
-			status_location = KeyLoc.Stauts_Location.LOCK,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		#=======================================================================================================================
@@ -437,7 +457,7 @@ def list_config_wh2() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#ST ĐƯỜNG LUỒNG KHO 2
@@ -453,7 +473,7 @@ def list_config_wh2() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#ST OUT
@@ -469,7 +489,7 @@ def list_config_wh2() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#LOCATION REWORK
@@ -485,7 +505,7 @@ def list_config_wh2() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#LOCATION TRẢ HÀNG LẺ KHI XUẤT HÀNG
@@ -501,7 +521,7 @@ def list_config_wh2() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#ST SHIPOUT
@@ -517,7 +537,7 @@ def list_config_wh2() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#ST SCANOUT
@@ -533,7 +553,7 @@ def list_config_wh2() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			)
 

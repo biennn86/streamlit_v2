@@ -6,7 +6,7 @@ def list_config_cl1() -> list:
 		FloorConfig(
 			location_name = ['PM' + str(i) + j for i in range(17, 20) for j in ['A', 'B']] +\
 			 ['PM' + str(i) + j for i in range(23, 31) for j in ['A', 'B']] +\
-			 ['PM17C'],
+			 ['PM17C'] + ['PM27'],
 		 	location_system_type = KeyLoc.LocSystemType.MK,
 			rack_system_type = KeyLoc.RackSystemType.FL,
 			location_storage_type = KeyLoc.LocStorageType.FLOOR,
@@ -17,7 +17,7 @@ def list_config_cl1() -> list:
 			pallet_capacity = 1,
 			stack_limit = 2,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#CL1 WW
@@ -33,7 +33,7 @@ def list_config_cl1() -> list:
 			pallet_capacity = 1,
 			stack_limit = 2,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.DUONG_LUONG
 			)
 	]

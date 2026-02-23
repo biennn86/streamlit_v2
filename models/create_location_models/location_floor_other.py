@@ -15,7 +15,7 @@ def list_config_floor_other() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#ST XƯỞNG RA HÀNG FG
@@ -31,7 +31,7 @@ def list_config_floor_other() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#ST LSL RM
@@ -47,7 +47,7 @@ def list_config_floor_other() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#ST LINE RETURN
@@ -63,7 +63,7 @@ def list_config_floor_other() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#LOCATION KHO SCHENKER
@@ -79,7 +79,7 @@ def list_config_floor_other() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#LOCATION HÀNG HỦY
@@ -95,7 +95,7 @@ def list_config_floor_other() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#LOCATION CẮT MẪU
@@ -111,7 +111,7 @@ def list_config_floor_other() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 	]

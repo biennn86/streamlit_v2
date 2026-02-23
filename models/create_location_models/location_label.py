@@ -20,7 +20,7 @@ def list_config_label() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.LB,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -39,7 +39,7 @@ def list_config_label() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.LB,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#LB4
@@ -59,7 +59,7 @@ def list_config_label() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.LB,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -78,7 +78,7 @@ def list_config_label() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.LB,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#LB5
@@ -98,7 +98,7 @@ def list_config_label() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.LB,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -117,7 +117,7 @@ def list_config_label() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.LB,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#LB6
@@ -137,7 +137,7 @@ def list_config_label() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.LB,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		RackConfig(
@@ -156,7 +156,7 @@ def list_config_label() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.LB,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#LB7
@@ -176,7 +176,7 @@ def list_config_label() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.LB,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#LB7 EO
@@ -196,7 +196,7 @@ def list_config_label() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.LB,
 			stack_limit = 1,
 			is_active = 1,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.LB_EO
 			),
 		#ST KHO LABEL
@@ -212,7 +212,65 @@ def list_config_label() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
+			note = None
+			),
+		#==============================================
+		#Vị trí rack label đã bị bỏ khống sử dụng nữa
+		#LB6 từ 17->20 A-D-2
+		RackConfig(
+			name_rack = "LB6",
+			from_bin = 17,
+			to_bin = 20,
+			level_config = {key: ord(key[0]) - 64 for key in ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'D1', 'D2']},
+			list_bin_ho= [],
+			location_usage_type = {},
+			rack_system_type = KeyLoc.RackSystemType.SV,
+			location_storage_type = KeyLoc.LocStorageType.RACK,
+			zone = KeyLoc.Zone.LB_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			location_hight = KeyLoc.LocHight.LOW,
+			name_warehouse = KeyLoc.NameWarehouse.LB,
+			stack_limit = 1,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
+			note = None
+			),
+		#LB7 từ 1->8 A-D-2
+		RackConfig(
+			name_rack = "LB7",
+			from_bin = 1,
+			to_bin = 8,
+			level_config = {key: ord(key[0]) - 64 for key in ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'D1', 'D2']},
+			list_bin_ho= [],
+			location_usage_type = {},
+			rack_system_type = KeyLoc.RackSystemType.SV,
+			location_storage_type = KeyLoc.LocStorageType.RACK,
+			zone = KeyLoc.Zone.LB_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			location_hight = KeyLoc.LocHight.LOW,
+			name_warehouse = KeyLoc.NameWarehouse.LB,
+			stack_limit = 1,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
+			note = None
+			),
+		#ST cũ
+		FloorConfig(
+			location_name = ['LABEL' + str(i) + str(j) for i in range(8, 10) for j in ['A', 'B', 'C', 'D']],
+			location_system_type = KeyLoc.LocSystemType.WW,
+			rack_system_type = KeyLoc.RackSystemType.FL,
+			location_storage_type = KeyLoc.LocStorageType.FLOOR,
+			zone = KeyLoc.Zone.LB_FLOOR,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			name_warehouse = KeyLoc.NameWarehouse.LB,
+			pallet_capacity = 1,
+			stack_limit = 1,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 	]

@@ -253,7 +253,7 @@ class LocationGenerator:
 		Còn HLOD chưa xác định vì chưa gặp trong vận hành
 		"""
 		if is_active == 0:
-			return KeyLoc.Stauts_Location.LOCK
+			return KeyLoc.Status_Location.LOCK
 		else:
 			return status_location
 	
@@ -460,9 +460,9 @@ class LocationGenerator:
 		Nếu is_active = 1 -> status_location ok
 		"""
 		if is_active == 1:
-			return KeyLoc.Stauts_Location.OK
+			return KeyLoc.Status_Location.OK
 		elif is_active == 0:
-			return KeyLoc.Stauts_Location.BLOCK
+			return KeyLoc.Status_Location.BLOCK
 		else:
 			raise ValueError(f"Lỗi khi xác định status_location floor. Is_Active {is_active}")
 
@@ -650,7 +650,7 @@ class KeyLoc:
 		COOL1 = 'COOL1'
 		COOL2 = 'COOL2'
 		COOL3 = 'COOL3'
-	class Stauts_Location:
+	class Status_Location:
 		OK = 'OK'
 		HOLD = 'HOLD'
 		LOCK = 'BLOCK'

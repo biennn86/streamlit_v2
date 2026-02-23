@@ -17,7 +17,7 @@ def list_config_pf5() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#PF5 SÀN
@@ -34,7 +34,7 @@ def list_config_pf5() -> list:
 			pallet_capacity = 1,
 			stack_limit = 2,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#PF5 WW
@@ -50,7 +50,7 @@ def list_config_pf5() -> list:
 			pallet_capacity = 1,
 			stack_limit = 2,
 			is_active = [],
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.DUONG_LUONG
 			),
 		#================================================================================
@@ -68,7 +68,7 @@ def list_config_pf5() -> list:
 			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = 0,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#VỊ TRÍ ĐỂ PHUY CHỒNG ĐÔI
@@ -84,7 +84,7 @@ def list_config_pf5() -> list:
 			pallet_capacity = 1,
 			stack_limit = 2,
 			is_active = 0,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
 		#VỊ TRÍ ĐƯỜNG LUỒNG
@@ -100,10 +100,25 @@ def list_config_pf5() -> list:
 			pallet_capacity = 1,
 			stack_limit = 2,
 			is_active = 0,
-			status_location = KeyLoc.Stauts_Location.OK,
+			status_location = KeyLoc.Status_Location.OK,
 			note = KeyLoc.Note.DUONG_LUONG
 			),
-
+		#VỊ TRÍ ĐỂ CAN MÀU. ĐÃ BỎ KHÔNG SỬ DỤNG NỮA
+		FloorConfig(
+			location_name = ['Z519' + str(i) + str(j) for i in ['A', 'B', 'C', 'D'] for j in range(1, 5)],
+		 	location_system_type = KeyLoc.LocSystemType.MK,
+			rack_system_type = KeyLoc.RackSystemType.SV,
+			location_storage_type = KeyLoc.LocStorageType.RACK_PF,
+			zone = KeyLoc.Zone.PF5_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.MK,
+			name_warehouse = KeyLoc.NameWarehouse.PF5,
+			pallet_capacity = 1,
+			stack_limit = 1,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
+			note = None
+			),
 	]
 
 	return config_pf5
