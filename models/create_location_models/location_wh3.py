@@ -23,12 +23,32 @@ def list_config_wh3() -> list:
 			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
-		#G1 Racks Sheving
+		#G1 Racks Shelving
 		RackConfig(
 			name_rack = "G1",
-			from_bin = 15,
-			to_bin = 31,
+			from_bin = 24,
+			to_bin = 30,
 			level_config = {"A1": 1, "A2": 1, "A3": 1, "A4": 1, "A5": 1, "A6": 1, "A7": 1, "A8": 1},
+			list_bin_ho = [],
+			location_usage_type = {},
+			rack_system_type = KeyLoc.RackSystemType.SV,
+			location_storage_type = KeyLoc.LocStorageType.RACK,
+			zone = KeyLoc.Zone.WH3_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			location_hight = KeyLoc.LocHight.LOW,
+			name_warehouse = KeyLoc.NameWarehouse.WH3,
+			stack_limit = 1,
+			is_active = 1,
+			status_location = KeyLoc.Status_Location.OK,
+			note = None
+			),
+		#G1 Racks Shelving để can màu
+		RackConfig(
+			name_rack = "G1",
+			from_bin = 31,
+			to_bin = 31,
+			level_config = {(str(i) + str(j)): ord(i) - 64 for i in ['A', 'B', 'C'] for j in range(1, 5)}, #{'A1': 1, 'A2': 1, 'A3': 1, 'A4': 1, 'B1': 2, 'B2': 2, 'B3': 2, 'B4': 2, 'C1': 3, 'C2': 3, 'C3': 3, 'C4': 3}
 			list_bin_ho = [],
 			location_usage_type = {},
 			rack_system_type = KeyLoc.RackSystemType.SV,
@@ -543,6 +563,47 @@ def list_config_wh3() -> list:
 			stack_limit = 1,
 			is_active = [],
 			status_location = KeyLoc.Status_Location.OK,
+			note = None
+			),
+		#=======================================================
+		#Bin Shelving G1 đã không còn sử dụng
+		#G1 Racks Shelving
+		RackConfig(
+			name_rack = "G1",
+			from_bin = 15,
+			to_bin = 23,
+			level_config = {"A1": 1, "A2": 1, "A3": 1, "A4": 1, "A5": 1, "A6": 1, "A7": 1, "A8": 1},
+			list_bin_ho = [],
+			location_usage_type = {},
+			rack_system_type = KeyLoc.RackSystemType.SV,
+			location_storage_type = KeyLoc.LocStorageType.RACK,
+			zone = KeyLoc.Zone.WH3_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			location_hight = KeyLoc.LocHight.LOW,
+			name_warehouse = KeyLoc.NameWarehouse.WH3,
+			stack_limit = 1,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
+			note = None
+			),
+		RackConfig(
+			name_rack = "G1",
+			from_bin = 31,
+			to_bin = 31,
+			level_config = {"A5": 1, "A6": 1, "A7": 1, "A8": 1},
+			list_bin_ho = [],
+			location_usage_type = {},
+			rack_system_type = KeyLoc.RackSystemType.SV,
+			location_storage_type = KeyLoc.LocStorageType.RACK,
+			zone = KeyLoc.Zone.WH3_RACK,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			location_hight = KeyLoc.LocHight.LOW,
+			name_warehouse = KeyLoc.NameWarehouse.WH3,
+			stack_limit = 1,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 	]
