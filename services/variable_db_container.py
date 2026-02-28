@@ -441,9 +441,9 @@ CAPACITY_WAREHOUSE = {
 		'floor': 42
 	},
 	'wh2': {
-		'total': 5082,
-		'hr': 4068,
-		'pf': 758,
+		'total': 5178,
+		'hr': 4164,
+		'pf': 854,
 		'floor': 256
 	},
 	'wh3': {
@@ -453,11 +453,11 @@ CAPACITY_WAREHOUSE = {
 		'floor': 22
 	},
 	'cool': {
-		'total': 376,
-		'cool1': 96,
-		'cool2': 178,
-		'cool3': 126,
-		'cool_floor': 20 #'cool_floor
+		'total': 306,
+		'cool1': 94,
+		'cool2': 176,
+		'cool3': 106,
+		'cool_floor': 30 #'cool_floor
 	},
 	'pf': {
 		'total': 364,
@@ -475,7 +475,7 @@ CAPACITY_WAREHOUSE = {
 		'total': 546
 	},
 	'wh': {
-		'total': 8776
+		'total': 8872
 	}
 }
 
