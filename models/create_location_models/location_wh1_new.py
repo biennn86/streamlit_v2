@@ -677,7 +677,7 @@ def list_config_wh1_new() -> list:
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		RackConfig(
-			name_rack = "B6",
+			name_rack = "B06",
 			from_bin = 9,
 			to_bin = 12,
 			level_config = {i:ord(i)-64 for i in ['A', 'B', 'C', 'D', 'E']},

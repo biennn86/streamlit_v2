@@ -41,7 +41,7 @@ def create_all_locations() -> LocationGenerator:
 	#List location hệ thống mới
 	list_location_wh1_new = list_config_wh1_new()
 
-	list_configs_final = list_configs_location + list_location_wh1_new
+	list_configs_final = list_location_wh1_new + list_configs_location
 
 	#Kiểm tra từng phần tử trong list config_location
 	#Phân biệt đâu là phần tử class RackConfig và đâu là phần tử FloorConfig
