@@ -32,7 +32,7 @@ class DatabaseManager:
         try:
             #Lấy path database trên máy nếu chạy local, lấy trong file nguồn nếu chạy streamlit could
             if os.path.exists(self.__PATH_DB_LOCAL_ON_DISK):
-                self.__PATH_DB = self.__PATH_DB_LOCAL_ON_DISK
+                self.__PATH_DB = self.__PATH_DB_ON_SOURCE
             else:
                 self.__PATH_DB = self.__PATH_DB_ON_SOURCE
 
