@@ -18,8 +18,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.TANG_A_LSL_LRT_DNDC
 			),
 		RackConfig(
@@ -37,8 +37,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.WW_MID_WH
 			),
 		RackConfig(
@@ -56,8 +56,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.TANG_A_LSL_LRT_DNDC
 			),
 		RackConfig(
@@ -75,8 +75,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.TANG_A_LSL_CA
 			),
 		RackConfig(
@@ -94,8 +94,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.WW_MID_WH
 			),
 		RackConfig(
@@ -113,8 +113,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		#B2 Racks
@@ -133,8 +133,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -152,8 +152,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.WW_MID_WH
 			),
 		RackConfig(
@@ -171,8 +171,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -190,8 +190,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		RackConfig(
@@ -209,8 +209,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -228,8 +228,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.WW_MID_WH
 			),
 		RackConfig(
@@ -247,8 +247,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -266,8 +266,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		#B3 Racks
@@ -286,8 +286,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		RackConfig(
@@ -305,8 +305,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -324,8 +324,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.WW_MID_WH
 			),
 		RackConfig(
@@ -343,8 +343,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -362,8 +362,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		RackConfig(
@@ -381,8 +381,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -400,8 +400,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.WW_MID_WH
 			),
 		RackConfig(
@@ -419,8 +419,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -438,8 +438,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		#B4 Racks
@@ -458,8 +458,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		RackConfig(
@@ -477,8 +477,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		RackConfig(
@@ -496,8 +496,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.WW_MID_WH
 			),
 		RackConfig(
@@ -515,9 +515,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
-			note = None
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK
 			),
 		RackConfig(
 			name_rack = "B4",
@@ -534,8 +533,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		RackConfig(
@@ -553,8 +552,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -572,8 +571,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.WW_MID_WH
 			),
 		RackConfig(
@@ -591,8 +590,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -610,8 +609,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		
@@ -631,8 +630,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -650,8 +649,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		RackConfig(
@@ -669,8 +668,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -688,8 +687,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		#B6 Racks
@@ -708,8 +707,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -727,8 +726,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		RackConfig(
@@ -746,8 +745,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -765,8 +764,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		#B7 Racks
@@ -785,8 +784,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -804,8 +803,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		RackConfig(
@@ -823,8 +822,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -842,8 +841,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		#B8 Racks
@@ -862,8 +861,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		RackConfig(
@@ -881,8 +880,8 @@ def list_config_wh1() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = KeyLoc.Note.BO_TANG_E_PCCC
 			),
 		#ST KHO B
@@ -897,7 +896,7 @@ def list_config_wh1() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			pallet_capacity = 1,
 			stack_limit = 1,
-			is_active = [],
+			is_active = 1,
 			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			),
@@ -914,7 +913,7 @@ def list_config_wh1() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			pallet_capacity = 1,
 			stack_limit = 1,
-			is_active = [],
+			is_active = 1,
 			status_location = KeyLoc.Status_Location.OK,
 			note = None
 			)

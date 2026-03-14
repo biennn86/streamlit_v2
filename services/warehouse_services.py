@@ -160,6 +160,8 @@ class WarehouseAnalyzer(DataProcessor):
 
 		results = {}
 		#Lọc data theo bộ lọc chung của nhóm kho (name_warehouse, location_usage_type, cat_inv)
+		# {'name_warehouse': ['wh2'], 'location_usage_type': ['hr', 'pf', 'ww', 'in', 'pick', 'rework', 'return', 'scanout'], 'cat_inv': ['eo', 'fg', 'rpm']}
+		#['pf1', 'pf2', 'pf3', 'pf4', 'pf5'], 'location_usage_type': ['mk', 'ww'], 'cat_inv': ['eo', 'fg', 'rpm']}
 		group_filtered_df = self.filter_data(filter_dict)
 
 		#Tính toán kết quả cho mỗi name_warehouse, location_usage_type và cat_inv CÓ TRONG DỮ LIỆU ĐÃ LỌC

@@ -20,13 +20,15 @@ from models.create_location_models.location_cl2 import *
 from models.create_location_models.location_cl3 import *
 from models.create_location_models.location_label import *
 from models.create_location_models.location_floor_other import *
+#Location hệ thống mới 14/03/2026
+from models.create_location_models.location_wh1_new import *
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def create_all_locations() -> LocationGenerator:
 	generator = LocationGenerator()
-
+	#List location hệ thống cũ
 	list_location_wh1 = list_config_wh1()
 	list_location_wh2 = list_config_wh2()
 	list_location_wh3 = list_config_wh3()
@@ -36,11 +38,15 @@ def create_all_locations() -> LocationGenerator:
 	list_location_floor_other = list_config_floor_other()
 
 	list_configs_location = list_location_wh1 + list_location_wh2 + list_location_wh3 + list_location_lb + list_location_pf + list_location_cl  + list_location_floor_other
+	#List location hệ thống mới
+	list_location_wh1_new = list_config_wh1_new()
+
+	list_configs_final = list_configs_location + list_location_wh1_new
 
 	#Kiểm tra từng phần tử trong list config_location
 	#Phân biệt đâu là phần tử class RackConfig và đâu là phần tử FloorConfig
 	#Để dùng method generate cho đúng
-	for item in list_configs_location:
+	for item in list_configs_final:
 		if isinstance(item, RackConfig):
 			generator.generate_from_rack_config(item)
 		elif isinstance(item, FloorConfig):
@@ -79,7 +85,7 @@ def main_create_loc():
 	df['created_at'] = formatted_string
 	df['user'] = user
 
-	# df.to_excel('location.xlsx', index=False)
+	# df.to_excel('location_new_prime.xlsx', index=False)
 
 	#Save to database
 	return save_location(df)

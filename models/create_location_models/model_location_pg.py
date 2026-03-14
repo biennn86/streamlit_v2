@@ -130,11 +130,22 @@ class LocationGenerator:
 		Xác định location_code
 		- Nếu name_rack là HO thì location_code không có level. VD HOFA25
 		- Ngược lại trả về location_code như bình thường. VD FA25A
+		Đối với rack dùng hệ thống mới prime thì namerack bắt đầu B01 thay vì B1.
+		Vị trí là 001 thay vì 01
+		Nên phải dùng regex để bắt B01 đối với rack mới và trả về vị trí 001 đổi với rack mơi.
+		Rack cũ giữ nguyên logic
 		"""
-		if name_rack.startswith("HO"):
-			return f"{name_rack}{rack_num:02d}"
+		match = re.search(r"^(BT|[B]0)", name_rack) #r"(?<=[B])0
+		if match:
+			if name_rack.startswith("HO"):
+				return f"{name_rack}{rack_num:03d}"
+			else:
+				return f"{name_rack}{rack_num:03d}{level}"
 		else:
-			return f"{name_rack}{rack_num:02d}{level}"
+			if name_rack.startswith("HO"):
+				return f"{name_rack}{rack_num:02d}"
+			else:
+				return f"{name_rack}{rack_num:02d}{level}"
 
 	@staticmethod
 	def get_str_level(level: str) -> str: #A1, B1
@@ -180,8 +191,10 @@ class LocationGenerator:
 		Đây là vị trí rack DB nhưng chuyển mục đích sử dụng sang ST 
 		- Nếu name_rack là HO thì trả về HO
 		- Nếu không thõa mãn thì trả về rack_system_type
+		Rack mới điều kiện len(level == 2) không thõa mãn nữa.
+		Đang để tạm điều kiện rack namerack B8, BT là rack đôi chuyển công năng thành rack đơn
 		"""
-		if (rack_system_type == "DB" and len(level) == 2):
+		if (rack_system_type == "DB" and len(level) == 2) or (name_rack in ['B08', 'BT8']):
 			return "ST"
 		elif name_rack.startswith("HO"):
 			return "HO"
