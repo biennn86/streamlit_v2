@@ -135,7 +135,7 @@ class LocationGenerator:
 		Nên phải dùng regex để bắt B01 đối với rack mới và trả về vị trí 001 đổi với rack mơi.
 		Rack cũ giữ nguyên logic
 		"""
-		match = re.search(r"^(BT|[B]0)", name_rack) #r"(?<=[B])0
+		match = re.match(r"^(BT|[B]0)", name_rack) #r"(?<=[B])0
 		if match:
 			if name_rack.startswith("HO"):
 				return f"{name_rack}{rack_num:03d}"
