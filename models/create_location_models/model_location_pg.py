@@ -25,7 +25,7 @@ class RackConfig:
 	stack_limit: Optional[int] = 1
 	is_active: Optional[Dict[int, list]] = 1 #Truyền vào 1 dict. Key là vị trí, value là tầng cần block. Giá trị mặc định là 1 (active)
 	status_location: Optional[str] = "OK" #Dựa vào is_active để trả về status_location mong muốn
-	note: Optional[str] = None #
+	note: Optional[str] = None 
 	
 	
 	def __post_init__(self):
@@ -130,22 +130,11 @@ class LocationGenerator:
 		Xác định location_code
 		- Nếu name_rack là HO thì location_code không có level. VD HOFA25
 		- Ngược lại trả về location_code như bình thường. VD FA25A
-		Đối với rack dùng hệ thống mới prime thì namerack bắt đầu B01 thay vì B1.
-		Vị trí là 001 thay vì 01
-		Nên phải dùng regex để bắt B01 đối với rack mới và trả về vị trí 001 đổi với rack mơi.
-		Rack cũ giữ nguyên logic
 		"""
-		match = re.match(r"^(BT|[B]0)", name_rack) #r"(?<=[B])0
-		if match:
-			if name_rack.startswith("HO"):
-				return f"{name_rack}{rack_num:03d}"
-			else:
-				return f"{name_rack}{rack_num:03d}{level}"
+		if name_rack.startswith("HO"):
+			return f"{name_rack}{rack_num:02d}"
 		else:
-			if name_rack.startswith("HO"):
-				return f"{name_rack}{rack_num:02d}"
-			else:
-				return f"{name_rack}{rack_num:02d}{level}"
+			return f"{name_rack}{rack_num:02d}{level}"
 
 	@staticmethod
 	def get_str_level(level: str) -> str: #A1, B1
@@ -194,7 +183,7 @@ class LocationGenerator:
 		Rack mới điều kiện len(level == 2) không thõa mãn nữa.
 		Đang để tạm điều kiện rack namerack B8, BT là rack đôi chuyển công năng thành rack đơn
 		"""
-		if (rack_system_type == "DB" and len(level) == 2) or (name_rack in ['B08', 'BT8']):
+		if (rack_system_type == "DB" and len(level) == 2):
 			return "ST"
 		elif name_rack.startswith("HO"):
 			return "HO"
