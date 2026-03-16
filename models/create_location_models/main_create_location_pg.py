@@ -105,7 +105,7 @@ def main_create_loc():
 	df['created_at'] = formatted_string
 	df['user'] = user
 
-	df.to_excel('location_new_prime_160326.xlsx', index=False)
+	# df.to_excel('location_new_prime_160326.xlsx', index=False)
 
 	#Save to database
 	return save_location(df)
