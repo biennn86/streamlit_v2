@@ -23,6 +23,8 @@ from models.create_location_models.location_label import *
 from models.create_location_models.location_floor_other import *
 #Location hệ thống mới 14/03/2026
 from models.create_location_models.location_pg_new.location_wh1_new import *
+from models.create_location_models.location_pg_new.location_wh2_new import *
+from models.create_location_models.location_pg_new.location_wh3_new import *
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -58,8 +60,10 @@ def create_all_locations_new() -> LocationGenerator_New:
 
 	#List location hệ thống mới
 	list_location_wh1_new = list_config_wh1_new()
+	list_location_wh2_new = list_config_wh2_new()
+	list_location_wh3_new = list_config_wh3_new()
 
-	list_configs_location = list_location_wh1_new
+	list_configs_location = list_location_wh1_new + list_location_wh2_new + list_location_wh3_new
 	for item in list_configs_location:
 		if isinstance(item, RackConfig_New):
 			generator_new.generate_from_rack_config(item)

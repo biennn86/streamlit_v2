@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict, Union, Literal
 from dataclasses import dataclass, field
 from datetime import datetime
 import pandas as pd
@@ -10,7 +10,7 @@ from models.create_location_models.model_location_pg import KeyLoc
 class RackConfig_New:
 	"""Cấu hình để generate rack locations"""
 	name_rack: Union[list]
-	from_bin: Union[int, list]
+	from_bin: Union[int, list] #int là số thứ tự cần tạo bin, list là list danh sách bin dùng cho tạo những vị trí có bin không liên tục
 	to_bin: int
 	level_config: Dict[str, int] # Mapping tầng -> level, VD: {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5}
 	rack_system_type: str
@@ -21,9 +21,11 @@ class RackConfig_New:
 	location_hight: str
 	name_warehouse: str
 	location_usage_type: Optional[Dict[str, int]] = field(default_factory=dict) #key vị trí change type, value là type
-	ft_prefix_chars: Optional[dict[str, str]] = field(default_factory=dict)
-	ft_prefix_at_level: Optional[dict[str, list]] = field(default_factory=dict)
-	list_bin_ho: Optional[List[int]] = field(default_factory=list)
+	ft_prefix_chars: Optional[dict[str, str]] = field(default_factory=dict) #Dict key là name_rak, value là prefix nam_rack
+	ft_prefix_at_level: Optional[dict[str, list]] = field(default_factory=dict) #Dict key là name_rack, value là list tầng cần thêm prefix_name_rack
+	even_odd_both_bin: Optional[Literal['even', 'odd', 'both']] = None
+	prefix_at_even_odd_bin: Optional[Literal['even', 'odd']] = None
+	list_bin_ho: Optional[List[int]] = field(default_factory=list)#List vị trí cần tạo bin HO
 	stack_limit: Optional[int] = 1
 	is_active: Optional[Dict[int, list]] = 1 #Truyền vào 1 dict. Key là vị trí, value là tầng cần block. Giá trị mặc định là 1 (active)
 	status_location: Optional[str] = "OK" #Dựa vào is_active để trả về status_location mong muốn
@@ -266,11 +268,54 @@ class LocationGenerator_New:
 			tránh báo lỗi.
 			Khai báo Union[str, list] cho name_rack, Union[int, list] cho from bin ở RackConfig
 			Còn lại đều như thiết kế ban đầu
+			Kiểu 3: Tạo location mới khi dùng hệ thống Prime. Location có tiền tố là "name_rack + T" (bin trong) để chuyển đổi rack đôi thành rack đơn lưu hàng lẻ, LRT
+			Dựa vào 2 thuộc tính mới thêm vào của class RackConfig_New để truyền thông tin
+			ft_prefix_chars = {'B08': 'BT8'},
+			ft_prefix_at_level = {'B08': ['C', 'D']},
+			ft_prefix_chars: Thông báo rack B08 có tiền tố BT8
+			ft_prefix_at_level = {'B08': ['C', 'D']}: Thông báo tiền tố này chỉ xuất hiện ở tần C, D
+			get_rack_usage_type: dựa vào ft_prefix_at_level có data không để chuyển rack_usage_type thành ST hay giữ nguyên DB
+			Kiểu 4: Tạo location hệ thống mới Prime. Một bên bin là bin lẻ, bên còn lại là bin chắn
+			Dựa vào thuộc tính mới thêm là: even_odd_both_bin = False mặc đinh là False
+			Nếu even_odd_both_bin = True thì chuyển đổi from_bin, to_bin thành 2 list_even và list_odd sau đó nối lại và tạo location như bình thường
+			Trường hợp from_bin là số chẵn thì sẽ trừ lùi 1 đơn vị để chuyển thành số lẻ.
+			Mặc định location đầu tiên luôn là location lẻ
 		"""
 		generated_racks = []
-		
+
+		#Chuyển đổi form_bin, to_bin để tạo location 1 bên chẵn, 1 bên lẻ
+		#Nếu from_bin được truyền vào 1 list thì trả về list truyền vào. Thường dùng tạo bin có số thứ tự không liền nhau
+		#Nếu even_odd_both_bin is None thì tạo location như bình thường, số thứ tự bin tứ bé đến lớn
+		#Nếu even_odd_both_bin == 'both' thì tạo bin lẻ trước, chắn sau
+		#Nếu even_odd_both_bin == 'even' thì tạo chỉ bin chẵn ngược lại even_odd_both_bin == 'odd' chỉ tạo bin lẻ
+		if isinstance(config_rack, RackConfig_New):
+			from_bin = config_rack.from_bin
+			to_bin = config_rack.to_bin
+			if isinstance(from_bin, int) and from_bin != 0 and from_bin % 2 == 0:
+				from_bin -= 1
+			elif isinstance(from_bin, int) and from_bin == 0:
+				from_bin = from_bin
+
+			if config_rack.even_odd_both_bin == 'both':
+				list_odd = list(range(from_bin, to_bin + 1, 2))
+				list_even = list(range(from_bin + 1, to_bin + 1, 2))
+				list_bin = list_odd + list_even
+			elif config_rack.even_odd_both_bin == 'even':
+				list_even = list(range(from_bin + 1, to_bin + 1, 2))
+				list_bin = list_even
+			elif config_rack.even_odd_both_bin == 'odd':
+				list_odd = list(range(from_bin, to_bin + 1, 2))
+				list_bin = list_odd
+			elif isinstance(from_bin, list):
+				list_bin = from_bin
+			else:
+				list_bin = list(range(config_rack.from_bin, config_rack.to_bin + 1))
+		#Xóa bin 67, 70 vì thực tế không có bin này
+		if to_bin == 71 and 70 in list_bin: list_bin.remove(70)
+		if to_bin == 67 and 67 in list_bin: list_bin.remove(67)
+		#Vòng lặp tạo location 
 		for namerack in config_rack.name_rack:
-			for rack_num in range(config_rack.from_bin, config_rack.to_bin + 1):
+			for rack_num in list_bin:
 				for str_level, num_level in config_rack.level_config.items():
 					#Xác định tầng location
 					level = self.get_str_level(str_level)
@@ -322,33 +367,48 @@ class LocationGenerator_New:
 					self.locations_new.append(location)
 					#Tạo tiếp location có tiền tố BT (bin trong) nếu ft_chars_at_level có data
 					if level in config_rack.ft_prefix_at_level.get(namerack, {}):
-						prefix_location = config_rack.ft_prefix_chars.get(namerack, f"UNKNOWN {namerack}")
-						ft_location_code = location_code.replace(namerack, prefix_location)
+						ft_location_code = None
+						#Tạo tất cả bin prefix
+						if config_rack.prefix_at_even_odd_bin is None:
+							prefix_location = config_rack.ft_prefix_chars.get(namerack, f"UNKNOWN {namerack}")
+							ft_location_code = location_code.replace(namerack, prefix_location)
+						#Chỉ tạo bin prefix có số thứ tự bin chẵn
+						elif config_rack.prefix_at_even_odd_bin == "even" and rack_num % 2 == 0:
+							prefix_location = config_rack.ft_prefix_chars.get(namerack, f"UNKNOWN {namerack}")
+							ft_location_code = location_code.replace(namerack, prefix_location)
+						#Chỉ tạo bin prefix có số thứ tự bin lẻ
+						elif config_rack.prefix_at_even_odd_bin == "odd" and rack_num % 2 != 0:
+							prefix_location = config_rack.ft_prefix_chars.get(namerack, f"UNKNOWN {namerack}")
+							ft_location_code = location_code.replace(namerack, prefix_location)
 						# Tạo location object
-						location = Location(
-							location = ft_location_code,
-							location_system_type = location_system_type,
-							location_usage_type = location_usage_type,
-							rack_system_type = config_rack.rack_system_type,
-							rack_usage_type = rack_usage_type,
-							location_storage_type = config_rack.location_storage_type,
-							zone = config_rack.zone,
-							location_category = config_rack.location_category,
-							location_product_category = config_rack.location_product_category,
-							name_rack = namerack,
-							bayslot = bayslot,
-							level = level,
-							location_hight = config_rack.location_hight,
-							name_warehouse = config_rack.name_warehouse,
-							pallet_capacity = pallet_capacity,
-							stack_limit = config_rack.stack_limit,
-							foot_print = foot_print,
-							is_active = is_active,
-							status_location = status_location,
-							note = config_rack.note
-							)
-						generated_racks.append(location)
-						self.locations_new.append(location)
+						# Phải check ft_location_code != None vì trong trường hợp chỉ gán prefix bên bin lẻ khi chạy đến rack_num chẵn
+						#thì ft_location_code sẽ không được lọt vào điều kiện nào trong 3 điều kiện trên, nghĩa là không cần gán prefix bin chẵn
+						#ft_location_code lúc đó vẫn là None sẽ không vào trong if để tạo location.
+						if ft_location_code:
+							location = Location(
+								location = ft_location_code,
+								location_system_type = location_system_type,
+								location_usage_type = location_usage_type,
+								rack_system_type = config_rack.rack_system_type,
+								rack_usage_type = rack_usage_type,
+								location_storage_type = config_rack.location_storage_type,
+								zone = config_rack.zone,
+								location_category = config_rack.location_category,
+								location_product_category = config_rack.location_product_category,
+								name_rack = namerack,
+								bayslot = bayslot,
+								level = level,
+								location_hight = config_rack.location_hight,
+								name_warehouse = config_rack.name_warehouse,
+								pallet_capacity = pallet_capacity,
+								stack_limit = config_rack.stack_limit,
+								foot_print = foot_print,
+								is_active = is_active,
+								status_location = status_location,
+								note = config_rack.note
+								)
+							generated_racks.append(location)
+							self.locations_new.append(location)
 
 		return generated_racks
 
