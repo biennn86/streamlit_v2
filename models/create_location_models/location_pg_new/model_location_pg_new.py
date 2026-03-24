@@ -310,9 +310,9 @@ class LocationGenerator_New:
 				list_bin = from_bin
 			else:
 				list_bin = list(range(config_rack.from_bin, config_rack.to_bin + 1))
-		#Xóa bin 67, 70 vì thực tế không có bin này
-		if to_bin == 71 and 70 in list_bin: list_bin.remove(70)
-		if to_bin == 67 and 67 in list_bin: list_bin.remove(67)
+		#Xóa bin 67 của F02, 70 của F03, F04, F05, F06 vì thực tế không có bin này
+		if to_bin == 71 and config_rack.name_warehouse == 'WH2' and 70 in list_bin: list_bin.remove(70)
+		if to_bin == 68 and config_rack.name_warehouse == 'WH2' and 67 in list_bin: list_bin.remove(67)
 		#Vòng lặp tạo location 
 		for namerack in config_rack.name_rack:
 			for rack_num in list_bin:

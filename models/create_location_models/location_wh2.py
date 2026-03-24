@@ -278,7 +278,7 @@ def list_config_wh2() -> list:
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH2,
 			stack_limit = 1,
-			is_active = 1,
+			is_active = 0,
 			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
