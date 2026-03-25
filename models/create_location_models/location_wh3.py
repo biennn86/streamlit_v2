@@ -551,7 +551,7 @@ def list_config_wh3() -> list:
 		#ST ĐƯỜNG LUỒNG KHO 3
 		FloorConfig(
 			location_name = ['WH3G1', 'WH3G3', 'WH3G5', 'WH3G9', 'WH3G7', 'WH3G1G2', 'WH3G3G4', 'WH3G5G6', 'WH3G7G8', 'WH3ST15',
-               'HOG2G3', 'HOG4G5', 'HOG8G9', 'HOG6G7', 'RJG10F'],
+               'HOG2G3', 'HOG4G5', 'HOG8G9', 'HOG6G7', 'RJG10F', 'RJG06FL'],
 			location_system_type = KeyLoc.LocSystemType.WW,
 			rack_system_type = KeyLoc.RackSystemType.FL,
 			location_storage_type = KeyLoc.LocStorageType.FLOOR,
