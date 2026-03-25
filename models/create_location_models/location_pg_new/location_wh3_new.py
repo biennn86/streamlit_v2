@@ -174,7 +174,7 @@ def list_config_wh3_new() -> list:
 			name_rack = ['G03'],
 			from_bin = 55,
 			to_bin = 72,
-			level_config = {i:ord(i)-64 for i in ['A', 'C', 'D', 'E']},
+			level_config = {i:ord(i)-64 for i in ['A', 'B', 'C', 'D', 'E']},
 			ft_prefix_chars = {},
 			ft_prefix_at_level = {},
 			prefix_at_even_odd_bin = None,
