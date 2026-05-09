@@ -1,5 +1,5 @@
 from models.create_location_models.model_location_pg import KeyLoc
-from models.create_location_models.location_pg_new.model_location_pg_new import RackConfig_New
+from models.create_location_models.location_pg_new.model_location_pg_new import RackConfig_New, FloorConfig_New
 
 def list_config_wh3_new() -> list:
 	'''	Location hệ thống mới chỉ thay đổi location rack
@@ -467,6 +467,23 @@ def list_config_wh3_new() -> list:
 			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
 			location_hight = KeyLoc.LocHight.LOW,
 			name_warehouse = KeyLoc.NameWarehouse.WH3,
+			stack_limit = 1,
+			is_active = 1,
+			status_location = KeyLoc.Status_Location.OK,
+			note = None
+			),
+		#ST ĐƯỜNG LUỒNG KHO 3
+		FloorConfig_New(
+			location_name = ['HOG1RTN', 'HOG01IN', 'HOG02IN', 'HOG03IN', 'HOG04IN', 'HOG05IN', 'HOG06IN',
+					'HOG01OUT', 'HOG02OUT', 'HOG03OUT', 'HOG04OUT', 'HOG05OUT', 'HOG06OUT'],
+			location_system_type = KeyLoc.LocSystemType.WW,
+			rack_system_type = KeyLoc.RackSystemType.FL,
+			location_storage_type = KeyLoc.LocStorageType.FLOOR,
+			zone = KeyLoc.Zone.WH3_WW,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			name_warehouse = KeyLoc.NameWarehouse.WH3,
+			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = 1,
 			status_location = KeyLoc.Status_Location.OK,

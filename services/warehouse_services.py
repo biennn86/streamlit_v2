@@ -12,6 +12,8 @@ from services.variable_db_container import VariableContainer
 from services.mixup_services import FindMixup
 from services.emptyloc_services import EmptyLocation
 from services.combinebin_services import CombineBin
+#---------------
+from services.vardataclass import *
 
 
 logging.basicConfig(level=logging.INFO)
@@ -600,6 +602,14 @@ class WarehouseAnalyzer(DataProcessor):
 		"""
 		#Get Dict sau khi tổng hợp từ config warehouse
 		dict_namewh_typerack_catinv: Dict[str, float] = self.get_comprehensive_analysis()
+		# print(f"method: 'get_chart_for_dashboard' của class 'WarehouseAnalyzer' trong file 'warehouse_services'")
+		# for key, value in dict_namewh_typerack_catinv.items():
+		# 	print(f"{key}: {value}")
+		container = VarContainerDrivative(**dict_namewh_typerack_catinv)
+		for field in fields(container):
+			field_name = field.name
+			field_value = getattr(container, field_name)
+			print(f"Key {field_name}. Value: {field_value}")
 		#Set đối tượng cho từng items của dict. Key làm tên biến, value làm value của biến
 		dict_data_draw_chart = VariableContainer(dict_namewh_typerack_catinv).get_comprehensive_data_chart()
 

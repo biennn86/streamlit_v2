@@ -10,7 +10,7 @@
 # sys.path.append(parent_dir)
 
 from models.create_location_models.model_location_pg import KeyLoc
-from models.create_location_models.location_pg_new.model_location_pg_new import RackConfig_New
+from models.create_location_models.location_pg_new.model_location_pg_new import RackConfig_New, FloorConfig_New
 
 #python -m models.create_location_models.location_pg_new.location_wh1_new
 def list_config_wh1_new() -> list:
@@ -1034,6 +1034,22 @@ def list_config_wh1_new() -> list:
 			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
 			location_hight = KeyLoc.LocHight.HIGHT,
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
+			stack_limit = 1,
+			is_active = 1,
+			status_location = KeyLoc.Status_Location.OK,
+			note = None
+			),
+		#ST ĐƯỜNG LUỒNG KHO 1
+		FloorConfig_New(
+			location_name = ['HOB01', 'HOB02', 'HOB03', 'HOB04', 'HOB05', 'HOB06', 'HOB07', 'HOB08', 'RJG06FL'],
+			location_system_type = KeyLoc.LocSystemType.WW,
+			rack_system_type = KeyLoc.RackSystemType.FL,
+			location_storage_type = KeyLoc.LocStorageType.FLOOR,
+			zone = KeyLoc.Zone.WH1_WW,
+			location_category = KeyLoc.LocCategory.STORARE,
+			location_product_category = KeyLoc.LocProducCategory.FG_RPM,
+			name_warehouse = KeyLoc.NameWarehouse.WH1,
+			pallet_capacity = 1,
 			stack_limit = 1,
 			is_active = 1,
 			status_location = KeyLoc.Status_Location.OK,

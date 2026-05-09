@@ -37,6 +37,26 @@ class RackConfig_New:
 				raise ValueError(f"from_bin '{self.from_bin}' lớn hơn to_bin '{self.to_bin}'")
 
 @dataclass
+class FloorConfig_New:
+	"""Cấu hình để generate floor locations"""
+	location_name: list
+	location_system_type: str
+	rack_system_type: str
+	location_storage_type: str
+	zone: str
+	location_category: str
+	location_product_category: str
+	name_warehouse: str
+	pallet_capacity: int
+	stack_limit: Optional[int] = 1
+	is_active: Optional[list] = 1 #Truyền vào list vị trí cần block
+	status_location: Optional[str] = "OK" # Dựa vào is_active để trả về status_location mong muốn
+	note: Optional[str] = None
+	
+	def __post_init__(self):
+		pass
+
+@dataclass
 class Location:
 	"""Đại diện cho một location trong kho"""
 	location: str
@@ -417,6 +437,135 @@ class LocationGenerator_New:
 		all_locations = []
 		for config in configs_rack:
 			locations = self.generate_from_rack_config(config)
+			all_locations.extend(locations)
+		return all_locations
+
+	#===================================Method Floor======================================
+	@staticmethod
+	def get_bayslot_floor() -> int:
+		"""Xác định bayslot location floor"""
+		return 99
+
+	@staticmethod
+	def get_level_floor(location_code: str, location_storage_type: str) -> any:
+		"""
+		Xác định level của location 
+		- Mặc định vị trí floor có level=0
+		- Trong các kho cooling3, pf5 có rack. Nên nếu storage_type là rack* thì
+		cắt phải 2 ký tự, nếu trong 2 ký tự đó có số thì lấy phần chữ, nếu không thì lấy số sau cùng
+		vì rack trong 2 kho này chưa có A1, B1, A2, B2 
+		"""
+		if location_storage_type.startswith("RACK"):
+			scrap_level = location_code[-2:]
+			if re.match(r'[0-9]', scrap_level):
+				return re.search(r'[a-zA-Z]', scrap_level).group()
+			else:
+				return scrap_level[-1:]
+		else:
+			return 0
+
+	@staticmethod
+	def get_location_hight_floor(location_storage_type: str) -> str:
+		"""
+		Nếu storage_type là rack thì trả về medium
+		Ngược lại trả về other 
+		Vì rack trong 2 kho cooling3, pf5 chưa có rack cao 
+		"""
+		if location_storage_type.startswith("RACK"):
+			return KeyLoc.LocHight.MEDIUM
+		else:
+			return KeyLoc.LocHight.OTHER
+				
+	@staticmethod
+	def get_footprint_floor(pallet_capacity: int, stack_limit: int) -> int:
+		"""Xác định foot_print"""
+		if (pallet_capacity is not None) and (stack_limit is not None):
+			return pallet_capacity * stack_limit
+		else:
+			raise ValueError(f"Lỗi khi tính foot_print floor")
+
+	@staticmethod
+	def get_is_active_floor(config_is_active: list|int, location: str) -> int:
+		"""
+		agrs: Config_floor list locaton cần block
+		Nếu location có trong list config_is_active trả về 0 ngược lại trả về 1.
+		Nếu list config_is_active rỗng trả về 1
+		"""
+		if config_is_active == 1:
+			return 1
+		elif config_is_active == 0:
+			return 0
+		
+		if not config_is_active:
+			return 1
+
+		if location in config_is_active:
+			return 0
+
+	@staticmethod
+	def get_status_location_floor(is_active: int) -> str:
+		"""
+		Nếu is_active = 0 -> status_location block
+		Nếu is_active = 1 -> status_location ok
+		"""
+		if is_active == 1:
+			return KeyLoc.Status_Location.OK
+		elif is_active == 0:
+			return KeyLoc.Status_Location.LOCK
+		else:
+			raise ValueError(f"Lỗi khi xác định status_location floor. Is_Active {is_active}")
+
+	def generate_from_floor_config(self, config_floor: FloorConfig_New) -> List[Location]:
+		"""Generate locations từ một config_floor"""
+		generated_floor = []
+
+		for location_code in config_floor.location_name:
+			#Lấy Bayslot floor
+			bayslot = self.get_bayslot_floor()
+			#Get level floor
+			level = self.get_level_floor(location_code, config_floor.location_storage_type)
+			#Get location_hight floor
+			location_hight = self.get_location_hight_floor(config_floor.location_storage_type)
+			#Get foot_print
+			foot_print = self.get_footprint_floor(config_floor.pallet_capacity, config_floor.stack_limit)
+			#Get is_activate floor
+			is_active = self.get_is_active_floor(config_floor.is_active, location_code)
+			#Get status_location floor
+			status_location = self.get_status_location_floor(is_active)
+			# Tạo location object
+			location = Location(
+				location = location_code,
+				location_system_type = config_floor.location_system_type,
+				location_usage_type = config_floor.location_system_type,
+				rack_system_type = config_floor.rack_system_type,
+				rack_usage_type = config_floor.rack_system_type,
+				location_storage_type = config_floor.location_storage_type,
+				zone = config_floor.zone,
+				location_category = config_floor.location_category,
+				location_product_category = config_floor.location_product_category,
+				name_rack = location_code,
+				bayslot = bayslot,
+				level = level,
+				location_hight = location_hight,
+				name_warehouse = config_floor.name_warehouse,
+				pallet_capacity = config_floor.pallet_capacity,
+				stack_limit = config_floor.stack_limit,
+				foot_print = foot_print,
+				is_active = is_active,
+				status_location = status_location,
+				note = config_floor.note
+				)
+
+			generated_floor.append(location)
+			self.locations_new.append(location)
+
+		return generated_floor
+
+	def generate_from_floor_configs(self, configs_floor: List[FloorConfig_New]) -> List[Location]:
+		"""Generate locations từ nhiều configs"""
+		all_locations = []
+		for config in configs_floor:
+			locations = self.generate_from_floor_config(config)
 			all_locations.extend(locations)
 		return all_locations
 	

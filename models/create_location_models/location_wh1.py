@@ -913,8 +913,8 @@ def list_config_wh1() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.WH1,
 			pallet_capacity = 1,
 			stack_limit = 1,
-			is_active = 1,
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			)
 	]
