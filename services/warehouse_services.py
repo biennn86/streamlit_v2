@@ -1,5 +1,7 @@
 import logging
 import keyword
+import operator
+import re
 from typing import List, Tuple, Dict, Any, Optional
 from dataclasses import dataclass, field
 import pandas as pd
@@ -22,6 +24,11 @@ logger = logging.getLogger(__name__)
 class DataProcessor:
 	"""Lớp cơ sở để xử lý dữ liệu từ DataFrame
 	"""
+	_OPS_MAP = {
+	'>': operator.gt, '<': operator.lt,
+	'>=': operator.ge, '<=': operator.le,
+	'==': operator.eq, '!=': operator.ne
+	}
 	def __init__(self, df_merge: Optional[pd.DataFrame]=None):
 		self.df = df_merge
 
@@ -75,6 +82,104 @@ class DataProcessor:
 				#So sánh trực tiếp cho giá trị đơn
 				mask &= (filtered_df[column] == values)
 		return filtered_df[mask].reset_index(drop=True)
+	
+	def _parse_expression(self, col_series, expr):
+		'''
+			Hàm chức năng phục vụ cho phương thức: self.fillter_other()
+		'''
+		# 1. Xử lý lọc Null/NaN
+		if expr == 'is_null': return col_series.isna()
+		if expr == 'not_null': return col_series.notna()
+		
+		# 2. Xử lý hàm tùy biến (Lambda)
+		if callable(expr):
+			try:
+				return col_series.apply(expr)
+			except Exception as e:
+				logger.warning(f"Lỗi khi chạy hàm custom trên cột {col_series.name}: {e}")
+				return pd.Series([False] * len(col_series), index=col_series.index)
+		#Nếu truyền vào một số (int/float) hoặc giá trị logic (True/False), hàm sẽ so sánh bằng chính xác ngay lập tức
+		if not isinstance(expr, str):
+			return col_series == expr
+
+		# 3. Xử lý toán tử so sánh & Date/Numeric (Giữ nguyên logic cũ của bạn)
+		match = re.match(r'([><=!]=?)\s*(.*)', expr)
+		if match:
+			op_str, val_str = match.groups()
+			func = self._OPS_MAP.get(op_str)
+			if func:
+				try:
+					# Nếu là toán tử bằng hoặc khác (!=, ==) ứng với dữ liệu chuỗi (văn bản)
+					if op_str in ['!=', '=='] and not 'date' in str(col_series.name).lower() and not val_str.replace('.', '', 1).isdigit():
+					# Ép cả 2 về dạng chuỗi thô để so sánh chính xác, không phân biệt khoảng trắng thừa
+						col_clean = col_series.astype(str).str.strip().str.lower()
+						val_clean = val_str.strip().lower()
+						return func(col_clean, val_clean)
+					# Ép kiểu ngày tháng hoặc số
+					if 'date' in str(col_series.name).lower() or "-" in val_str:
+						col_eval = pd.to_datetime(col_series, errors='coerce')
+						val = pd.to_datetime(val_str)
+					else:
+						col_eval = pd.to_numeric(col_series, errors='coerce')
+						val = float(val_str)
+					return func(col_eval, val).fillna(False)
+				except: pass
+		# 4. Tìm kiếm chuỗi nâng cao bằng Regex (Không phân biệt hoa thường)
+		return col_series.astype(str).str.contains(expr, regex=True, case=False, na=False)
+
+	def fillter_data_other(self, config: Dict[str, Any], exclude: bool = False, logic='AND') -> pd.DataFrame:
+		"""
+			Args: Dict có key là tên cột, value là giá trị cần fillter
+			Result: Trả về DataFrame sau khi đã fillter
+			Note: Có thể fillter đa chức năng như cung lấp value là list thì dùng isin
+			cung cấp toán tử (><>=<=!=) sẽ tự động bóc tách toán tử và value để fillter
+			cung cấp chuỗi giá trị sẽ dùng contains
+			cung cấp tuple sẽ lấy giá trị từ khoảng đến khoảng...
+		"""
+		# Khởi tạo mask dựa trên logic AND (True) hoặc OR (False)
+		if logic.upper() == 'AND':
+			final_mask = pd.Series([True] * len(self.df), index=self.df.index)
+		else:
+			final_mask = pd.Series([False] * len(self.df), index=self.df.index)
+		
+		for col, criteria in config.items():
+			if col not in self.df.columns:
+				logger.warning(f"⚠️ Cột '{col}' không tồn tại!")
+				continue
+			
+			# XỬ LÝ TRƯỜNG HỢP: Điều kiện là một Danh sách (List)
+			if isinstance(criteria, list) and len(criteria) > 0:
+				# Kiểm tra phần tử đầu tiên xem có bắt đầu bằng toán tử so sánh (như !=, >, <) hay không
+				first_item = str(criteria[0]).strip()
+				has_operator = any(first_item.startswith(op) for op in self._OPS_MAP.keys())
+				
+				if has_operator:
+					# TRƯỜNG HỢP A: List chứa toán tử (Ví dụ: ['!= rej', '!= lsl']) -> Kết hợp bằng toán tử AND (&)
+					mask = pd.Series([True] * len(self.df), index=self.df.index)
+					for single_expr in criteria:
+						mask = mask & self._parse_expression(self.df[col], single_expr)
+				else:
+					# TRƯỜNG HỢP B: List thuần túy (Ví dụ: ['rej', 'lsl']) -> Dùng .isin() tìm chính xác
+					# Làm sạch dữ liệu để tránh lỗi lệch chữ hoa/thường hoặc khoảng trắng thừa
+					col_clean = self.df[col].astype(str).str.strip().str.lower()
+					list_clean = [str(x).strip().lower() for x in criteria]
+					mask = col_clean.isin(list_clean)
+			# XỬ LÝ TRƯỜNG HỢP: Điều kiện là một Danh sách (Tuple). Tìm kiếm trong một khoảng
+			elif isinstance(criteria, tuple):
+				mask = self.df[col].between(*criteria)
+			else:
+				mask = self._parse_expression(self.df[col], criteria)
+			
+			# Kết hợp mask theo logic mong muốn
+			if logic.upper() == 'AND':
+				final_mask &= mask
+			else:
+				final_mask |= mask
+
+		actual_mask = ~final_mask if exclude else final_mask
+		self.dropped_data = self.df[~actual_mask].copy()
+
+		return self.df[actual_mask]
 
 @dataclass
 class WarehouseFilter:
@@ -102,6 +207,7 @@ class WarehouseAnalyzer(DataProcessor):
 		self.analytics_model = analytics_model
 		
 		self._setup_warehouse_filters()
+		self._setup_other_location_fillter()
 		
 		#Khởi tạo các biến cần phải check để chạy lấy df, từ đó lấy được số pallet để đưa lên dashboard
 		#Mục đích để chạy hàm tổng hợp 1 lần tránh phải chạy 2 lần khi chương trình được chạy
@@ -212,6 +318,150 @@ class WarehouseAnalyzer(DataProcessor):
 		
 		return final_results
 	
+	def _setup_other_location_fillter(self) ->None:
+		'''
+			Thiết lập bộ lọc cho các vị trí đặc biệt, không theo quy luật
+			
+		'''
+		self.other_location_fillters = {
+			'block': {
+				'status': ['hd'],
+				'name_warehouse': ['!=steam', '!=lsl'],
+			},
+			'special': {
+				'location': ['fgls', 'fgdm', 'matdm', 'lost']
+			},
+			'fg_other': {
+				'cat_inv': ['fg'],
+				'name_warehouse': ['!=steam', '!=lsl'],
+				'cat': ['dwn', 'febz', 'hdl']
+			},
+			'jit': {
+				'cat_inv': ['rpm'],
+				'name_warehouse': ['!=steam', '!=lsl'],
+				'jit': ['jit']
+			},
+			'pm_other': {
+				'cat_inv': ['rpm'],
+				'name_warehouse': ['!=steam', '!=lsl'],
+				'type2': ['shipper', 'pouch', 'bottle']
+			},
+			'da': {
+				'rack_usage_type': ['ob'],
+			},
+			'sv': {
+				'rack_usage_type': ['sv'],
+				'name_warehouse': ['wh3']
+			},
+			'ho': {
+				'rack_usage_type': ['ho'],
+			},
+			'fg': {
+				'cat_inv': ['fg'],
+				'name_warehouse': ['wh1', 'wh2', 'wh3', 'nan', '']
+			},
+			'pm': {
+				'cat_inv': ['rpm'],
+				'type1': ['!=raw_mat'],
+				'name_warehouse': ['wh1', 'wh2', 'wh3', 'nan', '']
+			},
+			'rm': {
+				'cat_inv': ['rpm'],
+				'type1': ['raw_mat'],
+				'name_warehouse': ['wh1', 'wh2', 'wh3', 'nan', '']
+			},
+			'eo': {
+				'cat_inv': ['eo'],
+				'name_warehouse': ['wh1', 'wh2', 'wh3', 'lsl', 'nan', '']
+			}
+		}
+		#========================================================================
+		self.other_location_fillters_layer_2 = {
+			'block': {
+				'cat_inv': ['fg', 'rpm', 'eo'],
+				'name_warehouse': ['lb'],
+				'type1': ['raw_mat']
+			},
+			'special': {
+				'location': ['fgls', 'fgdm', 'matdm', 'lost']
+				},
+			'fg_other': {
+				'cat': ['dwn', 'febz', 'hdl']
+			},
+			'jit': {
+				'jit': ['jit'],
+			},
+			'pm_other': {
+				'type2': ['shipper', 'pouch', 'bottle']
+			},
+			'da': {
+				'location_usage_type': ['pf', 'hr'],
+				'cat_inv': ['fg', 'rpm', 'eo']
+			},
+			'sv': {
+				'location_usage_type': ['pf', 'hr'],
+				'cat_inv': ['fg', 'rpm', 'eo']
+			},
+			'ho': {
+				'location_usage_type': ['pf', 'hr'],
+				'cat_inv': ['fg', 'rpm', 'eo']
+			},
+			'fg': {
+				'cat_inv': ['fg']
+			},
+			'pm': {
+				'cat_inv': ['rpm']
+			},
+			'rm': {
+				'cat_inv': ['rpm']
+			},
+			'eo': {
+				'cat_inv': ['eo']
+			}
+		}
+
+	def analyze_all_other_location(self) -> Dict[str, Any]:
+		'''
+			No comment
+		'''
+		other_all_results: Dict[str, float] = {}
+		for key, config in self.other_location_fillters.items():
+			result = self.fillter_data_other(config)
+			dict_fillter_layer_2 = self.other_location_fillters_layer_2.get(key, {})
+			special_keys = {'location_usage_type', 'cat_inv'}
+			if special_keys.issubset(dict_fillter_layer_2.keys()):
+				# TỐI ƯU: Chuẩn hóa 2 cột này trước 1 lần duy nhất ngoài vòng lặp
+				res_loc_clean = result['location_usage_type'].str.strip().str.lower()
+				res_cat_clean = result['cat_inv'].str.strip().str.lower()
+				
+				type_values = dict_fillter_layer_2['location_usage_type']
+				cat_values = dict_fillter_layer_2['cat_inv']
+				for type_loc in type_values:
+					loc_lower = type_loc.lower()
+					# Lọc theo location_usage_type
+					df_type = result[res_loc_clean == loc_lower]
+					
+					# Cắt bớt phần series đã lọc tương ứng để dùng cho vòng lặp trong
+					res_cat_sub = res_cat_clean[res_loc_clean == loc_lower]
+					for cat in cat_values:
+						cat_lower = cat.lower()
+						df_type_cat = df_type[res_cat_sub == cat_lower]
+						
+						key_count = f"{key}_{type_loc}_{cat}"
+						other_all_results[key_count] = df_type_cat['pallet'].sum().item() if not df_type_cat.empty else 0
+			else:
+				for col, values in dict_fillter_layer_2.items():
+					# TỐI ƯU: Chuẩn hóa cột hiện tại 1 lần trước khi lặp qua danh sách `values`
+					res_col_clean = result[col].str.strip().str.lower()
+					for k in values:
+						df_result_layer_2 = result[res_col_clean == k.lower()]
+						key_count = f"{key}_{k}"
+						other_all_results[key_count] = df_result_layer_2['pallet'].sum().item() if not df_result_layer_2.empty else 0
+				
+			# print(f"Số dòng tìm kiếm được {key}: {len(result)}. Tổng số pallet: {result['pallet'].sum()}")
+			# print(result[['gcas', 'batch', 'status', 'qty', 'pallet', 'location', 'cat_inv']])
+		return other_all_results
+
 	def get_mixup(self) -> pd.DataFrame:
 		"""Lấy bin mixup 
 		"""
@@ -265,10 +515,10 @@ class WarehouseAnalyzer(DataProcessor):
 			Mục đích giải phóng bin có tồn 1 pallet và tối ưu bin double để full 2 pallet.
 		"""
 		if self.df_combinebin.empty:
-			df_combinebin = CombineBin(self.df).get_combinebin()
-			return df_combinebin
+			self.df_combinebin = CombineBin(self.df).get_combinebin()
+			return self.df_combinebin
 		else:
-			return df_combinebin
+			return self.df_combinebin
 	
 	def count_bin_combine(self) -> int:
 		"""Get pallet cần combine bin
@@ -280,235 +530,6 @@ class WarehouseAnalyzer(DataProcessor):
 
 		return results
 	
-	
-	def count_block_pallet(self) -> Dict[str, float]:
-		"""
-			Tính tổng pallet có status HD và trừ vị trí stream có name_warehouse là STEAM và EOL có name_warehouse LSL
-			Tính riêng pallet block của fg, rpm, lable và rm
-			Trong pallet block_rpm vẫn có block_rm. Block_rm tính riêng ra đề trừ đi số pallet NORM. RM
-			Tổng pallet Block sẽ được tính trong VariableContainer
-		"""
-		if "status" not in self.df.columns:
-			logger.warning(f"Cột 'status' không tồn tại. Không thể tính pallet bị block.")
-			return {}
-		#Tạo bộ lọc
-		filtered_df = self.df[self.df['status'] == "hd"].copy()
-		mask = pd.Series(True, filtered_df.index)
-		mask = (filtered_df['name_warehouse'] != 'steam')&(filtered_df['name_warehouse'] != 'lsl')
-		filtered_df = filtered_df[mask]
-
-		results = {}
-
-		#Tính pallet fg, eo block
-		for cat_inv in ['fg', 'eo', 'rpm']:
-			sub_df = filtered_df[filtered_df['cat_inv'] == cat_inv]
-			result_key = f"block_pl{cat_inv}"
-			results[result_key] = sub_df['pallet'].sum() if not sub_df.empty else 0
-
-		#Tính pallet block raw_mat và label
-		block_rm_df = filtered_df[filtered_df['type1'] == 'raw_mat']
-		block_lb_df = filtered_df[filtered_df['name_warehouse'] == 'lb']
-		results['block_plrm'] = block_rm_df['pallet'].sum() if not block_rm_df.empty else 0
-		results['block_pllb'] = block_lb_df['pallet'].sum() if not block_lb_df.empty else 0
-
-		#Tính lại pallet block_rpm. Lấy block_rpm - block_lb
-		results['block_plpm'] = results['block_plrpm'] - results['block_pllb'] - results['block_plrm']
-		
-		return results
-	
-	def count_pallet_fgls_fgdm_matdm_lost(self) -> Dict[str, float]:
-		"""Tính tổng pallet có trong 4 vị trí trên
-		"""
-		if "location" not in self.df.columns:
-			logger.warning(f"Cột 'location' không tồn tại. Không thể tính pallet các vị trí FGLS, FGDM, MATDM, LOST.")
-			return {}
-		
-		filtered_df = self.df[self.df['location'].isin(['fgls', 'fgdm', 'matdm', 'lost'])].copy()
-
-		results = {}
-
-		for loc in ['fgls', 'fgdm', 'matdm', 'lost']:
-			sub_df = filtered_df[filtered_df['location'] == loc]
-			key_result = f"pallet_{loc}"
-			results[key_result] = sub_df['pallet'].sum() if not sub_df.empty else 0
-		
-		return results
-	
-	def count_pallet_fg_with_cat(self) -> Dict[str, float]:
-		"""	Count Pallet theo Cat dwn, febz, hdl dựa vào cat_inv là FG và cột cat (masterdata)
-			Không lấy pallet ở steam và lsl có name_warehouse lần lượt là rej, lsl
-			Pallet FG_Other sẽ được tính trong VariableContainer. Lấy tổng FG trừ 3 cái còn lại
-		"""
-		if "cat" not in self.df.columns:
-			logger.warning(f"Cột 'cat' không tồn tại. Không thể tính pallet theo CAT.")
-			return {}
-		
-		mask = pd.Series(True, self.df.index)
-		mask &= (self.df['name_warehouse'] != 'rej')&(self.df['name_warehouse'] != 'lsl')
-		mask &= self.df['cat_inv'] == 'fg'
-		mask &= self.df['cat'].isin(['dwn', 'febz', 'hdl'])
-
-		filtered_df = self.df[mask].copy()
-
-		results = {}
-
-		for cat in ['dwn', 'febz', 'hdl']:
-			sub_df = filtered_df[filtered_df['cat'] == cat]
-			key_result = f"fg_{cat}"
-			results[key_result] = sub_df['pallet'].sum() if not sub_df.empty else 0
-
-		return results
-	
-	def count_pallet_jit(self) -> Dict[str, float]:
-		"""	Không lấy pallet ở steam và lsl có name_warehouse lần lượt là rej, lsl
-			Lấy tổng pallet ở cột jit có nội dung là jit và cat_inv là rpm
-		"""
-		if "jit" not in self.df.columns:
-			logger.warning(f"Cột 'jit' không tồn tại. Không thể tính pallet JIT.")
-			return {}
-		
-		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
-		mask = pd.Series(True, filtered_df.index)
-		mask = (filtered_df['name_warehouse'] != 'rej')&(filtered_df['name_warehouse'] != 'lsl')
-		mask &= filtered_df['jit'] == 'jit'
-		filtered_df = filtered_df[mask]
-
-		results = {}
-
-		pallet_jit = filtered_df['pallet'].sum() if not filtered_df.empty else 0
-
-		results['pallet_jit'] = pallet_jit
-
-		return results
-	
-	def count_pallet_rpm_with_type2(self) -> Dict[str, float]:
-		"""	Không lấy pallet ở steam và lsl có name_warehouse lần lượt là rej, lsl
-			Cout pallet theo cat_inv và type2 shipper, pouch, bottle.
-			Muốn tính được other phải lấy tổng trừ đi 3 cái còn lại
-		"""
-		if "type2" not in self.df.columns:
-			logger.warning(f"Cột 'type2' không tồn tại. Không thể tính pallet shipper, pouch, bottle.")
-			return {}
-		
-		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
-		mask = pd.Series(True, filtered_df.index)
-		mask &= (filtered_df['name_warehouse'] != 'rej')&(filtered_df['name_warehouse'] != 'lsl')
-		mask &= filtered_df['type2'].isin(['shipper', 'pouch', 'bottle'])
-
-		filtered_df = filtered_df[mask]
-
-		results = {}
-
-		for type2 in ['shipper', 'pouch', 'bottle']:
-			sub_df = filtered_df[filtered_df['type2'] == type2]
-			key_result = f"pm_{type2}"
-			results[key_result] = sub_df['pallet'].sum() if not sub_df.empty else 0
-
-		return results
-	
-	def count_pallet_rack_da(self) -> Dict[str, float]:
-		"""	Count pallet có cột rack_usage_type là ob
-		"""
-		filtered_df = self.df[self.df['rack_usage_type'] == 'ob'].copy()
-
-		results = {}
-
-		for location_usage_type in ['pf', 'hr']:
-			df_location_usage_type = filtered_df[filtered_df['location_usage_type'] == location_usage_type]
-			for cat_inv in ['fg', 'rpm', 'eo']:
-				df_cat_inv = df_location_usage_type[df_location_usage_type['cat_inv'] == cat_inv]
-				key_result = f"da_{location_usage_type}_{cat_inv}"
-				results[key_result] = df_cat_inv['pallet'].sum() if not df_cat_inv.empty else 0
-
-		return results
-	
-	def count_pallet_rack_ho(self) -> Dict[str, float]:
-		"""	Cout pallet có cột rack_usage_type là ho
-		"""
-		filtered_df = self.df[self.df['rack_usage_type'] == 'ho'].copy()
-
-		results = {}
-
-		for location_usage_type in ['pf']:
-			df_location_usage_type = filtered_df[filtered_df['location_usage_type'] == location_usage_type]
-			for cat_inv in ['fg', 'rpm', 'eo']:
-				df_cat_inv = df_location_usage_type[df_location_usage_type['cat_inv'] == cat_inv]
-				key_result = f"ho_{location_usage_type}_{cat_inv}"
-				results[key_result] = df_cat_inv['pallet'].sum() if not df_cat_inv.empty else 0
-
-		return results
-	
-	def count_pallet_total_fg(self) -> Dict[str, float]:
-		"""	Count tất cả pallet có cat_inv là FG.
-			Tránh trường hợp count sót khi gcas chưa có trong masterdata
-			Chỉ count những vị trí có trong 'wh1', 'wh2', 'wh3'
-		"""
-
-		filtered_df = self.df[self.df['cat_inv'] == 'fg'].copy()
-		mask = pd.Series(True, filtered_df.index)
-		mask &= filtered_df['name_warehouse'].isin(['wh1', 'wh2', 'wh3', ''])
-		filtered_df = filtered_df[mask]
-
-		results = {}
-
-		key_result = f"pallet_totalfg"
-		results[key_result] = filtered_df['pallet'].sum() if not filtered_df.empty else 0
-
-		return results
-	
-	def count_pallet_total_pm(self) -> Dict[str, float]:
-		"""	Tính tổng cột pallet có cat_inv là rpm.
-			Không lấy pallet ở steam và lsl có name_warehouse lần lượt là rej, lsl, label.
-			Sở dĩ không lọc trong wh1,2,3 vì có trường hợp pm sẽ đem vào lưu cooling3, cooling1 trong những ngày kho đầy
-			Cột type1 khác raw_mat
-		"""
-
-		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
-		mask = pd.Series(True, filtered_df.index)
-		mask &= filtered_df['type1'] != 'raw_mat'
-		mask &= filtered_df['name_warehouse'].isin(['wh1', 'wh2', 'wh3', ''])
-		filtered_df = filtered_df[mask]
-
-		results = {}
-
-		key_result = f"pallet_totalpm"
-		results[key_result] = filtered_df['pallet'].sum() if not filtered_df.empty else 0
-
-		return results
-	
-	def count_pallet_total_rm(self) -> Dict[str, float]:
-		"""	Tính tổng cột pallet có cat_inv là rpm.
-			Chỉ lấy trong wh1,2,3 và những dòng trống vì location chưa update trong masterlocation
-			Sở dĩ không lấy như pm là loại những pallet ở steam, lsl, label vì hàng rm khi lưu vào các
-			kho đặc biệt như cool1,2,3 or pf1,2,3,4,5 đã được count riêng rồi.
-			Cột type1 bằng raw_mat
-		"""
-
-		filtered_df = self.df[self.df['cat_inv'] == 'rpm'].copy()
-		mask = pd.Series(True, filtered_df.index)
-		mask &= filtered_df['type1'] == 'raw_mat'
-		mask &= filtered_df['name_warehouse'].isin(['wh1', 'wh2', 'wh3', ''])
-		filtered_df = filtered_df[mask]
-
-		results = {}
-
-		key_result = f"pallet_totalrm"
-		results[key_result] = filtered_df['pallet'].sum() if not filtered_df.empty else 0
-
-		return results
-	
-	def count_pallet_eo(self) -> Dict[str, float]:
-		"""Tính tổng cột pallet có cat_inv là EO
-		"""
-		filtered_df = self.df[self.df['cat_inv'] == 'eo'].copy()
-
-		results = {}
-
-		key_result = f"pallet_totaleo"
-		results[key_result] = filtered_df['pallet'].sum() if not filtered_df.empty else 0
-
-		return results
-
 	def get_all_potential_wh_type_cat_keys(self) -> List[str]:
 		"""
 		Tạo ra danh sách TẤT CẢ các key wh_type_cat có thể có dựa trên cấu hình filter,
@@ -534,58 +555,12 @@ class WarehouseAnalyzer(DataProcessor):
 		#Phân tích từng nhóm kho
 		warehouse_results = self.analyze_all_warehouses()
 		results.update(warehouse_results)
-
-		# Count pallet block
-		block_pallet = self.count_block_pallet()
-		results.update(block_pallet)
-		
-		#Count pallet FGLS, FGDM, MATDM, LOST
-		pallet_fgls_fgdm_matdm_lost = self.count_pallet_fgls_fgdm_matdm_lost()
-		results.update(pallet_fgls_fgdm_matdm_lost)
-
-		#Count pallet FG with CAT
-		pallet_fg_with_cat = self.count_pallet_fg_with_cat()
-		results.update(pallet_fg_with_cat)
-
-		#Count pallet JIT
-		pallet_jit = self.count_pallet_jit()
-		results.update(pallet_jit)
-
-		# Count pallet type2 (shipper, pouch, bottle)
-		pallet_type2 = self.count_pallet_rpm_with_type2()
-		results.update(pallet_type2)
-
-		#Count pallet rack DA
-		pallet_rack_da = self.count_pallet_rack_da()
-		results.update(pallet_rack_da)
-
-		#Count pallet vị trí HO
-		pallet_location_ho = self.count_pallet_rack_ho()
-		results.update(pallet_location_ho)
-
-		#Count pallet total FG
-		pallet_total_fg = self.count_pallet_total_fg()
-		results.update(pallet_total_fg)
-
-		#Count pallet total pm
-		pallet_total_pm = self.count_pallet_total_pm()
-		results.update(pallet_total_pm)
-
-		#Count pallet total rm
-		pallet_total_rm = self.count_pallet_total_rm()
-		results.update(pallet_total_rm)
-
-		#Count pallet total eo
-		pallet_total_eo = self.count_pallet_eo()
-		results.update(pallet_total_eo)
-
+		#Phân tích các vị trí đặc biệt
+		other_location_result = self.analyze_all_other_location()
+		results.update(other_location_result)
 		#Count location mixup
 		location_mixup = self.count_location_mixup()
 		results.update(location_mixup)
-
-		# #Count pallet empty bin
-		# pallet_empty = self.count_pallet_bin_empty()
-		# # results.update(pallet_empty)
 
 		#Count bin cần combine
 		pallet_combinebin = self.count_bin_combine()
@@ -607,22 +582,6 @@ class WarehouseAnalyzer(DataProcessor):
 		chart_config = ChartConfig(container)
 		obj_all_chart = chart_config.render_chart()
 
-		#===================================================
-		#Set đối tượng cho từng items của dict. Key làm tên biến, value làm value của biến
-		# dict_data_draw_chart = VariableContainer(dict_namewh_typerack_catinv).get_comprehensive_data_chart()
-		# dict_all_chart: Dict[str, Any] = {}
-		# for name, pallet_type in dict_data_draw_chart.items():
-		# 	if pallet_type.type_chart == 1:
-		# 		fig = GaugeChart(pallet_type.title_chart, pallet_type.pallet, pallet_type.capa_chart, pallet_type.height_chart).create_fig()
-		# 		dict_all_chart[name] = fig
-		# 	elif  pallet_type.type_chart == 2:
-		# 		fig = Metric(pallet_type.title_chart, pallet_type.pallet).create_metric_card()
-		# 		dict_all_chart[name] = fig
-		# 	elif  pallet_type.type_chart == 3:
-		# 		dict_all_chart[name] = pallet_type.cu_chart
-				
-		# obj_all_chart = VariableChartContainer(dict_all_chart)
-		#=====================================================
 		return obj_all_chart
 
 		
@@ -651,3 +610,62 @@ class VariableChartContainer:
 
 	def to_dict(self):
 		return self.__dict__
+
+'''
+Block:
+Tính tổng pallet có status HD và trừ vị trí stream có name_warehouse là STEAM và EOL có name_warehouse LSL
+Tính riêng pallet block của fg, rpm, lable và rm
+Trong pallet block_rpm vẫn có block_rm. Block_rm tính riêng ra đề trừ đi số pallet NORM. RM
+Tổng pallet Block sẽ được tính trong VariableContainer
+FG_with_cat
+Count Pallet theo Cat dwn, febz, hdl dựa vào cat_inv là FG và cột cat (masterdata)
+Không lấy pallet ở steam và lsl có name_warehouse lần lượt là rej, lsl
+Pallet FG_Other sẽ được tính trong VariableContainer. Lấy tổng FG trừ 3 cái còn lại
+JIT
+Không lấy pallet ở steam và lsl có name_warehouse lần lượt là rej, lsl
+Lấy tổng pallet ở cột jit có nội dung là jit và cat_inv là rpm
+RPM_with_type2
+Không lấy pallet ở steam và lsl có name_warehouse lần lượt là rej, lsl
+Cout pallet theo cat_inv và type2 shipper, pouch, bottle.
+Muốn tính được other phải lấy tổng trừ đi 3 cái còn lại
+Rack DA
+Count pallet có cột rack_usage_type là ob
+Rack HO
+Cout pallet có cột rack_usage_type là ho
+Total_FG
+Count tất cả pallet có cat_inv là FG.
+Tránh trường hợp count sót khi gcas chưa có trong masterdata
+Chỉ count những vị trí có trong 'wh1', 'wh2', 'wh3'
+Total_PM
+Tính tổng cột pallet có cat_inv là rpm.
+Không lấy pallet ở steam và lsl có name_warehouse lần lượt là rej, lsl, label.
+Sở dĩ không lọc trong wh1,2,3 vì có trường hợp pm sẽ đem vào lưu cooling3, cooling1 trong những ngày kho đầy
+Cột type1 khác raw_mat
+Toal_RM
+Tính tổng cột pallet có cat_inv là rpm.
+Chỉ lấy trong wh1,2,3 và những dòng trống vì location chưa update trong masterlocation
+Sở dĩ không lấy như pm là loại những pallet ở steam, lsl, label vì hàng rm khi lưu vào các
+kho đặc biệt như cool1,2,3 or pf1,2,3,4,5 đã được count riêng rồi.
+Cột type1 bằng raw_mat
+Total_EO
+Tính tổng cột pallet có cat_inv là EO
+'''
+'''
+	cũ trước khi chuyển sang dataclass: def get_chart_for_dashboard(self):
+	#===================================================
+		#Set đối tượng cho từng items của dict. Key làm tên biến, value làm value của biến
+		# dict_data_draw_chart = VariableContainer(dict_namewh_typerack_catinv).get_comprehensive_data_chart()
+		# dict_all_chart: Dict[str, Any] = {}
+		# for name, pallet_type in dict_data_draw_chart.items():
+		# 	if pallet_type.type_chart == 1:
+		# 		fig = GaugeChart(pallet_type.title_chart, pallet_type.pallet, pallet_type.capa_chart, pallet_type.height_chart).create_fig()
+		# 		dict_all_chart[name] = fig
+		# 	elif  pallet_type.type_chart == 2:
+		# 		fig = Metric(pallet_type.title_chart, pallet_type.pallet).create_metric_card()
+		# 		dict_all_chart[name] = fig
+		# 	elif  pallet_type.type_chart == 3:
+		# 		dict_all_chart[name] = pallet_type.cu_chart
+				
+		# obj_all_chart = VariableChartContainer(dict_all_chart)
+	#=====================================================
+'''

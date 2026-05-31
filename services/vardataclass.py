@@ -142,26 +142,25 @@ class VarWarehoueTypeFormDict:
 	lb_hr_fg: int
 	lb_hr_eo: int
 	#Block
-	block_plfg: int
-	block_pleo: int
-	block_plrpm: int
-	block_plrm: int
-	block_pllb: int
-	block_plpm: int
+	block_fg: int
+	block_rpm: int
+	block_eo: int
+	block_lb: int
+	block_raw_mat: int
 	#FGLS, FGDM, MATDM, LOST
-	pallet_fgls: int
-	pallet_fgdm: int
-	pallet_matdm: int
-	pallet_lost: int
+	special_fgls: int
+	special_fgdm: int
+	special_matdm: int
+	special_lost: int
 	#DWN, FEBZ, HDL
-	fg_dwn: int
-	fg_febz: int
-	fg_hdl: int
+	fg_other_dwn: int
+	fg_other_febz: int
+	fg_other_hdl: int
 	#Shipper, pouch, bottle, jit
-	pallet_jit: int
-	pm_shipper: int
-	pm_pouch: int
-	pm_bottle: int
+	jit_jit: int
+	pm_other_shipper: int
+	pm_other_pouch: int
+	pm_other_bottle: int
 	#Rack DA
 	da_pf_fg: int
 	da_pf_rpm: int
@@ -169,22 +168,39 @@ class VarWarehoueTypeFormDict:
 	da_hr_fg: int
 	da_hr_rpm: int
 	da_hr_eo: int
+	#Location Shelving
+	sv_pf_fg: int
+	sv_pf_rpm: int
+	sv_pf_eo: int
+	sv_hr_fg: int
+	sv_hr_rpm: int
+	sv_hr_eo: int
 	#Location HO
 	ho_pf_fg: int
 	ho_pf_rpm: int
 	ho_pf_eo: int
+	ho_hr_fg: int
+	ho_hr_rpm: int
+	ho_hr_eo: int
 	#Total FG, PM, RM, EO
-	pallet_totalfg: int
-	pallet_totalpm: int
-	pallet_totalrm: int
-	pallet_totaleo: int
+	fg_fg: int
+	pm_rpm: int
+	rm_rpm: int
+	eo_eo: int
 	#Mixup, combine bin, empty bin
 	pallet_mixup: int
 	pallet_combinebin: int
 	pallet_emptybin: int
+	#ĐẶC BIỆT CỦA ĐẶC BIỆT. PALLET BLOCK_PM SẼ ĐƯỢC TÍNH KHI CLASS ĐƯỢC KHỞI TẠO XONG
+	block_pm: int = field(init=False)
+	def __post_init__(self):
+		self.block_pm = self.block_rpm - self.block_lb - self.block_raw_mat
 
 @dataclass
 class VarContainerDrivative(VarWarehoueTypeFormDict):
+	'''
+		Tạo các biến phái sinh từ các thuộc tính của VarWarehoueTypeFormDict được khởi tạo
+	'''
 	#WH1
 	wh1_floor: int = field(init=False, metadata={'chart_type': 'gauge', 'chart_title': None, 'chart_height': None})
 	wh1_pf: int = field(init=False, metadata={'chart_type': 'gauge', 'chart_title': None, 'chart_height': None})
@@ -260,6 +276,8 @@ class VarContainerDrivative(VarWarehoueTypeFormDict):
 	total_mixup: int = field(init=False, metadata={'chart_type': 'metric', 'chart_title': True, 'chart_height': None})
 
 	def __post_init__(self):
+		# BẮT BUỘC: Chạy __post_init__ của cha trước để tính xong `self.block_pm`
+		super().__post_init__()
 		self.pallet_wh1()
 		self.pallet_wh2()
 		self.pallet_wh3()
@@ -308,23 +326,23 @@ class VarContainerDrivative(VarWarehoueTypeFormDict):
 	def pallet_wh2(self):
 		"""
 		Kho 2 có những vị trí đặc biệt và cách tính toán khác với wh1, wh3
-        Điểm chung tính total pallet hightrack, level A và Floor
-        Điểm riêng:
-        - High Rack kho 2 cộng luôn tồn tầng A của rack DA (nói chung lấy cả rack DA)
+		Điểm chung tính total pallet hightrack, level A và Floor
+		Điểm riêng:
+		- High Rack kho 2 cộng luôn tồn tầng A của rack DA (nói chung lấy cả rack DA)
 		- Pickface của rack kho 2 trừ đi pf_da và trừ luôn HO
-        - Floor: lấy tồn pallet các vị trí in (nhập 2,3,4), pick (fill hàng), vị trí HO, các vị trí đường luồng wh2_
-        các vị trí STJP, FGDM, FGLS
-        Lưu ý: khi tính tồn kho hr, pf của wh2 đã có tồn kho của rack DA rồi. Nên chỉ cần lấy tồn pf_da trừ khỏi pf_wh2
-        và cộng ngược lại hr_wh để đảm bảo tồn rack DA được cộng hết cho hr_wh2
+		- Floor: lấy tồn pallet các vị trí in (nhập 2,3,4), pick (fill hàng), vị trí HO, các vị trí đường luồng wh2_
+		các vị trí STJP, FGDM, FGLS
+		Lưu ý: khi tính tồn kho hr, pf của wh2 đã có tồn kho của rack DA rồi. Nên chỉ cần lấy tồn pf_da trừ khỏi pf_wh2
+		và cộng ngược lại hr_wh để đảm bảo tồn rack DA được cộng hết cho hr_wh2
 		=====================================
-        Tính riêng tồn kho của rack DA và bin HO.
-        Tồn rack DA sẽ được cộng vào tầng cao của WH2
-        Tồn HO sẽ được cộng vào Floor của WH2
-    
-        typerack_da = ('hr', 'pf')
-        typeloc_da = ('ob',)
-        typerack_ho = ('pf',)
-        typeloc_ho = ('ho',)
+		Tính riêng tồn kho của rack DA và bin HO.
+		Tồn rack DA sẽ được cộng vào tầng cao của WH2
+		Tồn HO sẽ được cộng vào Floor của WH2
+	
+		typerack_da = ('hr', 'pf')
+		typeloc_da = ('ob',)
+		typerack_ho = ('pf',)
+		typeloc_ho = ('ho',)
 		"""
 		self.wh2_floor = self.wh2_in_fg + self.wh2_in_rpm + self.wh2_in_eo +\
 			  self.wh2_ww_rpm + self.wh2_ww_fg + self.wh2_ww_eo +\
@@ -344,8 +362,8 @@ class VarContainerDrivative(VarWarehoueTypeFormDict):
 		"""
 		self.wh3_floor = self.wh3_in_fg + self.wh3_in_rpm + self.wh3_in_eo +\
 			self.wh3_ww_fg + self.wh3_ww_rpm + self.wh3_ww_eo
-		self.wh3_pf = self.wh3_pf_rpm + self.wh3_pf_fg
-		self.wh3_hr = self.wh3_hr_fg + self.wh3_hr_rpm
+		self.wh3_pf = self.wh3_pf_rpm + self.wh3_pf_fg - (self.sv_pf_fg + self.sv_pf_rpm + self.sv_pf_eo)
+		self.wh3_hr = self.wh3_hr_fg + self.wh3_hr_rpm - (self.sv_hr_fg + self.sv_hr_rpm + self.sv_hr_eo)
 		self.wh3_total = (self.wh3_floor + self.wh3_pf + self.wh3_hr) - (self.wh3_in_eo + self.wh3_ww_eo)
 	
 	def pallet_cool(self):
@@ -376,27 +394,27 @@ class VarContainerDrivative(VarWarehoueTypeFormDict):
 			Không cần trừ pallet rm ở steam vì có lọc vào đâu :))
 			Trừ luôn pallet rpm trên scanout đem lên lưu cont
 		"""
-		self.total_rm = self.pallet_totalrm
+		self.total_rm = self.rm_rpm
 
 	def pallet_packmat(self):
 		"""Tổng pallet PM trong wh1, wh2, wh3
 		"""
-		self.total_pm = self.pallet_totalpm - self.wh2_scanout_rpm
+		self.total_pm = self.pm_rpm - self.wh2_scanout_rpm
 
 	def pallet_bd_packmat(self):
 		"""Pallet PMBD pm_total trừ đi block_pm
 		"""
-		self.total_bdpm = self.pallet_totalpm - self.wh2_scanout_rpm - self.block_plpm
+		self.total_bdpm = self.pm_rpm - self.wh2_scanout_rpm - self.block_pm
 	
 	def pallet_fg(self):
 		"""Tổng pallet FG trong wh1, wh2, wh3 trừ đi vị trí scanout
 		"""
-		self.total_fg = self.pallet_totalfg - self.wh2_scanout_fg
+		self.total_fg = self.fg_fg - self.wh2_scanout_fg
 	
 	def pallet_bd_fg(self):
 		"""Pallet FGBD fg_total trừ đi block_fg
 		"""
-		self.total_bdfg = self.pallet_totalfg - self.wh2_scanout_fg - self.block_plfg
+		self.total_bdfg = self.fg_fg - self.wh2_scanout_fg - self.block_fg
 
 	def pallet_total_bdwh(self):
 		"""Tổng của fg_total + pm_totam + rm_total
@@ -409,61 +427,61 @@ class VarContainerDrivative(VarWarehoueTypeFormDict):
 			self.lb_hr_rpm + self.lb_hr_fg + self.lb_hr_eo
 	
 	def pallet_eo(self):
-		self.eo_total = self.pallet_totaleo
+		self.eo_total = self.eo_eo
 	
 	def pallet_shipper(self):
-		self.total_shipper = self.pm_shipper
+		self.total_shipper = self.pm_other_shipper
 	
 	def pallet_bottle(self):
-		self.total_bottle = self.pm_bottle
+		self.total_bottle = self.pm_other_bottle
 
 	def pallet_pouch(self):
-		self.total_pouch = self.pm_pouch
+		self.total_pouch = self.pm_other_pouch
 
 	def pallet_pm_jit(self):
-		self.total_jit = self.pallet_jit
+		self.total_jit = self.jit_jit
 
 	def pallet_pm_other(self):
-		self.total_pm_other = self.pallet_totalpm - self.pm_shipper - self.pm_bottle - self.pm_pouch
+		self.total_pm_other = self.pm_rpm - self.pm_other_shipper - self.pm_other_bottle - self.pm_other_pouch
 	
 	def pallet_dwn(self):
-		self.total_dwn = self.fg_dwn
+		self.total_dwn = self.fg_other_dwn
 	
 	def pallet_febz(self):
-		self.total_febz = self.fg_febz
+		self.total_febz = self.fg_other_febz
 
 	def pallet_hdl(self):
-		self.total_hdl = self.fg_hdl
+		self.total_hdl = self.fg_other_hdl
 
 	def pallet_fg_other(self):
-		self.total_fg_other = self.pallet_totalfg - self.fg_dwn - self.fg_febz - self.fg_hdl
+		self.total_fg_other = self.fg_fg - self.fg_other_dwn - self.fg_other_febz - self.fg_other_hdl
 	
 	def pallet_block_fg(self):
-		self.total_block_fg = self.block_plfg
+		self.total_block_fg = self.block_fg
 	
 	def pallet_block_rpm(self):
-		self.total_block_rpm = self.block_plpm + self.block_plrm
+		self.total_block_rpm = self.block_rpm + self.block_raw_mat
 
 	def pallet_block_lb(self):
-		self.total_block_lb = self.block_pllb
+		self.total_block_lb = self.block_lb
 	
 	def pallet_total_block(self):
-		self.total_block = self.block_plfg + self.block_plpm + self.block_plrm + self.block_pllb
+		self.total_block = self.block_fg + self.block_pm + self.block_raw_mat + self.block_lb
 	
 	def pallet_scanout(self):
 		self.total_cont = self.wh2_scanout_fg + self.wh2_scanout_rpm + self.wh2_scanout_eo
 	
 	def pallet_fgls_count(self):
-		self.total_fgls = self.pallet_fgls
+		self.total_fgls = self.special_fgls
 
 	def pallet_fgdm_count(self):
-		self.total_fgdm = self.pallet_fgdm
+		self.total_fgdm = self.special_fgdm
 	
 	def pallet_matdm_count(self):
-		self.total_matdm = self.pallet_matdm
+		self.total_matdm = self.special_matdm
 
 	def pallet_lost_count(self):
-		self.total_lost = self.pallet_lost
+		self.total_lost = self.special_lost
 
 	def pallet_eol(self):
 		self.total_eol = self.lsl_in_rpm + self.lsl_in_fg + self.lsl_in_eo
