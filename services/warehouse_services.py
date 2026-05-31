@@ -8,7 +8,7 @@ import numpy as np
 from models.analytics_model import AnalyticsModel
 
 from services.chart_services import GaugeChart, Metric
-from services.variable_db_container import VariableContainer
+from services.variable_db_container_no_usage import VariableContainer
 from services.mixup_services import FindMixup
 from services.emptyloc_services import EmptyLocation
 from services.combinebin_services import CombineBin
@@ -157,6 +157,7 @@ class WarehouseAnalyzer(DataProcessor):
 			#Trả về dictionary rỗng thay vì raise lỗi để get_comprohensive_analysis không bị dừng
 			logger.warning(f"Cảnh báo: Không có cấu hình kho hàng: {warehouse_key}. Bỏ qua.")
 			return {}
+		#Lấy bộ lọc theo từng kho
 		wh_filter = self.warehouse_filters[warehouse_key]
 		filter_dict = wh_filter.get_filter_dict()
 
@@ -170,8 +171,8 @@ class WarehouseAnalyzer(DataProcessor):
 		# Duyệt qua các giá trị name_warehouse, location_usage_type, cat_inv CÓ TRONG group_filter_df
 		#để tránh tạo ra các key cho tổ hợp không tồn tại
 		actual_name_warehouses = group_filtered_df["name_warehouse"].unique()
-		actual_location_usage_types = group_filtered_df["location_usage_type"].unique()
-		actual_cat_invs = group_filtered_df["cat_inv"].unique()
+		# actual_location_usage_types = group_filtered_df["location_usage_type"].unique()
+		# actual_cat_invs = group_filtered_df["cat_inv"].unique()
 
 		for wh in wh_filter.name_warehouse:
 			if wh not in actual_name_warehouses: continue # Chỉ xử lý nếu kho này có trong dữ liệu đã lọc
@@ -282,7 +283,7 @@ class WarehouseAnalyzer(DataProcessor):
 	
 	def count_block_pallet(self) -> Dict[str, float]:
 		"""
-			Tính tổng pallet có status HD và trừ vị trí stream có name_warehouse là REJ và EOL có name_warehouse LSL
+			Tính tổng pallet có status HD và trừ vị trí stream có name_warehouse là STEAM và EOL có name_warehouse LSL
 			Tính riêng pallet block của fg, rpm, lable và rm
 			Trong pallet block_rpm vẫn có block_rm. Block_rm tính riêng ra đề trừ đi số pallet NORM. RM
 			Tổng pallet Block sẽ được tính trong VariableContainer
@@ -293,7 +294,7 @@ class WarehouseAnalyzer(DataProcessor):
 		#Tạo bộ lọc
 		filtered_df = self.df[self.df['status'] == "hd"].copy()
 		mask = pd.Series(True, filtered_df.index)
-		mask = (filtered_df['name_warehouse'] != 'rej')&(filtered_df['name_warehouse'] != 'lsl')
+		mask = (filtered_df['name_warehouse'] != 'steam')&(filtered_df['name_warehouse'] != 'lsl')
 		filtered_df = filtered_df[mask]
 
 		results = {}
@@ -602,31 +603,28 @@ class WarehouseAnalyzer(DataProcessor):
 		"""
 		#Get Dict sau khi tổng hợp từ config warehouse
 		dict_namewh_typerack_catinv: Dict[str, float] = self.get_comprehensive_analysis()
-		# print(f"method: 'get_chart_for_dashboard' của class 'WarehouseAnalyzer' trong file 'warehouse_services'")
-		# for key, value in dict_namewh_typerack_catinv.items():
-		# 	print(f"{key}: {value}")
 		container = VarContainerDrivative(**dict_namewh_typerack_catinv)
-		for field in fields(container):
-			field_name = field.name
-			field_value = getattr(container, field_name)
-			print(f"Key {field_name}. Value: {field_value}")
-		#Set đối tượng cho từng items của dict. Key làm tên biến, value làm value của biến
-		dict_data_draw_chart = VariableContainer(dict_namewh_typerack_catinv).get_comprehensive_data_chart()
+		chart_config = ChartConfig(container)
+		obj_all_chart = chart_config.render_chart()
 
-		dict_all_chart: Dict[str, Any] = {}
-		for name, pallet_type in dict_data_draw_chart.items():
-			if pallet_type.type_chart == 1:
-				fig = GaugeChart(pallet_type.title_chart, pallet_type.pallet, pallet_type.capa_chart, pallet_type.height_chart).create_fig()
-				dict_all_chart[name] = fig
-			elif  pallet_type.type_chart == 2:
-				fig = Metric(pallet_type.title_chart, pallet_type.pallet).create_metric_card()
-				dict_all_chart[name] = fig
-			elif  pallet_type.type_chart == 3:
-				dict_all_chart[name] = pallet_type.cu_chart
-		
-		obj_all_chart = VariableChartContainer(dict_all_chart)
-		return obj_all_chart
+		#===================================================
+		#Set đối tượng cho từng items của dict. Key làm tên biến, value làm value của biến
+		# dict_data_draw_chart = VariableContainer(dict_namewh_typerack_catinv).get_comprehensive_data_chart()
+		# dict_all_chart: Dict[str, Any] = {}
+		# for name, pallet_type in dict_data_draw_chart.items():
+		# 	if pallet_type.type_chart == 1:
+		# 		fig = GaugeChart(pallet_type.title_chart, pallet_type.pallet, pallet_type.capa_chart, pallet_type.height_chart).create_fig()
+		# 		dict_all_chart[name] = fig
+		# 	elif  pallet_type.type_chart == 2:
+		# 		fig = Metric(pallet_type.title_chart, pallet_type.pallet).create_metric_card()
+		# 		dict_all_chart[name] = fig
+		# 	elif  pallet_type.type_chart == 3:
+		# 		dict_all_chart[name] = pallet_type.cu_chart
 				
+		# obj_all_chart = VariableChartContainer(dict_all_chart)
+		#=====================================================
+		return obj_all_chart
+
 		
 class VariableChartContainer:
 	def __init__(self, variables_dict: Dict[str, Any]):

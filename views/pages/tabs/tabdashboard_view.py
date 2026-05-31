@@ -2,9 +2,10 @@ import streamlit as st
 from utils.constants import StatusBorder
 from views.style.style_css import load_custom_css
 from controllers.analytics_controller import AnalyticsController
+from services.vardataclass import DictChartTypeHint
 
 class TabDashboardView:
-    def __init__(self, data_chart, datetime_current):
+    def __init__(self, data_chart: DictChartTypeHint, datetime_current):
         self.data_chart = data_chart
         self.datetime_current = datetime_current
 
@@ -113,11 +114,11 @@ class TabDashboardView:
                     c1, c2 = st.columns([1, 1])
                     c3, c4 = st.columns([1, 1])
                     with c1:
-                        st.markdown(obj_chart.cool1_mk, unsafe_allow_html=True)
+                        st.markdown(obj_chart.cool1, unsafe_allow_html=True)
                     with c2:
-                        st.markdown(obj_chart.cool2_mk, unsafe_allow_html=True)
+                        st.markdown(obj_chart.cool2, unsafe_allow_html=True)
                     with c3:
-                        st.markdown(obj_chart.cool3_mk, unsafe_allow_html=True)
+                        st.markdown(obj_chart.cool3, unsafe_allow_html=True)
                     with c4:
                         st.markdown(obj_chart.cool_floor, unsafe_allow_html=True)
                 
@@ -136,15 +137,15 @@ class TabDashboardView:
                         p1, p2, p3 = st.columns([1, 1, 1])
                         p4, p5, p6 = st.columns([1, 1, 1])
                         with p1:
-                            p1.markdown(obj_chart.pf1_mk, unsafe_allow_html=True)
+                            p1.markdown(obj_chart.pf1, unsafe_allow_html=True)
                         with p2:
-                            p2.markdown(obj_chart.pf2_mk, unsafe_allow_html=True)
+                            p2.markdown(obj_chart.pf2, unsafe_allow_html=True)
                         with p3:
-                            p3.markdown(obj_chart.pf3_mk, unsafe_allow_html=True)
+                            p3.markdown(obj_chart.pf3, unsafe_allow_html=True)
                         with p4:
-                            p4.markdown(obj_chart.pf4_mk, unsafe_allow_html=True)
+                            p4.markdown(obj_chart.pf4, unsafe_allow_html=True)
                         with p5:
-                            p5.markdown(obj_chart.pf5_mk, unsafe_allow_html=True)
+                            p5.markdown(obj_chart.pf5, unsafe_allow_html=True)
                         with p6:
                             p6.markdown(obj_chart.pf_floor, unsafe_allow_html=True)
 
@@ -160,7 +161,7 @@ class TabDashboardView:
                 cont_label = cont_label_total.container(border=StatusBorder.BORDER.value)
                 with cont_label:
                     st.markdown('<div class="gauge-container" id="wh-lb">', unsafe_allow_html=True)
-                    st.plotly_chart(obj_chart.lb_total, use_container_width=True, key="wh_lb")
+                    st.plotly_chart(obj_chart.label_total, use_container_width=True, key="wh_lb")
                     st.markdown('</div>', unsafe_allow_html=True)
 
                  #==============EO===================
@@ -177,73 +178,73 @@ class TabDashboardView:
                 with st.container(border=StatusBorder.BORDER.value):
                     a1, a2, a3, a4, a5, a6, a7, a8, a9, a10 = st.columns([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
                     with a1:
-                        a1.markdown(obj_chart.pmbd_total, unsafe_allow_html=True)
+                        a1.markdown(obj_chart.total_bdpm, unsafe_allow_html=True)
                     with a2:
-                        a2.markdown(obj_chart.rm_total, unsafe_allow_html=True)
+                        a2.markdown(obj_chart.total_rm, unsafe_allow_html=True)
                     with a3:
-                        a3.markdown(obj_chart.pm_shipper, unsafe_allow_html=True)
+                        a3.markdown(obj_chart.total_shipper, unsafe_allow_html=True)
                     with a4:
-                        a4.markdown(obj_chart.pm_bottle, unsafe_allow_html=True)
+                        a4.markdown(obj_chart.total_bottle, unsafe_allow_html=True)
                     with a5:
-                        a5.markdown(obj_chart.pm_pouch, unsafe_allow_html=True)
+                        a5.markdown(obj_chart.total_pouch, unsafe_allow_html=True)
                     with a6:
-                        a6.markdown(obj_chart.pm_other, unsafe_allow_html=True)
+                        a6.markdown(obj_chart.total_pm_other, unsafe_allow_html=True)
                     with a7:
-                        a7.markdown(obj_chart.lsl_in, unsafe_allow_html=True)
+                        a7.markdown(obj_chart.total_eol, unsafe_allow_html=True)
                     with a8:
-                        a8.markdown(obj_chart.lsl_lslpm, unsafe_allow_html=True)
+                        a8.markdown(obj_chart.total_lsl_pm, unsafe_allow_html=True)
                     with a9:
-                        a9.markdown(obj_chart.lsl_lslrm, unsafe_allow_html=True)
+                        a9.markdown(obj_chart.total_lsl_rm, unsafe_allow_html=True)
                     with a10:
-                        a10.markdown(obj_chart.lsl_lrt, unsafe_allow_html=True)
+                        a10.markdown(obj_chart.total_lrt, unsafe_allow_html=True)
 
                 with st.container(border=StatusBorder.BORDER.value):
                     b1, b2, b3, b4, b5, b6, b7, b8, b9, b10 = st.columns([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
                     with b1:
-                        b1.markdown(obj_chart.fgbd_total, unsafe_allow_html=True)
+                        b1.markdown(obj_chart.total_bdfg, unsafe_allow_html=True)
                     with b2:
-                        b2.markdown(obj_chart.fg_dwn, unsafe_allow_html=True)
+                        b2.markdown(obj_chart.total_dwn, unsafe_allow_html=True)
                     with b3:
-                        b3.markdown(obj_chart.fg_febz, unsafe_allow_html=True)
+                        b3.markdown(obj_chart.total_febz, unsafe_allow_html=True)
                     with b4:
-                        b4.markdown(obj_chart.fg_hdl, unsafe_allow_html=True)
+                        b4.markdown(obj_chart.total_hdl, unsafe_allow_html=True)
                     with b5:
-                        b5.markdown(obj_chart.fg_other, unsafe_allow_html=True)
+                        b5.markdown(obj_chart.total_fg_other, unsafe_allow_html=True)
                     with b6:
-                        b6.markdown(obj_chart.pallet_scanout, unsafe_allow_html=True)
+                        b6.markdown(obj_chart.total_cont, unsafe_allow_html=True)
                     with b7:
-                        b7.markdown(obj_chart.pallet_fgls, unsafe_allow_html=True)
+                        b7.markdown(obj_chart.total_fgls, unsafe_allow_html=True)
                     with b8:
-                        b8.markdown(obj_chart.pallet_fgdm, unsafe_allow_html=True)
+                        b8.markdown(obj_chart.total_fgdm, unsafe_allow_html=True)
                     with b9:
-                        b9.markdown(obj_chart.pallet_matdm, unsafe_allow_html=True)
+                        b9.markdown(obj_chart.total_matdm, unsafe_allow_html=True)
                     with b10:
-                        b10.markdown(obj_chart.pallet_lost, unsafe_allow_html=True)
+                        b10.markdown(obj_chart.total_lost, unsafe_allow_html=True)
                     # with b11:
                     #     b11.markdown(obj_chart.pallet_steam, unsafe_allow_html=True)
 
                 with st.container(border=StatusBorder.BORDER.value):
                     c1, c2, c3, c4, c5, c6, c7, c8, c9, c10 = st.columns([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
                     with c1:
-                        c1.markdown(obj_chart.fg_total, unsafe_allow_html=True)
+                        c1.markdown(obj_chart.total_fg, unsafe_allow_html=True)
                     with c2:
-                        c2.markdown(obj_chart.pm_total, unsafe_allow_html=True)
+                        c2.markdown(obj_chart.total_pm, unsafe_allow_html=True)
                     with c3:
-                        c3.markdown(obj_chart.block_total, unsafe_allow_html=True)
+                        c3.markdown(obj_chart.total_block, unsafe_allow_html=True)
                     with c4:
-                        c4.markdown(obj_chart.block_fg, unsafe_allow_html=True)
+                        c4.markdown(obj_chart.total_block_fg, unsafe_allow_html=True)
                     with c5:
-                        c5.markdown(obj_chart.block_rpm, unsafe_allow_html=True)
+                        c5.markdown(obj_chart.total_block_rpm, unsafe_allow_html=True)
                     with c6:
-                        c6.markdown(obj_chart.block_lb, unsafe_allow_html=True)
+                        c6.markdown(obj_chart.total_block_lb, unsafe_allow_html=True)
                     with c7:
-                        c7.markdown(obj_chart.pallet_jit, unsafe_allow_html=True)
+                        c7.markdown(obj_chart.total_jit, unsafe_allow_html=True)
                     with c8:
-                        c8.markdown(obj_chart.pallet_emptybin, unsafe_allow_html=True)
+                        c8.markdown(obj_chart.total_emptybin, unsafe_allow_html=True)
                     with c9:
-                        c9.markdown(obj_chart.pallet_combinebin, unsafe_allow_html=True)
+                        c9.markdown(obj_chart.total_combinebin, unsafe_allow_html=True)
                     with c10:
-                        c10.markdown(obj_chart.pallet_mixup, unsafe_allow_html=True)
+                        c10.markdown(obj_chart.total_mixup, unsafe_allow_html=True)
         #Top section
         # st.markdown('</div>', unsafe_allow_html=True)
         #Mid section
