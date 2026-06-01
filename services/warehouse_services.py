@@ -249,7 +249,7 @@ class WarehouseAnalyzer(DataProcessor):
 				location_usage_type=["mk", "ww"]
 			),
 			 "steam": WarehouseFilter(
-				name_warehouse=["rej"], # Giả định 'rej' là tên kho cho loại 'steam'
+				name_warehouse=["steam"], # Giả định 'rej' là tên kho cho loại 'steam'
 				location_usage_type=["reject"]
 			)
 			# Có thể thêm các cấu hình kho khác tại đây

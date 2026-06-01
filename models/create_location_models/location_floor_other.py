@@ -62,8 +62,8 @@ def list_config_floor_other() -> list:
 			name_warehouse = KeyLoc.NameWarehouse.LSL,
 			pallet_capacity = 1,
 			stack_limit = 1,
-			is_active = [],
-			status_location = KeyLoc.Status_Location.OK,
+			is_active = 0,
+			status_location = KeyLoc.Status_Location.LOCK,
 			note = None
 			),
 		#LOCATION KHO SCHENKER

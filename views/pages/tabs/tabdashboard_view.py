@@ -245,6 +245,11 @@ class TabDashboardView:
                         c9.markdown(obj_chart.total_combinebin, unsafe_allow_html=True)
                     with c10:
                         c10.markdown(obj_chart.total_mixup, unsafe_allow_html=True)
+                with st.container(border=StatusBorder.BORDER.value):
+                    # d1, d2, d3, d4, d5, d6, d7, d8, d9, d10 = st.columns([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+                    d1 = st.columns([1])
+                    with d1[0]:
+                        d1[0].markdown(obj_chart.total_steam, unsafe_allow_html=True)
         #Top section
         # st.markdown('</div>', unsafe_allow_html=True)
         #Mid section

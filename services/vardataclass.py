@@ -56,9 +56,9 @@ class VarWarehoueTypeFormDict:
 	wh3_hr_fg: int
 	wh3_hr_eo: int
 	#REJECT
-	rej_reject_rpm: int
-	rej_reject_fg: int
-	rej_reject_eo: int
+	steam_reject_rpm: int
+	steam_reject_fg: int
+	steam_reject_eo: int
 	#Cooling 1
 	cool1_mk_eo: int
 	cool1_mk_fg: int
@@ -270,6 +270,7 @@ class VarContainerDrivative(VarWarehoueTypeFormDict):
 	total_lsl_pm: int = field(init=False, metadata={'chart_type': 'metric', 'chart_title': True, 'chart_height': None})
 	total_lsl_rm: int = field(init=False, metadata={'chart_type': 'metric', 'chart_title': True, 'chart_height': None})
 	total_lrt: int = field(init=False, metadata={'chart_type': 'metric', 'chart_title': True, 'chart_height': None})
+	total_steam: int = field(init=False, metadata={'chart_type': 'metric', 'chart_title': True, 'chart_height': None})
 
 	total_emptybin: int = field(init=False, metadata={'chart_type': 'metric', 'chart_title': True, 'chart_height': None})
 	total_combinebin: int = field(init=False, metadata={'chart_type': 'metric', 'chart_title': True, 'chart_height': None})
@@ -313,6 +314,7 @@ class VarContainerDrivative(VarWarehoueTypeFormDict):
 		self.palllet_lsl_pm()
 		self.pallet_lsl_rm()
 		self.pallet_lrt()
+		self.pallet_steam()
 		self.pallet_emptybin_count()
 		self.pallet_combinebin_count()
 		self.pallet_mixup_count()
@@ -495,6 +497,9 @@ class VarContainerDrivative(VarWarehoueTypeFormDict):
 	def pallet_lrt(self):
 		self.total_lrt = self.lsl_lrt_rpm + self.lsl_lrt_fg + self.lsl_lrt_eo
 	
+	def pallet_steam(self):
+		self.total_steam = self.steam_reject_fg + self.steam_reject_rpm + self.steam_reject_eo
+	
 	def pallet_emptybin_count(self):
 		self.total_emptybin = self.pallet_emptybin
 
@@ -574,6 +579,7 @@ class DictChartTypeHint:
 	total_lsl_pm: Any
 	total_lsl_rm: Any
 	total_lrt: Any
+	total_steam: Any
 	total_emptybin: Any
 	total_combinebin: Any
 	total_mixup: Any
@@ -618,7 +624,7 @@ class ChartConfig:
 	'total_shipper': 'SHIPPER',
 	'total_pm_other': 'OTHER',
 	'total_cont': 'CONT**',
-	'pallet_steam': 'STEAM 1,2',
+	'total_steam': 'STEAM 1,2',
 	'total_block_fg': 'FG',
 	'total_block_rpm': 'RPM',
 	'total_block_lb': 'LABEL',
