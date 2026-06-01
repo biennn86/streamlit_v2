@@ -358,12 +358,14 @@ class WarehouseAnalyzer(DataProcessor):
 			},
 			'fg': {
 				'cat_inv': ['fg'],
-				'name_warehouse': ['wh1', 'wh2', 'wh3', 'nan', '']
+				'name_warehouse': ['wh1', 'wh2', 'wh3', 'nan', ''],
+				'rack_usage_type': ['!=sv']
 			},
 			'pm': {
 				'cat_inv': ['rpm'],
 				'type1': ['!=raw_mat'],
-				'name_warehouse': ['wh1', 'wh2', 'wh3', 'nan', '']
+				'name_warehouse': ['wh1', 'wh2', 'wh3', 'nan', ''],
+				'rack_usage_type': ['!=sv']
 			},
 			'rm': {
 				'cat_inv': ['rpm'],

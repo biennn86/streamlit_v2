@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__) 
 
 @dataclass
-class VarWarehoueTypeFormDict:
+class VarWarehoueTypeFromDict:
 	#WH1
 	wh1_ww_rpm: int
 	wh1_ww_fg: int
@@ -217,7 +217,7 @@ class VarWarehoueTypeFormDict:
 		return cls(**filtered_data)
 
 @dataclass
-class VarContainerDrivative(VarWarehoueTypeFormDict):
+class VarContainerDrivative(VarWarehoueTypeFromDict):
 	'''
 		Tạo các biến phái sinh từ các thuộc tính của VarWarehoueTypeFormDict được khởi tạo
 	'''
