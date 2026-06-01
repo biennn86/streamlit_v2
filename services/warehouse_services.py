@@ -578,7 +578,7 @@ class WarehouseAnalyzer(DataProcessor):
 		"""
 		#Get Dict sau khi tổng hợp từ config warehouse
 		dict_namewh_typerack_catinv: Dict[str, float] = self.get_comprehensive_analysis()
-		container = VarContainerDrivative(**dict_namewh_typerack_catinv)
+		container = VarContainerDrivative.from_dict(dict_namewh_typerack_catinv)
 		chart_config = ChartConfig(container)
 		obj_all_chart = chart_config.render_chart()
 

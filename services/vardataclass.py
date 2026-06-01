@@ -1,6 +1,10 @@
+import logging
 from dataclasses import dataclass, field, fields
 from services.chart_services import GaugeChart, Metric
 from typing import List, Tuple, Dict, Any, Optional
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__) 
 
 @dataclass
 class VarWarehoueTypeFormDict:
@@ -195,6 +199,22 @@ class VarWarehoueTypeFormDict:
 	block_pm: int = field(init=False)
 	def __post_init__(self):
 		self.block_pm = self.block_rpm - self.block_lb - self.block_raw_mat
+	
+	@classmethod
+	def from_dict(cls, data: Dict[str, int]):
+		#1. Lay cac truong dang co trong class
+		valid_keys = {f.name for f in fields(cls)}
+		#2. Loai bo truong du cua data dict truyen ngoai vao
+		filtered_data = {key: val for key, val in data.items() if key in valid_keys}
+		#3. Tìm và in ra các trường thừa
+		extra_keys = set(data.keys()) - valid_keys
+		if extra_keys:
+			logger.warning(f"⚠️ Phát hiện trường thừa từ API: {extra_keys}")
+			extra_data = {k: data[k] for k in extra_keys}
+			logger.warning(f"⚠️ Dữ liệu thừa: {extra_data}")
+
+	   #4. Unpacking du lieu duoc lam sach vao class
+		return cls(**filtered_data)
 
 @dataclass
 class VarContainerDrivative(VarWarehoueTypeFormDict):
@@ -277,7 +297,7 @@ class VarContainerDrivative(VarWarehoueTypeFormDict):
 	total_mixup: int = field(init=False, metadata={'chart_type': 'metric', 'chart_title': True, 'chart_height': None})
 
 	def __post_init__(self):
-		# BẮT BUỘC: Chạy __post_init__ của cha trước để tính xong `self.block_pm`
+		# BẮT BUỘC: Chạy __post_init__ của class cha trước để tính xong `self.block_pm`
 		super().__post_init__()
 		self.pallet_wh1()
 		self.pallet_wh2()
