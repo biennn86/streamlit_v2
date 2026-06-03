@@ -482,13 +482,13 @@ class VarContainerDrivative(VarWarehoueTypeFromDict):
 		self.total_block_fg = self.block_fg
 	
 	def pallet_block_rpm(self):
-		self.total_block_rpm = self.block_rpm + self.block_raw_mat
+		self.total_block_rpm = self.block_rpm
 
 	def pallet_block_lb(self):
 		self.total_block_lb = self.block_lb
 	
 	def pallet_total_block(self):
-		self.total_block = self.block_fg + self.block_pm + self.block_raw_mat + self.block_lb
+		self.total_block = self.block_fg + self.block_rpm + self.block_lb #+ self.block_raw_mat
 	
 	def pallet_scanout(self):
 		self.total_cont = self.wh2_scanout_fg + self.wh2_scanout_rpm + self.wh2_scanout_eo
