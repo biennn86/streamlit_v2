@@ -167,6 +167,7 @@ class InventoryModel:
             if self.df_location.empty:
                 self.df_location = self.location.read_to_dataframe()
                 logger.info(f"Retrieved {len(self.df_location)} location records from database")
+                # self.df_location.to_excel("location_pg.xlsx", index=False)
                 return self.df_location
             else:
                 return self.df_location

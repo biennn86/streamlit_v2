@@ -886,7 +886,7 @@ def list_config_wh1() -> list:
 			),
 		#ST KHO B
 		FloorConfig(
-			location_name = ['ST17', 'ST18', 'ST19'],
+			location_name = ['ST17', 'ST18', 'ST19', 'N/A'],
 			location_system_type = KeyLoc.LocSystemType.IN,
 			rack_system_type = KeyLoc.RackSystemType.FL,
 			location_storage_type = KeyLoc.LocStorageType.FLOOR,
