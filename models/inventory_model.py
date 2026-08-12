@@ -1,4 +1,6 @@
 import datetime
+from pathlib import Path
+from charset_normalizer import from_path, from_bytes
 import streamlit as st
 import logging
 from typing import List, Tuple, Dict, Any, Optional
@@ -68,10 +70,56 @@ class InventoryModel:
             df_data_final['created_at'] = formatted_string
             df_data_final['user'] = user
             logger.info(f"Processed {len(df_data_final)} inventory records")
+            
             return df_data_final
         else:
             logger.error(f"Processed read inventory error")
             return None
+
+    def process_inventory_prime(self, uploaded_files: List) -> pd.DataFrame:
+        """
+            Đọc và chuyển concat 2 file tồn kho prime và tồn eo thành 1 dataframe duy nhất
+        """
+        # lst_duoi_file_import = [Path(file.name).suffix for file in uploaded_files]
+        list_df = []
+        for file in uploaded_files:
+            extension = Path(file.name).suffix[1:]
+            if extension in ["csv"]:
+                list_df.append(self._read_file_inv_prime(file))
+            elif extension in ValidateFile.LIST_DUOI_FILE_EO.value:
+                list_df.append(self._read_file_eo_prime(file))
+                #import description EO to masterdata in database
+                # self.import_masterdata_eo_to_masterdata_db(file)
+
+        if list_df is not None:
+            df_data_final = pd.concat(list_df, ignore_index=True)
+            #Chèn thêm cột datetime ở vị trí đầu tiên trong df
+            # df_data_final.insert(0, 'date', date_time)
+            # Lấy ngày giờ hiện tại
+            current_datetime = datetime.datetime.now()
+            # Định dạng đối tượng datetime thành chuỗi
+            formatted_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            df_data_final.insert(0, 'date', formatted_string)
+            #lấy user
+            state = get_state_everywhere()
+            user = state.get('username', None)
+            # Lấy ngày giờ hiện tại
+            current_datetime = datetime.datetime.now()
+            # Định dạng đối tượng datetime thành chuỗi
+            formatted_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+            df_data_final['created_at'] = formatted_string
+            df_data_final['user'] = user
+            logger.info(f"Processed {len(df_data_final)} inventory records")
+            #====================
+            #Lấy tạm df_data_final làm self.df_current để tính toán dashboard
+            #Chưa đưa data này vào database
+            #====================
+            self.df_current = df_data_final
+            return df_data_final
+        else:
+            logger.error(f"Processed read inventory error")
+            return None
+
         
     def save_inventory(self, uploaded_files: List) -> Tuple[bool, int, Optional[pd.DataFrame]]:
         """Lưu file inventory vào database
@@ -377,4 +425,81 @@ class InventoryModel:
         df_eo = df_eo.astype('string')
         return df_eo
     
- 
+    def _read_file_eo_prime(self, excel_eo) -> pd.DataFrame:
+            df_eo = pd.read_excel(excel_eo)
+            # df_eo = pd.read_excel(link_file)
+            columns_eo = Columns.COLUMNS_INV.value
+            df_eo = df_eo[Columns.COLUMNS_EO_NEED.value]
+            df_eo['Bin'] = df_eo['Bin'].apply(lambda x: re.sub(r'[ ]', '', x.upper()))
+            df_eo.insert(3, 'status', 'RL')
+            df_eo.insert(5, 'pallet', 1)
+            df_eo.insert(8, 'cat_inv', 'EO')
+            df_eo.columns = columns_eo
+            df_eo = df_eo.astype('string')
+            return df_eo
+
+    def _read_file_inv_prime(self, csv_file) -> pd.DataFrame:
+        '''
+            Đọc file tồn kho csv của Prime. Lấy những cột cần thiết
+            đưa về dataframe có các cột chuẩn như dataframe tồn kho RTCIS
+            để dùng chung các class, function đã được tạo để sử dụng cho dataframe RTCIS
+        '''
+        # Tự động nhận diện bảng mã của tệp
+        # 1. Đọc nội dung file dưới dạng chuỗi bytes trong bộ nhớ
+        file_bytes = csv_file.read()
+        # 2. Tự động dò tìm mã hóa từ chuỗi bytes này
+        results = from_bytes(file_bytes).best()
+        bng_ma = results.encoding
+        # 3. Đưa con trỏ file về vị trí ban đầu trước khi đọc bằng Pandas
+        csv_file.seek(0)
+
+        df = pd.read_csv(csv_file, encoding=bng_ma, sep=",", dtype={'lotnum': str, 'lodnum': str}) #sep=None, engine='python'
+        df.columns = [re.sub(r"[\s+.,]", "_", col.strip().lower()) for col in df.columns]
+        # Tự động đánh số các cột trùng tên (ví dụ: uom, uom.1)
+        cols = pd.Series(df.columns)
+        for dup in cols[cols.duplicated()].unique(): 
+            cols[cols == dup] = [f"{dup}_{i}" if i != 0 else dup for i in range(cols[cols == dup].shape[0])]
+        df.columns = cols
+        #Thêm cột class
+        df["cat_inv"] = np.where(
+            df["uom"] == "CS",
+            "FG",
+            "RPM"
+        )
+        #edit lại cột status
+        conditions = [
+            df['invsts'] == 'U',
+            df['invsts'] == 'Q',
+            df['invsts'] == 'B'
+        ]
+        choices = ['RL', 'QU', 'HD']
+        df['invsts'] = np.select(conditions, choices, default=df['invsts'])
+        #thêm cột pallet
+        # df['pallet'] = df.groupby('locatn')['locatn'].transform('count')
+        df['pallet'] = 1
+        #thêm số 0 vào trước cột lotnum cho đủ 10 ký tự
+        df['lotnum'] = df['lotnum'].str.zfill(10)
+        #cột vnl tạm thời chưa lpn
+        df["vnl"] = df["lodnum"]
+        #cột note_inv tạm thời để trống
+        df["note_inv"] = "NONE"
+        #Lộc cột cần lấy
+        df_inv_fillter = df[["prtnum", "lotnum", "vnl", "invsts",  "untqty", "pallet", "stoloc", "note_inv",  "cat_inv"]].copy()
+        #đổi tên cột sang cột inv rtcis
+        df_inv_fillter = df_inv_fillter.rename(columns=
+        {   
+            "prtnum": "gcas",
+            "lotnum": "batch",
+            "vln": "vnl",
+            "invsts": "status",
+            "stoloc": "location",
+            "untqty": "qty",
+            "lodnum": "note_inv",
+            "cat_inv": "cat_inv"
+        })
+        return df_inv_fillter
+        # # Chuyển cột về dạng chuỗi trước
+        # df['prtnum'] = df['prtnum'].astype(str)
+
+        # # Tự động thêm số 0 vào đầu cho đến khi chuỗi đủ 8 ký tự (ví dụ: '12345' -> '00012345')
+        # df['prtnum'] = df['prtnum'].str.zfill(8) 

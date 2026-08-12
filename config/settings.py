@@ -21,6 +21,9 @@ class AppConfig:
         USER_PROFILE = 'user_profile'
         DASHBOARD_DATA = 'dashboard_data'
         FILE_UPLOADER = 'file_uploader'
+        UPLOADER_ID = 'uploader_id'
+        CURRENT_FILES = 'current_files '
+        LAST_PROCESSED_FILES = 'last_processed_files'
 
     # Default values
     DEFAULT_STATE = {
@@ -35,7 +38,10 @@ class AppConfig:
         StateKeys.FILTERS: {},
         StateKeys.USER_PROFILE: {},
         StateKeys.DASHBOARD_DATA: {},
-        StateKeys.FILE_UPLOADER: False
+        StateKeys.FILE_UPLOADER: False,
+        StateKeys.UPLOADER_ID: 0,
+        StateKeys.CURRENT_FILES: [],
+        StateKeys.LAST_PROCESSED_FILES: []
     }
 
     # App settings

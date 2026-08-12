@@ -99,6 +99,7 @@ class DashboardView:
         status_file_uploader = self.dashboard_controller.state.get(AppConfig.StateKeys.FILE_UPLOADER, False)
         if all([files_inventory_import, status_file_uploader]):
             is_valid, meesage, df = self.dashboard_controller.inventory_controller.import_file(files_inventory_import)
+
             st.toast(meesage, icon="ℹ️")
 
             if not is_valid:

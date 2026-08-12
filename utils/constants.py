@@ -30,6 +30,7 @@ class StatusBorder(Enum):
 class ValidateFile(Enum):
     LIST_DUOI_FILE_IMPORT = ['xlsx', 'xlsm', 'xls', 'RPT', 'txt', 'TXT', None]
     LIST_DUOI_FILE_EO = ['xlsx', 'xlsm', 'xls']
+    LIST_DUOI_FILE_PRIME = ['.xlsx', '.xlsm', '.xls', '.csv']
     LIST_DUOI_FILE_TXT = ['RPT', 'txt', 'TXT', None]
     DECODE_FILE_TXT = "utf-8"
     CATEGORY_FG = ['F']
