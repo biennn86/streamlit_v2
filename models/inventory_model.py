@@ -454,6 +454,8 @@ class InventoryModel:
         csv_file.seek(0)
 
         df = pd.read_csv(csv_file, encoding=bng_ma, sep=",", dtype={'lotnum': str, 'lodnum': str}) #sep=None, engine='python'
+        #Loại bỏ những dòng trống hoàn toàn
+        df = df.dropna(how='all')
         df.columns = [re.sub(r"[\s+.,]", "_", col.strip().lower()) for col in df.columns]
         # Tự động đánh số các cột trùng tên (ví dụ: uom, uom.1)
         cols = pd.Series(df.columns)
@@ -497,6 +499,8 @@ class InventoryModel:
             "lodnum": "note_inv",
             "cat_inv": "cat_inv"
         })
+        # print(df_inv_fillter.index.is_unique)
+        # df_inv_fillter.to_csv("tonkholoi.csv", index=False)
         return df_inv_fillter
         # # Chuyển cột về dạng chuỗi trước
         # df['prtnum'] = df['prtnum'].astype(str)
