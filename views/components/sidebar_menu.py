@@ -21,7 +21,7 @@ def handle_new_import():
             # Cất file vào biến lưu trữ độc lập
             AppManager().state.set(AppConfig.StateKeys.CURRENT_FILES, new_files)
             # Tăng ID ngay tại đây để widget tự động đổi sang key mới ở dòng dưới
-            AppManager().state.set(AppConfig.StateKeys.UPLOADER_ID, AppManager().state.get(AppConfig.StateKeys.UPLOADER_ID) + 1)
+            AppManager().state.set(AppConfig.StateKeys.UPLOADER_ID, AppManager().state.get(AppConfig.StateKeys.UPLOADER_ID, 0) + 1)
     
 
 def sidebar_import_files_inventory():
