@@ -87,23 +87,7 @@ class InventoryModel:
             if extension in ["csv"]:
                 list_df.append(self._read_file_inv_prime(file))
                 #Lấy tên file để biết ngày giờ chạy tồn kho
-                #Lấy chuỗi ngày, giờ bằng regex từ chuỗi tên file
-                print(file.name)
-                pattern = r"(\d{8}).*(\d{2})"
-                match = re.search(pattern, file.name)
-                if match:
-                    date_str = match.group(1)
-                    hour_str = match.group(2)
-                    #Chuyển ngày sang định dạng chuẩn
-                    # Bước 1: Chuyển chuỗi thành đối tượng datetime
-                    date_obj = datetime.strptime(date_str, "%Y%m%d")
-                    # Bước 2: Định dạng lại thành chuỗi mong muốn
-                    date_result = date_obj.strftime("%d-%b-%Y")
-                    #Chuyển giờ sang định dạng chuẩn
-                    hour_result = f"{int(hour_str):02d}:00:00"
-                    datetime_string = f"{date_result} {hour_result}"
-                else:
-                    datetime_string = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                datetime_string = self.get_datetime_from_filename_inv_prime(file.name)
             elif extension in ValidateFile.LIST_DUOI_FILE_EO.value:
                 list_df.append(self._read_file_eo_prime(file))
                 #import description EO to masterdata in database
@@ -520,4 +504,24 @@ class InventoryModel:
         # df['prtnum'] = df['prtnum'].astype(str)
 
         # # Tự động thêm số 0 vào đầu cho đến khi chuỗi đủ 8 ký tự (ví dụ: '12345' -> '00012345')
-        # df['prtnum'] = df['prtnum'].str.zfill(8) 
+        # df['prtnum'] = df['prtnum'].str.zfill(8)
+    
+    def get_datetime_from_filename_inv_prime(self, file_name) -> str:
+        #Lấy tên file để biết ngày giờ chạy tồn kho
+        #Lấy chuỗi ngày, giờ bằng regex từ chuỗi tên file
+        pattern = r"(\d{8}).*(\d{2})"
+        match = re.search(pattern, file_name)
+        if match:
+            date_str = match.group(1)
+            hour_str = match.group(2)
+            #Chuyển ngày sang định dạng chuẩn
+            # Bước 1: Chuyển chuỗi thành đối tượng datetime
+            date_obj = datetime.strptime(date_str, "%Y%m%d")
+            # Bước 2: Định dạng lại thành chuỗi mong muốn
+            date_result = date_obj.strftime("%d-%b-%Y")
+            #Chuyển giờ sang định dạng chuẩn
+            hour_result = f"{int(hour_str):02d}:00:00"
+            datetime_string = f"{date_result} {hour_result}"
+        else:
+            datetime_string = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        return datetime_string
