@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from pathlib import Path
 from charset_normalizer import from_path, from_bytes
 import streamlit as st
@@ -86,6 +86,24 @@ class InventoryModel:
             extension = Path(file.name).suffix[1:]
             if extension in ["csv"]:
                 list_df.append(self._read_file_inv_prime(file))
+                #Lấy tên file để biết ngày giờ chạy tồn kho
+                #Lấy chuỗi ngày, giờ bằng regex từ chuỗi tên file
+                print(file.name)
+                pattern = r"(\d{8}).*(\d{2})"
+                match = re.search(pattern, file.name)
+                if match:
+                    date_str = match.group(1)
+                    hour_str = match.group(2)
+                    #Chuyển ngày sang định dạng chuẩn
+                    # Bước 1: Chuyển chuỗi thành đối tượng datetime
+                    date_obj = datetime.strptime(date_str, "%Y%m%d")
+                    # Bước 2: Định dạng lại thành chuỗi mong muốn
+                    date_result = date_obj.strftime("%d-%b-%Y")
+                    #Chuyển giờ sang định dạng chuẩn
+                    hour_result = f"{int(hour_str):02d}:00:00"
+                    datetime_string = f"{date_result} {hour_result}"
+                else:
+                    datetime_string = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             elif extension in ValidateFile.LIST_DUOI_FILE_EO.value:
                 list_df.append(self._read_file_eo_prime(file))
                 #import description EO to masterdata in database
@@ -95,16 +113,12 @@ class InventoryModel:
             df_data_final = pd.concat(list_df, ignore_index=True)
             #Chèn thêm cột datetime ở vị trí đầu tiên trong df
             # df_data_final.insert(0, 'date', date_time)
-            # Lấy ngày giờ hiện tại
-            current_datetime = datetime.datetime.now()
-            # Định dạng đối tượng datetime thành chuỗi
-            formatted_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-            df_data_final.insert(0, 'date', formatted_string)
+            df_data_final.insert(0, 'date', datetime_string)
             #lấy user
             state = get_state_everywhere()
             user = state.get('username', None)
             # Lấy ngày giờ hiện tại
-            current_datetime = datetime.datetime.now()
+            current_datetime = datetime.now()
             # Định dạng đối tượng datetime thành chuỗi
             formatted_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
             df_data_final['created_at'] = formatted_string
