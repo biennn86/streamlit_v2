@@ -1,9 +1,10 @@
 from datetime import datetime
 from pathlib import Path
 from charset_normalizer import from_path, from_bytes
+from streamlit.runtime.uploaded_file_manager import UploadedFile
 import streamlit as st
 import logging
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Dict, Any, Optional, Union
 import re 
 import pandas as pd
 import numpy as np
@@ -91,7 +92,7 @@ class InventoryModel:
             elif extension in ValidateFile.LIST_DUOI_FILE_EO.value:
                 list_df.append(self._read_file_eo_prime(file))
                 #import description EO to masterdata in database
-                # self.import_masterdata_eo_to_masterdata_db(file)
+                self.import_masterdata_eo_to_masterdata_db(file)
 
         if list_df is not None:
             df_data_final = pd.concat(list_df, ignore_index=True)
@@ -135,16 +136,24 @@ class InventoryModel:
             logger.error(f"Error saving inventory data: {e}")
             return False, 0, pd.DataFrame()
         
-    def import_masterdata_eo_to_masterdata_db(self, df_eo: pd.DataFrame) -> None:
+    def import_masterdata_eo_to_masterdata_db(self, df_eo: Union[pd.DataFrame, UploadedFile]) -> None:
         """ Thêm cột type1 là EO để phân biệt với masterdata RPM
             Thêm cột quy cách 'bd_plt_pat' là 9999 để lọc trùng data của sql được chạy chính xác
             Vì trong sql cột NULL với NULL trả về FALSE, nên khi insert vào sẽ bị trùng data
             Chi tiết đọc method insert_dataframe() để hiểu hơn.
+            Agrs:
+            Hàm nhận vào một pandas DataFrame hoặc một file Excel từ Streamlit file_uploader.
         """
         try:
             name_columns_masterdata = ['gcas', 'description', 'cat', 'type1', 'type2', 'vendor_name', 'source', 'jit', 'bd_plt_pat', 'history_storeLocation', 'latest_gr', 'created_at', 'user']
             df_masterdata_eo = pd.DataFrame(columns=name_columns_masterdata)
-            df_eo_import = df_eo.copy(deep=True)
+
+            # Nếu df_eo là file tải lên từ Streamlit, tiến hành đọc thành DataFrame
+            if isinstance(df_eo, UploadedFile):
+                df_eo_import = pd.read_excel(df_eo)
+            else:
+                df_eo_import = df_eo.copy(deep=True)
+
             df_eo_import.columns = [re.sub("[ -]", "_", string).lower().strip() for string in df_eo_import.columns]
 
             df_masterdata_eo['gcas'] = df_eo_import['gcas']
@@ -158,7 +167,7 @@ class InventoryModel:
             state = get_state_everywhere()
             user = state.get('username', None)
             # Lấy ngày giờ hiện tại
-            current_datetime = datetime.datetime.now()
+            current_datetime = datetime.now()
             # Định dạng đối tượng datetime thành chuỗi
             formatted_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
             df_masterdata_eo['created_at'] = formatted_string
