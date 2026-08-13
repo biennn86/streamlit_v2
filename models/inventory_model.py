@@ -460,7 +460,7 @@ class InventoryModel:
         # 3. Đưa con trỏ file về vị trí ban đầu trước khi đọc bằng Pandas
         csv_file.seek(0)
 
-        df = pd.read_csv(csv_file, encoding=bng_ma, sep=",", dtype={'lotnum': str, 'lodnum': str}) #sep=None, engine='python'
+        df = pd.read_csv(csv_file, encoding=bng_ma, sep=None, engine='python', dtype={'lotnum': str, 'lodnum': str}) #sep=None, engine='python'
         #Loại bỏ những dòng trống hoàn toàn
         df = df.dropna(how='all')
         df.columns = [re.sub(r"[\s+.,]", "_", col.strip().lower()) for col in df.columns]

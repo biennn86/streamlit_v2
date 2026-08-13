@@ -113,10 +113,21 @@ class TabDataViewer:
             st.divider()
 
 
-    def _edit_df_display(self, df):
+    def _edit_df_display(self, df: pd.DataFrame):
         df_dislay = df.copy()
-        df_dislay = df_dislay[['gcas', 'description', 'batch', 'location', 'status', 'qty', 'pallet', 'name_warehouse']]
-        df_dislay.columns = [re.sub(r'[ _-]', ' ', name).title().strip() for name in df_dislay.columns]
+        df_dislay = df_dislay[['gcas', 'description', 'location', 'batch', 'vnl', 'status', 'qty', 'pallet', 'name_warehouse']]
+        df_dislay = df_dislay.rename(columns={
+            "gcas": "Item",
+            "description": "Description",
+            "location": "Location",
+            "batch": "Batch",
+            "vnl": "LPN",
+            "status": "Status",
+            "qty": "Quantity",
+            "pallet": "Pallet",
+            "name_warehouse": "Name Warehouse"
+        })
+        # df_dislay.columns = [re.sub(r'[ _-]', ' ', name).title().strip() for name in df_dislay.columns]
         df_dislay = normalize_data_upper(df_dislay)
 
         return df_dislay
