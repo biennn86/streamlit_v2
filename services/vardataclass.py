@@ -195,6 +195,10 @@ class VarWarehoueTypeFromDict:
 	pallet_mixup: int
 	pallet_combinebin: int
 	pallet_emptybin: int
+	#Vị trí scanout của hệ thống prime
+	scanout_prime_rpm: int
+	scanout_prime_fg: int
+	scanout_prime_eo: int
 	#ĐẶC BIỆT CỦA ĐẶC BIỆT. PALLET BLOCK_PM SẼ ĐƯỢC TÍNH KHI CLASS ĐƯỢC KHỞI TẠO XONG
 	block_pm: int = field(init=False)
 	def __post_init__(self):
@@ -421,22 +425,22 @@ class VarContainerDrivative(VarWarehoueTypeFromDict):
 	def pallet_packmat(self):
 		"""Tổng pallet PM trong wh1, wh2, wh3
 		"""
-		self.total_pm = self.pm_rpm - self.wh2_scanout_rpm
+		self.total_pm = self.pm_rpm - self.wh2_scanout_rpm - self.scanout_prime_rpm
 
 	def pallet_bd_packmat(self):
 		"""Pallet PMBD pm_total trừ đi block_pm
 		"""
-		self.total_bdpm = self.pm_rpm - self.wh2_scanout_rpm - self.block_pm
+		self.total_bdpm = self.pm_rpm - self.wh2_scanout_rpm - self.scanout_prime_rpm - self.block_pm
 	
 	def pallet_fg(self):
 		"""Tổng pallet FG trong wh1, wh2, wh3 trừ đi vị trí scanout
 		"""
-		self.total_fg = self.fg_fg - self.wh2_scanout_fg
+		self.total_fg = self.fg_fg - self.wh2_scanout_fg - self.scanout_prime_fg
 	
 	def pallet_bd_fg(self):
 		"""Pallet FGBD fg_total trừ đi block_fg
 		"""
-		self.total_bdfg = self.fg_fg - self.wh2_scanout_fg - self.block_fg
+		self.total_bdfg = self.fg_fg - self.wh2_scanout_fg - self.scanout_prime_fg - self.block_fg
 
 	def pallet_total_bdwh(self):
 		"""Tổng của fg_total + pm_totam + rm_total
@@ -449,7 +453,7 @@ class VarContainerDrivative(VarWarehoueTypeFromDict):
 			self.lb_hr_rpm + self.lb_hr_fg + self.lb_hr_eo
 	
 	def pallet_eo(self):
-		self.eo_total = self.eo_eo
+		self.eo_total = self.eo_eo - self.wh2_scanout_eo - self.scanout_prime_eo
 	
 	def pallet_shipper(self):
 		self.total_shipper = self.pm_other_shipper
@@ -491,7 +495,8 @@ class VarContainerDrivative(VarWarehoueTypeFromDict):
 		self.total_block = self.block_fg + self.block_rpm + self.block_lb #+ self.block_raw_mat
 	
 	def pallet_scanout(self):
-		self.total_cont = self.wh2_scanout_fg + self.wh2_scanout_rpm + self.wh2_scanout_eo
+		self.total_cont = self.wh2_scanout_fg + self.wh2_scanout_rpm + self.wh2_scanout_eo +\
+			self.scanout_prime_eo + self.scanout_prime_fg + self.scanout_prime_rpm
 	
 	def pallet_fgls_count(self):
 		self.total_fgls = self.special_fgls

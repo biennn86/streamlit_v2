@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 import pandas as pd
 from typing import List, Tuple, Dict, Any, Optional
-from utils.constants import ValidateFile, Pattern, Columns, VNL_CAT
+from utils.constants import ValidateFile, Pattern, Columns, VNL_CAT, ImportFileStatus
 from models.inventory_model import InventoryModel
 
 logging.basicConfig(level=logging.INFO)
@@ -34,8 +34,9 @@ class InventoryController:
         """
         self.inventory_model = inventory_model
 
-    def _validate_file(self, uploaded_files: List) -> Tuple[bool, str]:
+    def _validate_extension_file(self, uploaded_files: List) -> Tuple[bool, str]:
         """Check đuôi file và số lượng file upload có hợp lệ không
+            Check file import là tồn kho RTCIS hay Prime
         Returns:
             Tuple[str, str]
         """
@@ -66,7 +67,7 @@ class InventoryController:
         else:
             return False, f"Unknown error import file"
     
-    def import_file(self, uploaded_files: List) -> Tuple[bool, str, pd.DataFrame]:
+    def import_file(self, uploaded_files: List) -> Tuple[bool, str]:
         """Import inventory data from an uploaded file.
         
         Args:
@@ -76,25 +77,31 @@ class InventoryController:
             Tuple containing:
                 - Success flag (boolean)
                 - Message (string)
+        gửi tạm, không có ý nghĩa trong chú thích: Incorrect file type. Please upload an EO file.
         """
-        #Check file upload
-        is_valid, message = self._validate_file(uploaded_files)
+        #Check file upload có đúng đuôi file và số lượng file không
+        is_valid, message = self._validate_extension_file(uploaded_files)
         if not is_valid:
-           return is_valid, f"{message}", None
+           return is_valid, f"{message}"
 
         if message == "rtcis":
             #gọi inventory_model để xử lý và import file vào database
             success, number_rows_insert, df = self.inventory_model.save_inventory(uploaded_files)
             if success:
                 if number_rows_insert == 0:
-                    return True, f"You have inserted duplicate data", df
+                    return True, f"You have inserted duplicate data"
                 else:
-                    return True,  f"Successfully imported {number_rows_insert:,} inventory records", df
+                    return True,  f"Successfully imported {number_rows_insert:,} inventory records"
             else:
-                return False, f"Failed to save inventory data to database", None
+                return False, f"Failed to save inventory data to database"
         elif message == "prime":
-            df = self.inventory_model.process_inventory_prime(uploaded_files)
-            return True,  f"Successfully imported inventory records", df
+            result = self.inventory_model.process_inventory_prime(uploaded_files)
+            if result.status == ImportFileStatus.SUCCESS:
+                return True,  f"Successfully imported {result.total_rows:,} inventory records"
+            elif result.status == ImportFileStatus.INVALID:
+                return False, result.error_message
+            elif result.status == ImportFileStatus.SYSTEM_ERROR:
+                return False, result.error_message
         
     def get_merge_data(self, date_time: Optional[List]=None) -> pd.DataFrame:
         """Lấy dataframe đã merge từ inventorymodel

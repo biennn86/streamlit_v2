@@ -53,6 +53,7 @@ class Pattern(Enum):
 class Columns(Enum):
     COLUMNS_FILE_EO = ['stt', 'barcode', 'lot#', 'po#', 'owner', 'gcas', 'description', 'supply_chain', 'type', 'status', 'created_by', 'created_date', 'wh_date', 'bin', 'assignment#', 'qty', 'remained_qty']
     COLUMNS_INV = ['gcas', 'batch', 'vnl', 'status', 'qty', 'pallet', 'location', 'note_inv', 'cat_inv']
+    COLUMNS_INV_PRIME = ['stoloc', 'prtnum', 'lngdsc', 'invsts', 'untqty', 'uom', 'lotnum', 'lodnum']
     COLUMNS_EO_NEED = ['GCAS', 'Lot#', 'Barcode', 'Qty', 'Bin', 'Type']
     COLUMNS_MASTERDATA_NEED = ['gcas','description', 'cat', 'type1', 'type2', 'source', 'jit']
     
@@ -94,6 +95,12 @@ CHART_CONFIG = {
     "default_width": 800,
     "color_scheme": ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]
 }
+
+class ImportFileStatus(Enum):
+    SUCCESS = "SUCCESS"
+    ERROR = "ERROR"       
+    INVALID = "INVALID_HEADERS"  
+    SYSTEM_ERROR = "SYSTEM_ERROR"
 
 # Status Codes
 class StatusCode(Enum):

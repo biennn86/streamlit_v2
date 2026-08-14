@@ -8,7 +8,7 @@ from typing import List, Tuple, Dict, Any, Optional, Union
 import re 
 import pandas as pd
 import numpy as np
-from utils.constants import ValidateFile, Pattern, Columns, VNL_CAT
+from utils.constants import ValidateFile, Pattern, Columns, VNL_CAT, ImportFileStatus
 from io import StringIO
 from models.table.tablename_database import *
 from utils.state_utils import get_state_everywhere
@@ -65,7 +65,7 @@ class InventoryModel:
             state = get_state_everywhere()
             user = state.get('username', None)
             # Lấy ngày giờ hiện tại
-            current_datetime = datetime.datetime.now()
+            current_datetime = datetime.now()
             # Định dạng đối tượng datetime thành chuỗi
             formatted_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
             df_data_final['created_at'] = formatted_string
@@ -83,18 +83,24 @@ class InventoryModel:
         """
         # lst_duoi_file_import = [Path(file.name).suffix for file in uploaded_files]
         list_df = []
-        for file in uploaded_files:
-            extension = Path(file.name).suffix[1:]
-            if extension in ["csv"]:
-                list_df.append(self._read_file_inv_prime(file))
-                #Lấy tên file để biết ngày giờ chạy tồn kho
-                datetime_string = self.get_datetime_from_filename_inv_prime(file.name)
-            elif extension in ValidateFile.LIST_DUOI_FILE_EO.value:
-                list_df.append(self._read_file_eo_prime(file))
-                #import description EO to masterdata in database
-                self.import_masterdata_eo_to_masterdata_db(file)
+        try:
+            for file in uploaded_files:
+                extension = Path(file.name).suffix[1:]
+                if extension in ["csv"]:
+                    df_single = self._read_file_inv_prime(file)
+                    #Lấy tên file để biết ngày giờ chạy tồn kho
+                    datetime_string = self.get_datetime_from_filename_inv_prime(file.name)
+                elif extension in ValidateFile.LIST_DUOI_FILE_EO.value:
+                    df_single = self._read_file_eo_prime(file)
+                    #import description EO to masterdata in database
+                    self.import_masterdata_eo_to_masterdata_db(file)
 
-        if list_df is not None:
+                list_df.append(df_single)
+
+            if not list_df:
+                logger.error(f"Processed read inventory error")
+                return ImportResult(status=ImportFileStatus.INVALID, error_message="Không có file nào được tải lên.")
+            
             df_data_final = pd.concat(list_df, ignore_index=True)
             #Chèn thêm cột datetime ở vị trí đầu tiên trong df
             # df_data_final.insert(0, 'date', date_time)
@@ -114,11 +120,26 @@ class InventoryModel:
             #Chưa đưa data này vào database
             #====================
             self.df_current = df_data_final
-            return df_data_final
-        else:
-            logger.error(f"Processed read inventory error")
-            return None
-
+            return ImportResult(
+                status=ImportFileStatus.SUCCESS,
+                total_rows=len(df_data_final)
+            )
+        
+        except ValueError as val_error:
+            # ĐÂY LÀ NƠI HỨNG LỖI INVALID FILE TẬP TRUNG
+            # Bất kỳ file nào trong vòng lặp bị lỗi cấu trúc cột, nó sẽ nhảy ngay lập tức vào đây
+            # Giúp ngắt toán tử concat phía dưới, không làm sập phần mềm.
+            return ImportResult(
+                status=ImportFileStatus.INVALID,
+                error_message=f"Xử lý thất bại! Lý do: {str(val_error)}"
+            )
+        except Exception as e:
+            # Hứng các lỗi hệ thống bất ngờ khác (mất kết nối, file hỏng nặng...)
+            return ImportResult(
+                status=ImportFileStatus.SYSTEM_ERROR,
+                error_message=f"Lỗi hệ thống chưa xác định: {str(e)}"
+            )
+        
         
     def save_inventory(self, uploaded_files: List) -> Tuple[bool, int, Optional[pd.DataFrame]]:
         """Lưu file inventory vào database
@@ -317,7 +338,7 @@ class InventoryModel:
         """
         regex_find_dot = re.compile(Pattern.DOT_PATTERN.value)
         regex_catfile = re.compile(Pattern.CATEGORY_FILE.value, re.MULTILINE)
-        columns_eo = Columns.COLUMNS_FILE_EO.value
+        columns_eo_default = Columns.COLUMNS_FILE_EO.value
         IS_FILE_EO = False; IS_FILE_FG = False; IS_FILE_RPM = False
         #1: Check nội dung bên trong của từng file
         for key, value in dict_data_rpmfgeo.items():
@@ -329,7 +350,7 @@ class InventoryModel:
                         df_eo_check_columns = value.copy()
                         df_eo_check_columns.columns = [re.sub("[ -]", "_", string).lower().strip() for string in df_eo_check_columns.columns]
                         columns_crr_file = df_eo_check_columns.columns.to_list()
-                        if columns_eo == columns_crr_file:
+                        if columns_eo_default == columns_crr_file:
                             IS_FILE_EO = True
                     except:
                         IS_FILE_EO = False
@@ -347,6 +368,24 @@ class InventoryModel:
                     IS_FILE_RPM = True
 
         if IS_FILE_EO and IS_FILE_FG and IS_FILE_RPM:
+            return True
+        else:
+            return False
+
+    def _validate_file_eo(self, df_eo_import: pd.DataFrame) -> bool:
+        columns_eo_default = Columns.COLUMNS_FILE_EO.value
+        df_eo_import.columns = [re.sub("[ -]", "_", string).lower().strip() for string in df_eo_import.columns]
+        columns_eo_import = df_eo_import.columns.to_list()
+        if columns_eo_default == columns_eo_import:
+            return True
+        else:
+            return False
+        
+    def _validate_file_inv_prime(self, df_inv_prime_import: pd.DataFrame) -> bool:
+        columns_inv_prime_default = Columns.COLUMNS_INV_PRIME.value
+        df_inv_prime_import.columns = [re.sub("[ -]", "_", string).lower().strip() for string in df_inv_prime_import.columns]
+        columns_inv_prime_import = df_inv_prime_import.columns.to_list()
+        if columns_inv_prime_default == columns_inv_prime_import:
             return True
         else:
             return False
@@ -435,15 +474,19 @@ class InventoryModel:
     def _read_file_eo_prime(self, excel_eo) -> pd.DataFrame:
             df_eo = pd.read_excel(excel_eo)
             # df_eo = pd.read_excel(link_file)
-            columns_eo = Columns.COLUMNS_INV.value
-            df_eo = df_eo[Columns.COLUMNS_EO_NEED.value]
-            df_eo['Bin'] = df_eo['Bin'].apply(lambda x: re.sub(r'[ ]', '', x.upper()))
-            df_eo.insert(3, 'status', 'RL')
-            df_eo.insert(5, 'pallet', 1)
-            df_eo.insert(8, 'cat_inv', 'EO')
-            df_eo.columns = columns_eo
-            df_eo = df_eo.astype('string')
-            return df_eo
+            is_invalid = self._validate_file_eo(df_eo.copy())
+            if not is_invalid:
+                raise ValueError(f"Incorrect file type. Please upload an EO file")
+            if is_invalid:
+                columns_eo = Columns.COLUMNS_INV.value
+                df_eo = df_eo[Columns.COLUMNS_EO_NEED.value]
+                df_eo['Bin'] = df_eo['Bin'].apply(lambda x: re.sub(r'[ ]', '', x.upper()))
+                df_eo.insert(3, 'status', 'RL')
+                df_eo.insert(5, 'pallet', 1)
+                df_eo.insert(8, 'cat_inv', 'EO')
+                df_eo.columns = columns_eo
+                df_eo = df_eo.astype('string')
+                return df_eo
 
     def _read_file_inv_prime(self, csv_file) -> pd.DataFrame:
         '''
@@ -461,60 +504,65 @@ class InventoryModel:
         csv_file.seek(0)
 
         df = pd.read_csv(csv_file, encoding=bng_ma, sep=None, engine='python', dtype={'lotnum': str, 'lodnum': str}) #sep=None, engine='python'
-        #Loại bỏ những dòng trống hoàn toàn
-        df = df.dropna(how='all')
-        df.columns = [re.sub(r"[\s+.,]", "_", col.strip().lower()) for col in df.columns]
-        # Tự động đánh số các cột trùng tên (ví dụ: uom, uom.1)
-        cols = pd.Series(df.columns)
-        for dup in cols[cols.duplicated()].unique(): 
-            cols[cols == dup] = [f"{dup}_{i}" if i != 0 else dup for i in range(cols[cols == dup].shape[0])]
-        df.columns = cols
-        #Thêm cột class
-        df["cat_inv"] = np.where(
-            df["uom"] == "CS",
-            "FG",
-            "RPM"
-        )
-        #edit lại cột status
-        conditions = [
-            df['invsts'] == 'U',
-            df['invsts'] == 'Q',
-            df['invsts'] == 'B'
-        ]
-        choices = ['RL', 'QU', 'HD']
-        df['invsts'] = np.select(conditions, choices, default=df['invsts'])
-        #thêm cột pallet
-        # df['pallet'] = df.groupby('locatn')['locatn'].transform('count')
-        df['pallet'] = 1
-        #thêm số 0 vào trước cột lotnum cho đủ 10 ký tự
-        df['lotnum'] = df['lotnum'].str.zfill(10)
-        #cột vnl tạm thời chưa lpn
-        df["vnl"] = df["lodnum"]
-        #cột note_inv tạm thời để trống
-        df["note_inv"] = "NONE"
-        #Lộc cột cần lấy
-        df_inv_fillter = df[["prtnum", "lotnum", "vnl", "invsts",  "untqty", "pallet", "stoloc", "note_inv",  "cat_inv"]].copy()
-        #đổi tên cột sang cột inv rtcis
-        df_inv_fillter = df_inv_fillter.rename(columns=
-        {   
-            "prtnum": "gcas",
-            "lotnum": "batch",
-            "vln": "vnl",
-            "invsts": "status",
-            "stoloc": "location",
-            "untqty": "qty",
-            "lodnum": "note_inv",
-            "cat_inv": "cat_inv"
-        })
-        # print(df_inv_fillter.index.is_unique)
-        # df_inv_fillter.to_csv("tonkholoi.csv", index=False)
-        return df_inv_fillter
-        # # Chuyển cột về dạng chuỗi trước
-        # df['prtnum'] = df['prtnum'].astype(str)
+        is_invalid = self._validate_file_inv_prime(df)
+        if not is_invalid:
+            raise ValueError(f"Incorrect file type. Please upload an inventory Prime file")
+        if is_invalid:
+            #Loại bỏ những dòng trống hoàn toàn
+            df = df.dropna(how='all')
+            df.columns = [re.sub(r"[\s+.,]", "_", col.strip().lower()) for col in df.columns]
+            # Tự động đánh số các cột trùng tên (ví dụ: uom, uom.1)
+            cols = pd.Series(df.columns)
+            for dup in cols[cols.duplicated()].unique(): 
+                cols[cols == dup] = [f"{dup}_{i}" if i != 0 else dup for i in range(cols[cols == dup].shape[0])]
+            df.columns = cols
+            #Thêm cột class
+            df["cat_inv"] = np.where(
+                df["uom"] == "CS",
+                "FG",
+                "RPM"
+            )
+            #edit lại cột status
+            conditions = [
+                df['invsts'] == 'U',
+                df['invsts'] == 'Q',
+                df['invsts'] == 'B'
+            ]
+            choices = ['RL', 'QU', 'HD']
+            df['invsts'] = np.select(conditions, choices, default=df['invsts'])
+            #thêm cột pallet
+            # df['pallet'] = df.groupby('locatn')['locatn'].transform('count')
+            df['pallet'] = 1
+            #thêm số 0 vào trước cột lotnum cho đủ 10 ký tự
+            df['lotnum'] = df['lotnum'].str.zfill(10)
+            #cột vnl tạm thời chưa lpn
+            df["vnl"] = df["lodnum"]
+            #cột note_inv tạm thời để trống
+            df["note_inv"] = "NONE"
+            #Lộc cột cần lấy
+            df_inv_fillter = df[["prtnum", "lotnum", "vnl", "invsts",  "untqty", "pallet", "stoloc", "note_inv",  "cat_inv"]].copy()
+            #đổi tên cột sang cột inv rtcis
+            df_inv_fillter = df_inv_fillter.rename(columns=
+            {   
+                "prtnum": "gcas",
+                "lotnum": "batch",
+                "vln": "vnl",
+                "invsts": "status",
+                "stoloc": "location",
+                "untqty": "qty",
+                "lodnum": "note_inv",
+                "cat_inv": "cat_inv"
+            })
+            
+            # print(df_inv_fillter.index.is_unique)
+            # df_inv_fillter.to_csv("tonkholoi.csv", index=False)
+            return df_inv_fillter
+            # # Chuyển cột về dạng chuỗi trước
+            # df['prtnum'] = df['prtnum'].astype(str)
 
-        # # Tự động thêm số 0 vào đầu cho đến khi chuỗi đủ 8 ký tự (ví dụ: '12345' -> '00012345')
-        # df['prtnum'] = df['prtnum'].str.zfill(8)
-    
+            # # Tự động thêm số 0 vào đầu cho đến khi chuỗi đủ 8 ký tự (ví dụ: '12345' -> '00012345')
+            # df['prtnum'] = df['prtnum'].str.zfill(8)
+        
     def get_datetime_from_filename_inv_prime(self, file_name) -> str:
         #Lấy tên file để biết ngày giờ chạy tồn kho
         #Lấy chuỗi ngày, giờ bằng regex từ chuỗi tên file
@@ -534,3 +582,11 @@ class InventoryModel:
         else:
             datetime_string = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         return datetime_string
+
+class ImportResult:
+    def __init__(self, status: ImportFileStatus, total_rows=0, imported_count=0, duplicate_count=0, error_message=None):
+        self.status = status                  # Trạng thái file (Enum)
+        self.total_rows = total_rows          # Tổng số dòng đọc được
+        self.imported_count = imported_count  # Số dòng thêm thành công vào DB
+        self.duplicate_count = duplicate_count # Số dòng bị trùng lặp dữ liệu
+        self.error_message = error_message    # Tin nhắn lỗi nếu có (dành cho lỗi tiêu đề cột)

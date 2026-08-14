@@ -62,6 +62,19 @@ class DashboardView:
         #Get role for user
         self.role_user = self.user_controller.state.user_role
 
+    @staticmethod
+    def show_error(message: str):
+        # st.error(message)
+        st.toast(message, icon="🚨")
+
+    @staticmethod
+    def show_warning(message: str):
+        # st.warning(message)
+        st.toast(message, icon="⚠️")
+
+    @staticmethod
+    def show_success(message: str):
+        st.toast(message, icon="✔️")
 
     def get_data(self):
         self.dashboard_controller.get_data_dashboard()
@@ -79,9 +92,9 @@ class DashboardView:
         if create_location:
             is_valid, meesage = self.location_controller.create_location()
             if is_valid:
-                st.toast(meesage, icon="ℹ️")
+               self.show_success(message=meesage)
             else:
-                st.toast(meesage, icon="🚨")
+                self.show_error(message=meesage)
 
     def import_masterdata(self):
         # icon="⚠️"
@@ -90,19 +103,19 @@ class DashboardView:
         if file_maserdata:
             is_valid, meesage = self.masterdata_controller.import_masterdata(file_maserdata)
             if is_valid:
-                st.toast(meesage, icon="ℹ️")
+                self.show_success(message=meesage)
             else:
-                st.toast(meesage, icon="🚨")
+                self.show_error(message=meesage)
 
     def import_inventory_files(self):
         files_inventory_import = sidebar_import_files_inventory()
         status_file_uploader = self.dashboard_controller.state.get(AppConfig.StateKeys.FILE_UPLOADER, False)
         if all([files_inventory_import, status_file_uploader]):
-            is_valid, meesage, df = self.dashboard_controller.inventory_controller.import_file(files_inventory_import)
-
-            st.toast(meesage, icon="ℹ️")
-
-            if not is_valid:
+            is_valid, meesage = self.dashboard_controller.inventory_controller.import_file(files_inventory_import)
+            if is_valid:
+                self.show_success(message=meesage)
+            else:
+                self.show_error(message=meesage)
                 st.stop()
 
     def render_tab_dashboard(self):

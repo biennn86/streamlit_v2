@@ -321,6 +321,14 @@ class WarehouseAnalyzer(DataProcessor):
 	def _setup_other_location_fillter(self) ->None:
 		'''
 			Thiết lập bộ lọc cho các vị trí đặc biệt, không theo quy luật
+			-other_location_fillters: chỉ định các cột và giá trị cần lọc ở trong dict con
+			key dict ngoài được dùng để làm tham chiếu truy cấp vào other_location_fillters_layer_2
+			và dùng làm tên biến cho vardataclass
+			- other_location_fillters_layer_2 dùng để lọc và đếm số lượng pallet sau khi phương thức fillter_data_other()
+			lọc và trả về df lọc ở other_location_fillters
+			other_location_fillters_layer_2 cũng lọc theo tên cột và giá trị cần lọc. Các giá trị trong dict cont của
+			other_location_fillters_layer_2 sẻ đại diện cho 1 biên, ví dụ ['eo', 'fg', 'rpm'] sẽ trả về 3 biến tương ứng
+			Tên biến được đặt theo quy ước lấy key của other_location_fillters nối với giá trị trong dict con của other_location_fillters_layer_2
 			
 		'''
 		self.other_location_fillters = {
@@ -375,6 +383,9 @@ class WarehouseAnalyzer(DataProcessor):
 			'eo': {
 				'cat_inv': ['eo'],
 				'name_warehouse': ['wh1', 'wh2', 'wh3', 'lsl', 'nan', '']
+			},
+			'scanout_prime':{
+				'location': "trl*"
 			}
 		}
 		#========================================================================
@@ -419,6 +430,9 @@ class WarehouseAnalyzer(DataProcessor):
 			},
 			'eo': {
 				'cat_inv': ['eo']
+			},
+			'scanout_prime': {
+				'cat_inv': ['fg', 'rpm', 'eo']
 			}
 		}
 
