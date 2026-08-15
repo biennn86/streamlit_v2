@@ -96,7 +96,12 @@ class TabDataViewer:
             )
             # Display the filtered data
             df_display = self._edit_df_display(filtered_df)
-            st.dataframe(df_display, use_container_width=True)
+            st.dataframe(df_display,
+                         #column_config={
+                        #"Batch": st.column_config.NumberColumn(format="%d"),     # %d ép hiển thị số nguyên
+                        #"LPN": st.column_config.NumberColumn(format="%d")        # Không hiển thị kiểu khoa học
+                        #},
+                         use_container_width=True)
             self.download_data_display(df_display, selected_wh)
 
         with datasumary:
@@ -115,6 +120,8 @@ class TabDataViewer:
 
     def _edit_df_display(self, df: pd.DataFrame):
         df_dislay = df.copy()
+        df_dislay[['batch', 'vnl']] = df_dislay[['batch', 'vnl']].astype(str)
+
         df_dislay = df_dislay[['gcas', 'description', 'location', 'batch', 'vnl', 'status', 'qty', 'pallet', 'name_warehouse']]
         df_dislay = df_dislay.rename(columns={
             "gcas": "Item",

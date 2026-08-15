@@ -25,6 +25,21 @@ class CombineBin:
             Bằng cách sử dụng hàm idxmax()
             idxmax() sẽ trả về index của giá trị True (vì True được coi là 1 và False là 0, nên True là giá trị lớn nhất).
         """
+        ''' df của RTCIS thì cột pallet là tổng pallet trong location đấy, nhưng tồn kho của Prime thì cột pallet luôn có giá trị là 1,
+            vì hệ thống Prime quản lý theo LPN
+            Combine bin sẽ lấy số lượng cột pallet để biết được số lượng pallet trong location đó là bao nhiêu pallet để xác đinh to_location
+            có để thêm được 1 pallet trong location của rack double deep hay không
+            Nên để chạy 1 lúc import được cả 2 dạng tồn kho RTCIS và Prime
+            phải biết được tồn nào là của RTCIS và tồn nào của PRime
+            Cách nhận biết:
+            Kiểm tra cột pallet nếu giá trị là 1 hết thì đó là tồn kho Prime, ngược lại là tồn kho RTCIS
+            Nếu tồn hiện tại là của RTCIS thì giữ nguyên giá trị cột pallet
+            Nếu tồn hiện tại là của Prime tính lại cột pallet sẽ count theo số lượng location của cột location
+        '''
+        #Check df là của RTCIS hay Prime
+        if (self.df['pallet']==1).all():
+            self.df['pallet'] = self.df.groupby('location')['location'].transform('count')
+            
         #Lọc df1 với các tiêu chí như dưới. df1 là df đi dò tìm (from_location)
         mask_from_location = pd.Series(True, self.df.index)
         mask_from_location &= self.df['name_warehouse'].isin(['wh1', 'wh2', 'wh3'])
