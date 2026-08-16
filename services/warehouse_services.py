@@ -385,7 +385,7 @@ class WarehouseAnalyzer(DataProcessor):
 				'name_warehouse': ['wh1', 'wh2', 'wh3', 'lsl', 'nan', '']
 			},
 			'scanout_prime':{
-				'location': "trl*"
+				'location': "^trl"
 			}
 		}
 		#========================================================================
