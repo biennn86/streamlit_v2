@@ -383,9 +383,10 @@ class InventoryModel:
         
     def _validate_file_inv_prime(self, df_inv_prime_import: pd.DataFrame) -> bool:
         columns_inv_prime_default = Columns.COLUMNS_INV_PRIME.value
+        columns_inv_prime_default_2 = Columns.COLUMNS_INV_PRIME_2.value
         df_inv_prime_import.columns = [re.sub("[ -]", "_", string).lower().strip() for string in df_inv_prime_import.columns]
         columns_inv_prime_import = df_inv_prime_import.columns.to_list()
-        if columns_inv_prime_default == columns_inv_prime_import:
+        if (columns_inv_prime_default == columns_inv_prime_import) or (columns_inv_prime_default_2 == columns_inv_prime_import):
             return True
         else:
             return False

@@ -54,6 +54,7 @@ class Columns(Enum):
     COLUMNS_FILE_EO = ['stt', 'barcode', 'lot#', 'po#', 'owner', 'gcas', 'description', 'supply_chain', 'type', 'status', 'created_by', 'created_date', 'wh_date', 'bin', 'assignment#', 'qty', 'remained_qty']
     COLUMNS_INV = ['gcas', 'batch', 'vnl', 'status', 'qty', 'pallet', 'location', 'note_inv', 'cat_inv']
     COLUMNS_INV_PRIME = ['stoloc', 'prtnum', 'lngdsc', 'invsts', 'untqty', 'uom', 'lotnum', 'lodnum']
+    COLUMNS_INV_PRIME_2 = ['stoloc', 'prtnum', 'lngdsc', 'invsts', 'untqty', 'stkuom', 'lotnum', 'lodnum']
     COLUMNS_EO_NEED = ['GCAS', 'Lot#', 'Barcode', 'Qty', 'Bin', 'Type']
     COLUMNS_MASTERDATA_NEED = ['gcas','description', 'cat', 'type1', 'type2', 'source', 'jit']
     
