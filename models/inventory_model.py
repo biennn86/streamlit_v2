@@ -297,7 +297,7 @@ class InventoryModel:
             df_inv_mt_loc['gcas'] = df_inv_mt_loc['gcas'].astype(str)
             df_final = df_inv_mt_loc
 
-            # df_final.to_excel('data_tonghop_28052026.xlsx', index=False)
+            # df_final.to_excel('data_tonghop_prime.xlsx', index=False)
             logger.info(f"Merged {len(df_final)} records inventory, location, masterdata")
             
             return df_final
@@ -504,26 +504,29 @@ class InventoryModel:
         # 3. Đưa con trỏ file về vị trí ban đầu trước khi đọc bằng Pandas
         csv_file.seek(0)
 
-        df = pd.read_csv(csv_file, encoding=bng_ma, sep=None, engine='python', dtype={'lotnum': str, 'lodnum': str}) #sep=None, engine='python'
+        df = pd.read_csv(csv_file, encoding=bng_ma, sep=None, engine='python', dtype={'lotnum': str, 'lodnum': str})
         is_invalid = self._validate_file_inv_prime(df)
         if not is_invalid:
             raise ValueError(f"Incorrect file type. Please upload an inventory Prime file")
         if is_invalid:
-            #Loại bỏ những dòng trống hoàn toàn
+            #1. Loại bỏ những dòng trống hoàn toàn
             df = df.dropna(how='all')
+            #2. Chuẩn hóa tên cột
             df.columns = [re.sub(r"[\s+.,]", "_", col.strip().lower()) for col in df.columns]
-            # Tự động đánh số các cột trùng tên (ví dụ: uom, uom.1)
+            #3. Tự động đánh số các cột trùng tên (ví dụ: uom, uom.1)
             cols = pd.Series(df.columns)
             for dup in cols[cols.duplicated()].unique(): 
                 cols[cols == dup] = [f"{dup}_{i}" if i != 0 else dup for i in range(cols[cols == dup].shape[0])]
             df.columns = cols
-            #Thêm cột class
+            #4. Đổi tên cột stkuom thành uom nếu file inv Prime import là stkuom
+            df = df.rename(columns={"stkuom": "uom"})
+            #5. Thêm cột class
             df["cat_inv"] = np.where(
-                df["uom"] == "CS",
+                df["uom"].isin(["CS"]),
                 "FG",
                 "RPM"
             )
-            #edit lại cột status
+            #6. Edit lại cột status
             conditions = [
                 df['invsts'] == 'U',
                 df['invsts'] == 'Q',
@@ -531,18 +534,18 @@ class InventoryModel:
             ]
             choices = ['RL', 'QU', 'HD']
             df['invsts'] = np.select(conditions, choices, default=df['invsts'])
-            #thêm cột pallet
+            #7. Thêm cột pallet
             # df['pallet'] = df.groupby('locatn')['locatn'].transform('count')
             df['pallet'] = 1
-            #thêm số 0 vào trước cột lotnum cho đủ 10 ký tự
+            #8. Thêm số 0 vào trước cột lotnum cho đủ 10 ký tự
             df['lotnum'] = df['lotnum'].str.zfill(10)
-            #cột vnl tạm thời chưa lpn
+            #9. Cột vnl tạm thời chứa lpn
             df["vnl"] = df["lodnum"]
-            #cột note_inv tạm thời để trống
+            #10. Cột note_inv tạm thời để trống
             df["note_inv"] = "NONE"
-            #Lộc cột cần lấy
+            #11. Lọc cột cần lấy
             df_inv_fillter = df[["prtnum", "lotnum", "vnl", "invsts",  "untqty", "pallet", "stoloc", "note_inv",  "cat_inv"]].copy()
-            #đổi tên cột sang cột inv rtcis
+            #12. Đổi tên cột sang cột inv rtcis
             df_inv_fillter = df_inv_fillter.rename(columns=
             {   
                 "prtnum": "gcas",
@@ -556,7 +559,7 @@ class InventoryModel:
             })
             
             # print(df_inv_fillter.index.is_unique)
-            # df_inv_fillter.to_csv("tonkholoi.csv", index=False)
+            # df_inv_fillter.to_excel("tonkholoi.xlsx", index=False)
             return df_inv_fillter
             # # Chuyển cột về dạng chuỗi trước
             # df['prtnum'] = df['prtnum'].astype(str)

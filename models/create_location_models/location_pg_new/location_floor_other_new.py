@@ -150,7 +150,7 @@ def list_config_floor_other_new() -> list:
 			),
 		#VỊ TRÍ ĐƯỜNG LUỒNG WH3 MỚI HỆ THỐNG PRIME
 		FloorConfig_New(
-			location_name = ['PROBLEM', 'WH3JPDO', 'F2WG1G2', 'F2WG3G4', 'F2WG5G6', 'F2WG7G8'],
+			location_name = ['PROBLEM', 'WH3JPDO', 'HOWH3SL', 'F2WG1G2', 'F2WG3G4', 'F2WG5G6', 'F2WG7G8'],
 			location_system_type = KeyLoc.LocSystemType.WW,
 			rack_system_type = KeyLoc.RackSystemType.FL,
 			location_storage_type = KeyLoc.LocStorageType.FLOOR,

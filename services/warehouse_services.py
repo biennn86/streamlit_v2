@@ -386,6 +386,10 @@ class WarehouseAnalyzer(DataProcessor):
 			},
 			'scanout_prime':{
 				'location': "^trl"
+			},
+			#location đã cấp xưởng. dùng tạm
+			'tmp_lsl': {
+				'location': "^bd"
 			}
 		}
 		#========================================================================
@@ -432,6 +436,10 @@ class WarehouseAnalyzer(DataProcessor):
 				'cat_inv': ['eo']
 			},
 			'scanout_prime': {
+				'cat_inv': ['fg', 'rpm', 'eo']
+			},
+			#location đã cấp xưởng. dùng tạm
+			'tmp_lsl': {
 				'cat_inv': ['fg', 'rpm', 'eo']
 			}
 		}
