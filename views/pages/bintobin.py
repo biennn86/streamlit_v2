@@ -81,7 +81,7 @@ class BintobinView:
             # Header với container có thể control
             header_html  = f"""
             <div class="main-header" id="main-header">
-                <div class="header-title">LIST BIN TO BIN IN RACK {num_bin_ww}</div>
+                <div class="header-title">LIST BIN TO BIN IN WORKWAY {num_bin_ww}</div>
             </div>
             """
             st.markdown(header_html, unsafe_allow_html=True)
