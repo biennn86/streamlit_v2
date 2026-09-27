@@ -44,7 +44,7 @@ class BintobinModel:
         df_tonkho = pd.merge(df_ton_kho, df_location, on='location', how='left')
         #Lọc tồn kho chỉ lấy tầng A của WH2
         mask_is_tang_a = pd.Series(True, df_tonkho.index)
-        mask_is_tang_a &= df_tonkho['location_system_type'].isin(["PF"])
+        mask_is_tang_a &= df_tonkho['location_system_type'].isin(["PF", "WW"])
         mask_is_tang_a &= df_tonkho['name_warehouse'].isin(["WH2"])
         df_ton_tang_a = df_tonkho[mask_is_tang_a]
 
@@ -120,7 +120,7 @@ class BintobinModel:
         final_move_list = df_process[df_process['qty_need_move'] > 0].copy()
 
         final_move_list = final_move_list[[
-            'gcas', 'location', 'qty', 'tong_ton_tang_a', 'sl_demand', 'over_demand', 'qty_need_move', 'available'
+            'gcas', 'location', 'qty', 'tong_ton_tang_a', 'sl_demand', 'over_demand', 'qty_need_move', 'available', 'location_system_type'
         ]]
 
         # move_on  = 220
