@@ -243,7 +243,7 @@ class InventoryModel:
             if self.df_location.empty:
                 self.df_location = self.location.read_to_dataframe()
                 logger.info(f"Retrieved {len(self.df_location)} location records from database")
-                # self.df_location.to_excel("location_pg.xlsx", index=False)
+                # self.df_location.to_excel("location_pg_24082026.xlsx", index=False)
                 return self.df_location
             else:
                 return self.df_location
@@ -586,6 +586,18 @@ class InventoryModel:
         else:
             datetime_string = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         return datetime_string
+
+    def download_data_display(self, filtered_df):
+        # Optional: Download filtered data
+        if not filtered_df.empty:
+            csv = filtered_df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="Download Displayed Data as CSV",
+                data=csv,
+                file_name=f"inventory_data_{pd.Timestamp.now().strftime('%Y%m%d%H%M')}.csv",
+                mime="text/csv",
+                icon=":material/download:",
+            )
 
 class ImportResult:
     def __init__(self, status: ImportFileStatus, total_rows=0, imported_count=0, duplicate_count=0, error_message=None):

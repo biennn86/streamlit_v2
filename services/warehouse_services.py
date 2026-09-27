@@ -484,6 +484,7 @@ class WarehouseAnalyzer(DataProcessor):
 				
 			# print(f"Số dòng tìm kiếm được {key}: {len(result)}. Tổng số pallet: {result['pallet'].sum()}")
 			# print(result[['gcas', 'batch', 'status', 'qty', 'pallet', 'location', 'cat_inv']])
+		# print(other_all_results)
 		return other_all_results
 
 	def get_mixup(self) -> pd.DataFrame:

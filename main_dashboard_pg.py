@@ -20,6 +20,8 @@ from views.pages.profile import render_profile
 from views.pages.registry_user import render_registry_user
 from views.components.sidebar_root import render_sidebar
 
+from views.pages.bintobin import BintobinView
+
 
 
 def main():
@@ -42,6 +44,8 @@ def main():
         
         if page == "Dashboard":
             DashboardView().render()
+        elif page == "Bintobin":
+            BintobinView().render_page_btb()
         elif page == "Profile":
             render_profile()
         elif page == "Registry User":
