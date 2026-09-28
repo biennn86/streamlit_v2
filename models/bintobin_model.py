@@ -18,19 +18,28 @@ class BintobinModel:
 
     def read_file_demand(self, link_file_demand) -> pd.DataFrame:
         selected_sheets  = pd.read_excel(link_file_demand, sheet_name=["DEMAND EXPORT", "CTMZ,PDS,ST"])
-        lst_demand = []
+        dict_demand = {}
         for key in selected_sheets.keys():
             df_export = selected_sheets[key] #CTMZ,PDS,ST
             df = self._get_demand_sheet_by_sheet(df_export)
-            lst_demand.append(df)
-        self.df_demand = pd.concat(lst_demand, ignore_index=True)
-        return self.df_demand
+
+            if key in ["DEMAND EXPORT"]:
+                key_dict = "demand_export"
+            elif key in ["CTMZ,PDS,ST"]:
+                key_dict = "demand_pds"
+
+            dict_demand[key_dict] = df
+        #self.df_demand = pd.concat(lst_demand, ignore_index=True)
+        return dict_demand
 
     def get_master_location(self) -> pd.DataFrame:
         self.location = self.inventory_model.get_location()
 
-    def process_bintobin(self, df_tonkho: pd.DataFrame, df_demand: pd.DataFrame) ->pd.DataFrame:
+    def process_bintobin(self, df_tonkho: pd.DataFrame, dict_demand: Dict[str, pd.DataFrame]) ->pd.DataFrame:
         #Dùng vòng lặp
+        #Lấy demand export và demand pds
+        df_demand_export = dict_demand.get("demand_export", pd.DataFrame())
+        df_demand_pds = dict_demand.get("demand_pds", pd.DataFrame())
         #Lấy master_location
         self.get_master_location()
         #Lấy df tồn kho
@@ -47,28 +56,58 @@ class BintobinModel:
         mask_is_tang_a &= df_tonkho['location_system_type'].isin(["PF", "WW"])
         mask_is_tang_a &= df_tonkho['name_warehouse'].isin(["WH2"])
         df_ton_tang_a = df_tonkho[mask_is_tang_a]
+        #Lọc tồn tầng cao để tính chừa pds
+        mask_is_hr = pd.Series(True, df_tonkho.index)
+        mask_is_hr &= df_tonkho['location_system_type'].isin(["HR"])
+        df_ton_hr = df_tonkho[mask_is_hr]
+        
+        # Nhóm tổng tồn tầng a của từng item
+        df_tong_ton_tang_a = df_ton_tang_a.groupby('gcas')['qty'].sum().reset_index(name='tong_ton_tang_a')
+        # Nhóm tổng tồn tầng cao của từng item
+        df_tong_ton_tang_cao = df_ton_hr.groupby('gcas')['qty'].sum().reset_index(name='tong_ton_tang_cao')
 
-        # Nhóm tổng tồn tầng 1 của từng item
-        df_tong_t1 = df_ton_tang_a.groupby('gcas')['qty'].sum().reset_index(name='tong_ton_tang_a')
-
+        #Tìm và tính toán item không có trong demand và item có tồn vượt demand
         # df_tong_ton = df_ton_kho.groupby('gcas')['qty'].sum().reset_index(name='tong_ton')
-        df_tong_demand = df_demand.groupby('gcas')['sl_demand'].sum().reset_index(name='sl_demand')
-        df_tong_demand = df_tong_demand[df_tong_demand['sl_demand']>0]
-        df_du_thua = pd.merge(df_tong_t1, df_tong_demand, left_on='gcas', right_on='gcas', how='left')
+        df_tong_demand_export = df_demand_export.groupby('gcas')['sl_demand'].sum().reset_index(name='sl_demand')
+        df_tong_demand_export = df_tong_demand_export[df_tong_demand_export['sl_demand']>0]
+        df_du_thua_export = pd.merge(df_tong_ton_tang_a, df_tong_demand_export, left_on='gcas', right_on='gcas', how='left')
 
-
+        #Tìm và tính toán item có trong demand_pds
+        df_tong_demand_pds = df_demand_pds.groupby('gcas')['sl_demand'].sum().reset_index(name='sl_demand')
+        df_tong_demand_pds = df_tong_demand_pds[df_tong_demand_pds['sl_demand']>0]
+        df_du_thua_pds = pd.merge(df_tong_ton_tang_cao, df_tong_demand_pds, left_on='gcas', right_on='gcas', how='left')
+        df_du_thua_pds['sl_demand'] = pd.to_numeric(df_du_thua_pds['sl_demand'], errors='coerce').fillna(0)
+        df_du_thua_pds['over_demand'] = np.maximum(df_du_thua_pds['sl_demand'] - df_du_thua_pds['tong_ton_tang_cao'], 0)
+        df_du_thua_pds = df_du_thua_pds[df_du_thua_pds['over_demand']>0]
+        
         # Nếu không có demand, SL_Demand = 0 -> Tổng dư thừa = Toàn bộ lượng tồn
         # df_du_thua['sl_demand'] = df_du_thua['sl_demand'].fillna(0)
-        df_du_thua['sl_demand'] = pd.to_numeric(df_du_thua['sl_demand'], errors='coerce').fillna(0)
-        df_du_thua['over_demand'] = np.maximum(df_du_thua['tong_ton_tang_a'] - df_du_thua['sl_demand'], 0)
-
+        df_du_thua_export['sl_demand'] = pd.to_numeric(df_du_thua_export['sl_demand'], errors='coerce').fillna(0)
+        df_du_thua_export['over_demand'] = np.maximum(df_du_thua_export['tong_ton_tang_a'] - df_du_thua_export['sl_demand'], 0)
+        
+        # Đưa df_demand_pds và cột overdemand của df_du_thua
+        df_du_thua = pd.concat(
+            [
+                df_du_thua_export,
+                pd.DataFrame(
+                    {
+                        "gcas": df_du_thua_pds["gcas"],
+                        "sl_demand": df_du_thua_pds["sl_demand"],
+                        "over_demand": df_du_thua_pds["over_demand"],
+                        "tong_ton_tang_a": df_du_thua_pds["tong_ton_tang_cao"],
+                    }
+                ),
+            ],
+            ignore_index=True,
+        )
+        # df_du_thua = pd.concat([df_du_thua_export, df_du_thua_pds], ignore_index=True)
         
 
         # 3. THUẬT TOÁN TRỪ LÙI LÀM TRÒN XUỐNG (TỐI ƯU TỐC ĐỘ BẰNG MẢNG)
-
         # Gộp dữ liệu tổng vào chi tiết vị trí và chỉ lấy các vị trí thuộc Tầng A
         df_process = pd.merge(df_ton_tang_a, df_du_thua[['gcas', 'over_demand', 'tong_ton_tang_a', 'sl_demand']], on='gcas', how='left')
         #df_process = df_process[df_process['location'].str.contains('a$', na=False, case=False, regex=True)].copy()
+       
 
         # QUAN TRỌNG: Sắp xếp tồn kho tăng dần theo GCAS và QTY 
         # Việc này giúp ưu tiên giải phóng các ô có số lượng ít trước (tối ưu không gian Bin)
@@ -172,7 +211,8 @@ class BintobinModel:
         # Giữ lại đúng 3 cột cần thiết theo yêu cầu
         final_df = final_df[['SKU', 'sl_demand', 'Market']]
         final_df = final_df.rename(columns={
-            'SKU': 'gcas'
+            'SKU': 'gcas',
+            'Market': 'market'
         })
 
         # Hiển thị kết quả kiểm tra
