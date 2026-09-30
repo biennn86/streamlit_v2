@@ -66,7 +66,7 @@ class BintobinView:
              # Đọc file no_bin_to_bin_log.txt đưa content vào state
             item_not_btb_save = self.bintobin_controller.bintobin_model.read_item_not_btb()
             self.bintobin_controller.state.set(AppConfig.StateKeys.ITEM_NOT_BTB, [int(item) for x in item_not_btb_save.split(",") if (item := x.strip()).isdigit()])
-
+            # Lấy data đã xử lỹ tron model từ state
             df_btb_draft = self.bintobin_controller.state.get(AppConfig.StateKeys.DF_BTB)
             list_item_not_btb_in_state = self.bintobin_controller.state.get(AppConfig.StateKeys.ITEM_NOT_BTB, [])
 
@@ -163,6 +163,11 @@ class BintobinView:
                 self.bintobin_controller.bintobin_model.write_item_not_btb(final_int_list)
                 # Update data mới lên state nếu có
                 self.bintobin_controller.state.set(AppConfig.StateKeys.ITEM_NOT_BTB, final_int_list)
+            else:
+                #Ghi data item not bin to bin xuống file txt
+                #Ghi nếu người dùng xóa hết item trong text_area
+                self.bintobin_controller.bintobin_model.write_item_not_btb(item_not_btb)
+
             # Update strategy btb mới nếu có
             self.bintobin_controller.state.set(AppConfig.StateKeys.STRATEGY_BTB, selected_strategy)
             
