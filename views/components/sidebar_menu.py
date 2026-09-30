@@ -15,7 +15,8 @@ def handle_new_import():
         # Lấy danh sách tên file hiện tại vừa import
         current_file_names = [f.name for f in new_files]
         #Nếu danh sách file này KHÁC hoàn toàn với danh sách file của lần import trước
-        if current_file_names != AppConfig.StateKeys.LAST_PROCESSED_FILES:
+        last_files = AppManager().state.get(AppConfig.StateKeys.LAST_PROCESSED_FILES, [])
+        if current_file_names != last_files: #AppConfig.StateKeys.LAST_PROCESSED_FILES:
             # Cập nhật danh sách lịch sử mới
             AppManager().state.set(AppConfig.StateKeys.LAST_PROCESSED_FILES, current_file_names)
             # Cất file vào biến lưu trữ độc lập
@@ -29,7 +30,7 @@ def sidebar_import_files_inventory():
     current_uploader_key = f"file_uploader_{AppManager().state.get(AppConfig.StateKeys.UPLOADER_ID)}"
     with st.sidebar:
         with st.expander('Import Files Inventory'):
-            st.file_uploader('Choose Files Inventory FG-RPM-EO',
+            st.file_uploader('Choose Files Inventory FG-RPM-EO/Prime-EO',
                                     accept_multiple_files=True,
                                     key=current_uploader_key,
                                     on_change=handle_new_import)
