@@ -35,6 +35,24 @@ class BintobinModel:
     def get_master_location(self) -> pd.DataFrame:
         location = self.inventory_model.get_location()
         return location
+    
+    def write_item_not_btb(self, no_bin_to_bin_items: List) -> None:
+        file_path = "no_bin_to_bin_log.txt"
+        # 1. Biến list thành chuỗi: "80883962, 67890, 112233"
+        csv_string = ", ".join([str(item) for item in no_bin_to_bin_items])
+        # 2. Ghi xuống file
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(csv_string)
+
+    def read_item_not_btb(self) -> List:
+        file_path = "no_bin_to_bin_log.txt"
+        # 2. Đọc file
+        with open(file_path, "r", encoding="utf-8") as file:
+            content = file.read()
+        # Chuyển ngược chuỗi thành list số nguyên, tự động dọn rác khoảng trắng
+        loaded_list = [int(item) for x in content.split(",") if (item := x.strip()).isdigit()]
+        loaded_string = ", ".join([str(item) for item in loaded_list])
+        return loaded_string
 
     def process_bintobin_standard(self, df_inventory: pd.DataFrame, dict_demand: Dict[str, pd.DataFrame]) ->pd.DataFrame:
         #Version mới nhất

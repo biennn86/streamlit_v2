@@ -17,7 +17,7 @@ class BintobinController(BaseStateController):
         self.bintobin_model = bintobin_model
 
     def get_default_state(self) -> Dict:
-        """Giá trị mặc định cho user state"""
+        """Giá trị mặc định cho BinToBin state"""
         return {
             AppConfig.StateKeys.INV_BTB: None,
             AppConfig.StateKeys.DEMAND_DATA: {},

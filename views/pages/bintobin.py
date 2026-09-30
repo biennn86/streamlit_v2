@@ -33,6 +33,7 @@ class BintobinView:
 
     def run_bintobin(self):
         button_btb = sidebar_button_btb()
+       
         if button_btb:
             current_strategy = self.bintobin_controller.state.get(AppConfig.StateKeys.STRATEGY_BTB, "standard")
             df_inv_btb = self.bintobin_controller.state.get(AppConfig.StateKeys.INV_BTB, pd.DataFrame())
@@ -60,10 +61,15 @@ class BintobinView:
         btb_ww = cont_bintobin.container(border=StatusBorder.BORDER.value)
 
 
-        #Lọc datafram rack và ww
+        #Lọc dataframe rack và ww
         try:
+             # Đọc file no_bin_to_bin_log.txt đưa content vào state
+            item_not_btb_save = self.bintobin_controller.bintobin_model.read_item_not_btb()
+            self.bintobin_controller.state.set(AppConfig.StateKeys.ITEM_NOT_BTB, [int(item) for x in item_not_btb_save.split(",") if (item := x.strip()).isdigit()])
+
             df_btb_draft = self.bintobin_controller.state.get(AppConfig.StateKeys.DF_BTB)
             list_item_not_btb_in_state = self.bintobin_controller.state.get(AppConfig.StateKeys.ITEM_NOT_BTB, [])
+
             if list_item_not_btb_in_state:
                 mask_item_not_btb = pd.Series(True, df_btb_draft.index)
                 mask_item_not_btb &= df_btb_draft['gcas'].isin(list_item_not_btb_in_state)
@@ -103,8 +109,16 @@ class BintobinView:
             with st.form(key="form_btb"):
                 col1, col2 = st.columns(2, gap="medium") #st.columns([3, 1])
                 with col1:
+                    # Đọc file no_bin_to_bin_log.txt lấy những items không btb đã lưu
+                    item_not_btb_save = self.bintobin_controller.state.get(AppConfig.StateKeys.ITEM_NOT_BTB, [])
+                    if not item_not_btb_save:
+                        item_not_btb_save = None
+                    else:
+                        item_not_btb_save = ", ".join([str(item) for item in item_not_btb_save])
+
                     item_not_btb = st.text_area(
                         label="Items Excluded from Bin-to-Bin",
+                        value = item_not_btb_save,
                         placeholder="Điền những Items không cần bin to bin vào đây. Các Items cách nhau bằng dấu phẩy. Ví dụ: 80883962, 80892777, 80833957",
                         height=68)
                     
@@ -139,13 +153,19 @@ class BintobinView:
 
                     sub_col1, sub_col2, sub_col3 = st.columns([8, 1, 1])
                     with sub_col3:
-                        submit_btn = st.form_submit_button(label="Save")
+                        submit_btn = st.form_submit_button(label="Save", type="primary")
         # 3. Xử lý logic khi bấm nút (nằm ngoài khối st.form)
         # Hàm này trả về True nếu người dùng CLICK vào nút
         if submit_btn:
-            final_int_list = [int(item) for x in item_not_btb.split(",") if (item := x.strip()).isdigit()]
+            if item_not_btb:
+                final_int_list = [int(item) for x in item_not_btb.split(",") if (item := x.strip()).isdigit()]
+                #Ghi data item not bin to bin xuống file txt
+                self.bintobin_controller.bintobin_model.write_item_not_btb(final_int_list)
+                # Update data mới lên state nếu có
+                self.bintobin_controller.state.set(AppConfig.StateKeys.ITEM_NOT_BTB, final_int_list)
+            # Update strategy btb mới nếu có
             self.bintobin_controller.state.set(AppConfig.StateKeys.STRATEGY_BTB, selected_strategy)
-            self.bintobin_controller.state.set(AppConfig.StateKeys.ITEM_NOT_BTB, final_int_list)
+            
 
         with title_btb_rack:
             # Header với container có thể control
