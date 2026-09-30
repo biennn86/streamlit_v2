@@ -151,9 +151,9 @@ class BintobinView:
                         unsafe_allow_html=True
                     )
 
-                    sub_col1, sub_col2, sub_col3 = st.columns([8, 1, 1])
+                    sub_col1, sub_col2, sub_col3 = st.columns([2, 1, 1])
                     with sub_col3:
-                        submit_btn = st.form_submit_button(label="Save", type="primary")
+                        submit_btn = st.form_submit_button(label="Update Configuration", type="primary")
         # 3. Xử lý logic khi bấm nút (nằm ngoài khối st.form)
         # Hàm này trả về True nếu người dùng CLICK vào nút
         if submit_btn:
