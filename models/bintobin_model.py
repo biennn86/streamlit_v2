@@ -5,32 +5,77 @@ import numpy as np
 
 from models.inventory_model import InventoryModel
 
+from utils.constants import ValidateFile, Pattern, Columns, VNL_CAT, ImportFileStatus
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+class ImportBtbResult:
+    def __init__(self, status: ImportFileStatus, data = None, error_message=None):
+        self.status = status  
+        self.data = data                
+        self.error_message = error_message
+
 class BintobinModel:
-    def __init__(self, inveotory: InventoryModel):
-        self.inventory_model = inveotory
+    def __init__(self, inventory: InventoryModel):
+        self.inventory_model = inventory
 
     def real_file_import_inv_csv(self, link_file_inv_csv) -> pd.DataFrame:
-        self.df_inv_csv = self.inventory_model._read_file_inv_prime(link_file_inv_csv)
-        return self.df_inv_csv
+        #Trong phương thức _read_file_inv_prime() đã có hàm validate file tồn kho có phải tồn kho của Prime
+        try:
+            self.df_inv_csv = self.inventory_model._read_file_inv_prime(link_file_inv_csv)
+            return ImportBtbResult(
+                    status=ImportFileStatus.SUCCESS,
+                    data = self.df_inv_csv
+                    )
+        except ValueError as val_error:
+            # ĐÂY LÀ NƠI HỨNG LỖI INVALID FILE TẬP TRUNG
+            # Bất kỳ file nào trong vòng lặp bị lỗi cấu trúc cột, nó sẽ nhảy ngay lập tức vào đây. Kể cả ValueError trong chương trình con
+            # Giúp ngắt toán tử concat phía dưới, không làm sập phần mềm.
+            return ImportBtbResult(
+                status=ImportFileStatus.INVALID,
+                error_message=f"Xử lý thất bại! Lý do: {str(val_error)}"
+            )
+        except Exception as e:
+            # Hứng các lỗi hệ thống bất ngờ khác (mất kết nối, file hỏng nặng...)
+            return ImportBtbResult(
+                status=ImportFileStatus.SYSTEM_ERROR,
+                error_message=f"Lỗi hệ thống chưa xác định: {str(e)}"
+            )
 
-    def read_file_demand(self, link_file_demand) -> Dict[str, pd.DataFrame]:
-        selected_sheets  = pd.read_excel(link_file_demand, sheet_name=["DEMAND EXPORT", "CTMZ,PDS,ST"])
-        dict_demand = {}
-        for key in selected_sheets.keys():
-            df_export = selected_sheets[key] #CTMZ,PDS,ST
-            df = self._get_demand_sheet_by_sheet(df_export)
+    def read_file_demand(self, link_file_demand) -> pd.DataFrame:
+        try:
+            selected_sheets  = pd.read_excel(link_file_demand, sheet_name=["DEMAND EXPORT", "CTMZ,PDS,ST"])
+            dict_demand = {}
+            for key in selected_sheets.keys():
+                df_export = selected_sheets[key] #CTMZ,PDS,ST
+                df = self._get_demand_sheet_by_sheet(df_export)
 
-            if key in ["DEMAND EXPORT"]:
-                key_dict = "demand_export"
-            elif key in ["CTMZ,PDS,ST"]:
-                key_dict = "demand_pds"
+                if key in ["DEMAND EXPORT"]:
+                    key_dict = "demand_export"
+                elif key in ["CTMZ,PDS,ST"]:
+                    key_dict = "demand_pds"
 
-            dict_demand[key_dict] = df
-        #self.df_demand = pd.concat(lst_demand, ignore_index=True)
-        return dict_demand
+                dict_demand[key_dict] = df
+
+            return ImportBtbResult(
+                status=ImportFileStatus.SUCCESS,
+                data = dict_demand,
+            )
+        except ValueError as val_error:
+            # ĐÂY LÀ NƠI HỨNG LỖI INVALID FILE TẬP TRUNG
+            # Bất kỳ file nào trong vòng lặp bị lỗi cấu trúc cột, nó sẽ nhảy ngay lập tức vào đây. Kể cả ValueError trong chương trình con
+            # Giúp ngắt toán tử concat phía dưới, không làm sập phần mềm.
+            return ImportBtbResult(
+                status=ImportFileStatus.INVALID,
+                error_message=f"Xử lý thất bại! Lý do: {str(val_error)}"
+            )
+        except Exception as e:
+            # Hứng các lỗi hệ thống bất ngờ khác (mất kết nối, file hỏng nặng...)
+            return ImportBtbResult(
+                status=ImportFileStatus.SYSTEM_ERROR,
+                error_message=f"Lỗi hệ thống chưa xác định: {str(e)}"
+            )
 
     def get_master_location(self) -> pd.DataFrame:
         location = self.inventory_model.get_location()
@@ -38,6 +83,8 @@ class BintobinModel:
     
     def write_item_not_btb(self, no_bin_to_bin_items: List) -> None:
         file_path = "no_bin_to_bin_log.txt"
+        if no_bin_to_bin_items is None:
+            no_bin_to_bin_items = []
         # 1. Biến list thành chuỗi: "80883962, 67890, 112233"
         csv_string = ", ".join([str(item) for item in no_bin_to_bin_items])
         # 2. Ghi xuống file
@@ -49,6 +96,7 @@ class BintobinModel:
         # 2. Đọc file
         with open(file_path, "r", encoding="utf-8") as file:
             content = file.read()
+        
         # Chuyển ngược chuỗi thành list số nguyên, tự động dọn rác khoảng trắng
         loaded_list = [int(item) for x in content.split(",") if (item := x.strip()).isdigit()]
         loaded_string = ", ".join([str(item) for item in loaded_list])
@@ -97,6 +145,24 @@ class BintobinModel:
         df_master['inv_after_pds'] = np.maximum(0, df_master['total_inv'] - df_master['qty_pds'])
         # 3.3. Xác định lượng hàng được phép GIỮ LẠI ở Tầng 1 để xuất Export trong ngày
         # Nó phải thỏa mãn: Không vượt quá tồn Tầng 1, không vượt quá lượng khả dụng sau PDS, và không vượt quá nhu cầu Export
+        ''' df_master['inv_after_pds'] trong dòng code dưới chỉ có tác dụng khi tổng kho bị thiếu hàng để đáp ứng cho nhu cầu PDS.
+            Nó bảo đảm rằng: Chỉ khi nào tổng kho thực sự có dư sau khi đã trừ hết sạch nhu cầu PDS, thì phần hàng dư đó mới được phép chia cho nhu cầu Export ở Tầng 1
+            Inv_After_PDS đóng vai trò như một "cái van an toàn.
+            Ví dụ:
+            Giả sử thực tế: Inv_T1 = 30, Inv_High = 0. Tổng kho (Total_Inv) = 30.
+            Nhu cầu: Qty_pds = 50 (Thiếu hàng), Qty_export = 40.
+            Tính toán theo code:
+            Inv_After_PDS = max(0, 30 - 50) = 0 (Tổng kho đã cạn kiệt, không còn dư gì cho việc khác).
+            Khi tính Keep_T1: np.minimum(Inv_T1, Inv_After_PDS, Qty_export) -> np.minimum(30, 0, 40) -> Kết quả là 0.
+            Từ đó, Qty_To_Move = (30 - 0 = 30). (Hệ thống sẽ ra lệnh bốc toàn bộ 30 cái từ Tầng 1 lên Tầng cao để ưu tiên gom hàng đi đóng PDS).
+            * Điều gì xảy ra nếu BỎ Inv_After_PDS
+            Nếu code chỉ là: np.minimum(Inv_T1, Qty_export) -> np.minimum(30, 40) = 30.
+            Hệ thống sẽ hiểu là: "À, Tầng 1 đang có 30 cái, Export cần 40 cái, vậy cho phép giữ lại cả 30 cái này ở Tầng 1 để xuất Export nhé!"
+            Hậu quả là sai logic: Vì đã lấy mất 30 cái này đem đi xuất Export, trong khi đơn hàng PDS (vốn được ưu tiên cao hơn) đang bị thiếu hụt thê thảm và không có hàng để đóng
+            ***
+            "Tôi muốn giữ lại hàng ở Tầng 1 để bán Export, nhưng số lượng giữ lại không được vượt quá số hàng đang có ở Tầng 1,
+            không được vượt quá số lượng khách mua, và đặc biệt là không được lấy lạm vào phần hàng phải trả nợ cho khách PDS"
+        '''
         df_master['keep_t1'] = np.minimum(
             df_master['inv_t1'], 
             np.minimum(df_master['inv_after_pds'], df_master['qty_export'])
@@ -202,7 +268,7 @@ class BintobinModel:
         df_master = df_master.fillna(0).infer_objects(copy=False)
         # Bước 2: Tính lượng PDS còn THIẾU trên tầng cao cần phải bù vào
         df_master['pds_needed_high'] = np.maximum(0, df_master['qty_pds'] - df_master['inv_high'])
-        # Bước 3: Tính lượng tồn Tầng 1 còn lại sau khi đã ưu tiên cấu đi để bù vào PDS trên tầng cao
+        # Bước 3: Tính lượng tồn Tầng 1 còn lại sau khi đã ưu tiên cất đi để bù vào PDS trên tầng cao
         df_master['t1_available_after_pds'] = np.maximum(0, df_master['inv_t1'] - df_master['pds_needed_high'])
         # Bước 4: Lượng thực tế GIỮ LẠI ở Tầng 1 để xuất hàng trong ngày (Export)
         df_master['keep_t1'] = np.minimum(df_master['t1_available_after_pds'], df_master['qty_export'])

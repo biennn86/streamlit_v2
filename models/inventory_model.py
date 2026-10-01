@@ -127,7 +127,7 @@ class InventoryModel:
         
         except ValueError as val_error:
             # ĐÂY LÀ NƠI HỨNG LỖI INVALID FILE TẬP TRUNG
-            # Bất kỳ file nào trong vòng lặp bị lỗi cấu trúc cột, nó sẽ nhảy ngay lập tức vào đây
+            # Bất kỳ file nào trong vòng lặp bị lỗi cấu trúc cột, nó sẽ nhảy ngay lập tức vào đây. Kể cả ValueError trong chương trình con
             # Giúp ngắt toán tử concat phía dưới, không làm sập phần mềm.
             return ImportResult(
                 status=ImportFileStatus.INVALID,

@@ -15,21 +15,42 @@ class BintobinView:
         bintobin_model = BintobinModel(inventory_model)
         self.bintobin_controller = BintobinController(bintobin_model)
 
+    @staticmethod
+    def show_error(message: str):
+        # st.error(message)
+        st.toast(message, icon="🚨")
+
+    @staticmethod
+    def show_warning(message: str):
+        # st.warning(message)
+        st.toast(message, icon="⚠️")
+
+    @staticmethod
+    def show_success(message: str):
+        st.toast(message, icon="✔️")
+
     def import_inv_prime_csv(self):
         link_ton_kho_csv = import_inv_prime_csv_btb()
         status_file_uploader_inv_btb = self.bintobin_controller.state.get(AppConfig.StateKeys.FILE_UPLOADER_INV_BTB, False)
         if all([link_ton_kho_csv, status_file_uploader_inv_btb]):
-            self.df_ton_kho_csv = self.bintobin_controller.import_file_tonkho_prime(link_ton_kho_csv)
-            # Đưa tồn kho prime chạy btb vào state
-            self.bintobin_controller.state.inv_btb = self.df_ton_kho_csv
+            is_valid, meesage = self.bintobin_controller.import_file_tonkho_prime(link_ton_kho_csv)
+            if is_valid:
+                self.show_success(message=meesage)
+            else:
+                self.show_error(message=meesage)
+                st.stop()
 
     def import_file_demand(self):
         link_file_demand = import_demand_excel_btb()
         status_file_uploader_demand = self.bintobin_controller.state.get(AppConfig.StateKeys.FILE_UPLOADER_DEMAND, False)
         if all([link_file_demand, status_file_uploader_demand]):
-            self.dict_demand = self.bintobin_controller.import_file_demand(link_file_demand)
-            #Đưa data demand vào state
-            self.bintobin_controller.state.demand_data = self.dict_demand
+            is_valid, meesage = self.bintobin_controller.import_file_demand(link_file_demand)
+            if is_valid:
+                self.show_success(message=meesage)
+            else:
+                self.show_error(message=meesage)
+                st.stop()
+            
 
     def run_bintobin(self):
         button_btb = sidebar_button_btb()
@@ -150,10 +171,30 @@ class BintobinView:
                         f"Strategy Current: <span style='color: {color_code}; font-size: {font_size}; font-weight: bold;'>{text_content}</span>", 
                         unsafe_allow_html=True
                     )
+                    # 1. Thêm CSS để ép nút luôn căn sát lề phải và không được tràn viền
+                    st.markdown(
+                        """
+                        <style>
+                        /* Căn phải vùng chứa nút form */
+                        div[data-testid="stFormSubmitButton"] {
+                            display: flex;
+                            justify-content: flex-end; /* Đẩy nút sát lề phải */
+                            width: 100%;
+                        }
+                        /* Đảm bảo nút không tự động co giãn bậy hoặc tràn viền */
+                        div[data-testid="stFormSubmitButton"] button {
+                            white-space: nowrap !important; /* Không cho chữ xuống dòng */
+                            width: auto !important;         /* Độ rộng tự động vừa khít chữ */
+                        }
+                        </style>
+                        """,
+                        unsafe_allow_html=True
+                    )
 
                     sub_col1, sub_col2, sub_col3 = st.columns([2, 1, 1])
                     with sub_col3:
-                        submit_btn = st.form_submit_button(label="Update Configuration", type="primary")
+                        submit_btn = st.form_submit_button(label="Update Configuration", type="primary", use_container_width=True)
+
         # 3. Xử lý logic khi bấm nút (nằm ngoài khối st.form)
         # Hàm này trả về True nếu người dùng CLICK vào nút
         if submit_btn:

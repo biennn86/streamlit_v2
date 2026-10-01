@@ -94,6 +94,7 @@ class InventoryController:
                     return True,  f"Successfully imported {number_rows_insert:,} inventory records"
             else:
                 return False, f"Failed to save inventory data to database"
+            
         elif message == "prime":
             result = self.inventory_model.process_inventory_prime(uploaded_files)
             if result.status == ImportFileStatus.SUCCESS:
