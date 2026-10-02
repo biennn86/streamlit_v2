@@ -146,7 +146,7 @@ class BintobinModel:
             df_master = pd.merge(df_master, df_demand_export, on='gcas', how='left')
             # Điền giá trị 0 cho các ô trống (NaN). Đây là nhưng dòng chứa item không có trong deamnd
             # Liệt kê các cột chứa số cần xử lý
-            numeric_cols = ['gcas', 'qty_pds', 'qty_export']
+            numeric_cols = ['gcas', 'inv_t1', 'inv_high', 'qty_pds', 'qty_export']
             # Ép kiểu về dạng số đồng loạt (các ô chứa chữ hoặc khoảng trắng lỗi sẽ biến thành NaN)
             df_master[numeric_cols] = df_master[numeric_cols].apply(pd.to_numeric, errors='coerce')
             # Chỉ fillna và ép kiểu trên các cột số đó
@@ -307,7 +307,7 @@ class BintobinModel:
             df_master = pd.merge(df_master, df_demand_export, on='gcas', how='left')
             # Điền giá trị 0 cho các ô trống (NaN). Đây là nhưng dòng chứa item không có trong deamnd
             # Liệt kê các cột chứa số cần xử lý
-            numeric_cols = ['gcas', 'qty_pds', 'qty_export']
+            numeric_cols = ['gcas', 'inv_t1', 'inv_high', 'qty_pds', 'qty_export']
             # Ép kiểu về dạng số đồng loạt (các ô chứa chữ hoặc khoảng trắng lỗi sẽ biến thành NaN)
             df_master[numeric_cols] = df_master[numeric_cols].apply(pd.to_numeric, errors='coerce')
             # Chỉ fillna và ép kiểu trên các cột số đó
