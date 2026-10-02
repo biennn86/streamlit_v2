@@ -50,11 +50,25 @@ class BintobinController(BaseStateController):
             return False, result.error_message
     
     def run_bintobin_standard(self, df_tonkho, dict_demand):
-        self.df_bintobin = self.bintobin_model.process_bintobin_standard(df_tonkho, dict_demand)
-        self.state.set(AppConfig.StateKeys.DF_BTB,  self.df_bintobin)
-        return self.df_bintobin
+        result = self.bintobin_model.process_bintobin_standard(df_tonkho, dict_demand)
+        if result.status == ImportFileStatus.SUCCESS:
+            #Đưa dataframe btb final vào state
+            self.state.set(AppConfig.StateKeys.DF_BTB,  result.data)
+            return True,  f"Run Bin-To-Bin Strategy Standard Successfully"
+        elif result.status == ImportFileStatus.INVALID:
+            return False, result.error_message
+        elif result.status == ImportFileStatus.SYSTEM_ERROR:
+            return False, result.error_message
+        
     
     def run_bintobin_greedy(self, df_tonkho, dict_demand):
-        self.df_bintobin = self.bintobin_model.process_bintobin_greedy(df_tonkho, dict_demand)
-        self.state.set(AppConfig.StateKeys.DF_BTB,  self.df_bintobin)
-        return self.df_bintobin
+        result = self.bintobin_model.process_bintobin_greedy(df_tonkho, dict_demand)
+        if result.status == ImportFileStatus.SUCCESS:
+            #Đưa dataframe btb final vào state
+            self.state.set(AppConfig.StateKeys.DF_BTB,  result.data)
+            return True,  f"Run Bin-To-Bin Strategy Greedy Successfully"
+        elif result.status == ImportFileStatus.INVALID:
+            return False, result.error_message
+        elif result.status == ImportFileStatus.SYSTEM_ERROR:
+            return False, result.error_message
+        

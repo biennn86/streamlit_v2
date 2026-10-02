@@ -60,9 +60,19 @@ class BintobinView:
             df_inv_btb = self.bintobin_controller.state.get(AppConfig.StateKeys.INV_BTB, pd.DataFrame())
             dict_demand = self.bintobin_controller.state.get(AppConfig.StateKeys.DEMAND_DATA, {})
             if current_strategy == "standard":
-                self.df_btb = self.bintobin_controller.run_bintobin_standard(df_inv_btb, dict_demand)
+                is_valid, meesage = self.bintobin_controller.run_bintobin_standard(df_inv_btb, dict_demand)
+                if is_valid:
+                    self.show_success(message=meesage)
+                else:
+                    self.show_error(message=meesage)
+                    st.stop()
             elif current_strategy == "greedy":
-                self.df_btb = self.bintobin_controller.run_bintobin_greedy(df_inv_btb, dict_demand)
+                is_valid, meesage = self.bintobin_controller.run_bintobin_greedy(df_inv_btb, dict_demand)
+                if is_valid:
+                    self.show_success(message=meesage)
+                else:
+                    self.show_error(message=meesage)
+                    st.stop()
 
     def render_page_btb(self):
         self.run_bintobin()
@@ -103,13 +113,13 @@ class BintobinView:
                 mask_is_rack = mask & df_btb['location_system_type'].isin(["PF"])
                 mask_is_ww = mask & df_btb['location_system_type'].isin(["WW"])
 
-                df_btb_rack = df_btb[mask_is_rack]
+                df_btb_rack = df_btb[mask_is_rack].copy()
                 df_btb_rack["gcas"] = pd.to_numeric(df_btb_rack["gcas"],downcast="integer")
                 df_btb_rack["gcas"] = df_btb_rack["gcas"].astype(str)
                 df_btb_rack = df_btb_rack.sort_values(by=["location"])
                 num_bin_rack = df_btb_rack["location"].nunique()
 
-                df_btb_ww = df_btb[mask_is_ww]
+                df_btb_ww = df_btb[mask_is_ww].copy()
                 df_btb_ww["gcas"] = pd.to_numeric(df_btb_ww["gcas"],downcast="integer")
                 df_btb_ww["gcas"] = df_btb_ww["gcas"].astype(str)
                 df_btb_ww = df_btb_ww.sort_values(by=["location"])
