@@ -74,10 +74,56 @@ class BintobinView:
                     self.show_error(message=meesage)
                     st.stop()
 
+    def get_df_btb_view(self):
+        DEFAULT_ITEM_NOT_BTB = "80833958, 80833957, 80833959, 80841643, 80842234, 80842233, 80861956, 80863602, 80863601, 80883966, 80883983, 80883980, 80892777, 80892794, 80831266, 80831265, 83907572, 83907573, 83907574, 83907575, 83907576, 83907577, 83907578, 83907579, 83907580, 83907581, 83907582"
+        # Đọc file no_bin_to_bin_log.txt đưa content vào state
+        item_not_btb_from_txt = self.bintobin_controller.bintobin_model.read_item_not_btb()
+        self.bintobin_controller.state.set(AppConfig.StateKeys.ITEM_NOT_BTB, [int(item) for x in item_not_btb_from_txt.split(",") if (item := x.strip()).isdigit()])
+        self.item_not_btb_from_state = self.bintobin_controller.state.get(AppConfig.StateKeys.ITEM_NOT_BTB, [])
+
+        # Lấy data đã xử lý trong model từ state. Data này được set vào state từ ControllerBtB
+        self.df_btb_from_state = self.bintobin_controller.state.get(AppConfig.StateKeys.DF_BTB, pd.DataFrame())
+        # Tạo cột qty_total_need_move để remove bin duplicate
+        if len(self.df_btb_from_state)>0:
+            self.df_btb_from_state["qty_total_need_move"] = self.df_btb_from_state.groupby(["gcas", "location"])["qty_need_move"].transform("sum")
+            self.df_btb_from_state["pallet_count"] = self.df_btb_from_state.groupby(["gcas", "location"])["pallet"].transform("count")
+            self.df_btb_from_state["qty_total"] = self.df_btb_from_state.groupby(["gcas", "location"])["qty"].transform("sum")
+            self.df_btb_to_view = self.df_btb_from_state.drop_duplicates(subset=["location", "gcas"], keep="first").copy()
+
+            if self.item_not_btb_from_state:
+                mask_item_not_btb = pd.Series(True, self.df_btb_to_view.index)
+                mask_item_not_btb &= self.df_btb_to_view['gcas'].isin(self.item_not_btb_from_state)
+                self.df_btb_to_view = self.df_btb_to_view[~mask_item_not_btb].copy()
+            else:
+                self.df_btb_to_view = self.df_btb_to_view
+            # Lọc ra df_rack và df_ww
+            mask = pd.Series(True, self.df_btb_to_view.index)
+            mask_is_rack = mask & self.df_btb_to_view['location_system_type'].isin(["PF"])
+            mask_is_ww = mask & self.df_btb_to_view['location_system_type'].isin(["WW"])
+
+            self.df_btb_view_rack = self.df_btb_to_view[mask_is_rack].copy()
+            self.df_btb_view_rack["gcas"] = pd.to_numeric(self.df_btb_view_rack["gcas"],downcast="integer")
+            self.df_btb_view_rack["gcas"] = self.df_btb_view_rack["gcas"].astype(str)
+            self.df_btb_view_rack = self.df_btb_view_rack.sort_values(by=["location"])
+            self.num_bin_rack = self.df_btb_view_rack["location"].nunique()
+
+            self.df_btb_view_ww = self.df_btb_to_view[mask_is_ww].copy()
+            self.df_btb_view_ww["gcas"] = pd.to_numeric(self.df_btb_view_ww["gcas"],downcast="integer")
+            self.df_btb_view_ww["gcas"] = self.df_btb_view_ww["gcas"].astype(str)
+            self.df_btb_view_ww = self.df_btb_view_ww.sort_values(by=["location"])
+            self.num_bin_ww = self.df_btb_view_ww["location"].nunique()
+            # Lọc ra cột cần hiển thị
+            name_col_view_rack = ["location", "gcas", "batch", "status", "pallet_count", "qty_total_need_move"]
+            name_col_view_ww = ["location", "gcas", "batch", "status", "pallet_count", "qty_total"]
+            self.df_btb_view_rack = self.df_btb_view_rack[name_col_view_rack]
+            self.df_btb_view_ww = self.df_btb_view_ww[name_col_view_ww]
+        
+
     def render_page_btb(self):
         self.run_bintobin()
         self.import_inv_prime_csv()
         self.import_file_demand()
+        self.get_df_btb_view()
         load_custom_css()
 
         #Create layout bin to bin
@@ -90,51 +136,6 @@ class BintobinView:
 
         title_btb_ww = cont_bintobin.container(border=StatusBorder.BORDER.value)
         btb_ww = cont_bintobin.container(border=StatusBorder.BORDER.value)
-
-
-        #Lọc dataframe rack và ww
-        try:
-             # Đọc file no_bin_to_bin_log.txt đưa content vào state
-            item_not_btb_save = self.bintobin_controller.bintobin_model.read_item_not_btb()
-            self.bintobin_controller.state.set(AppConfig.StateKeys.ITEM_NOT_BTB, [int(item) for x in item_not_btb_save.split(",") if (item := x.strip()).isdigit()])
-            # Lấy data đã xử lỹ tron model từ state
-            df_btb_draft = self.bintobin_controller.state.get(AppConfig.StateKeys.DF_BTB)
-            list_item_not_btb_in_state = self.bintobin_controller.state.get(AppConfig.StateKeys.ITEM_NOT_BTB, [])
-
-            if list_item_not_btb_in_state:
-                mask_item_not_btb = pd.Series(True, df_btb_draft.index)
-                mask_item_not_btb &= df_btb_draft['gcas'].isin(list_item_not_btb_in_state)
-                df_btb = df_btb_draft[~mask_item_not_btb]
-            else:
-                df_btb = df_btb_draft
-
-            if isinstance(df_btb, pd.DataFrame):
-                mask = pd.Series(True, df_btb.index)
-                mask_is_rack = mask & df_btb['location_system_type'].isin(["PF"])
-                mask_is_ww = mask & df_btb['location_system_type'].isin(["WW"])
-
-                df_btb_rack = df_btb[mask_is_rack].copy()
-                df_btb_rack["gcas"] = pd.to_numeric(df_btb_rack["gcas"],downcast="integer")
-                df_btb_rack["gcas"] = df_btb_rack["gcas"].astype(str)
-                df_btb_rack = df_btb_rack.sort_values(by=["location"])
-                num_bin_rack = df_btb_rack["location"].nunique()
-
-                df_btb_ww = df_btb[mask_is_ww].copy()
-                df_btb_ww["gcas"] = pd.to_numeric(df_btb_ww["gcas"],downcast="integer")
-                df_btb_ww["gcas"] = df_btb_ww["gcas"].astype(str)
-                df_btb_ww = df_btb_ww.sort_values(by=["location"])
-                num_bin_ww = df_btb_ww["location"].nunique()
-
-            else:
-                df_btb_rack = pd.DataFrame()
-                df_btb_ww = pd.DataFrame()
-                num_bin_rack = 0
-                num_bin_ww = 0
-        except:
-            df_btb_rack = pd.DataFrame()
-            df_btb_ww = pd.DataFrame()
-            num_bin_rack = 0
-            num_bin_ww = 0
 
         with form_btb:
             with st.form(key="form_btb"):
@@ -221,30 +222,31 @@ class BintobinView:
 
             # Update strategy btb mới nếu có
             self.bintobin_controller.state.set(AppConfig.StateKeys.STRATEGY_BTB, selected_strategy)
+            self.show_success(message="Updated Done.")
             
 
         with title_btb_rack:
             # Header với container có thể control
             header_html  = f"""
             <div class="main-header" id="main-header">
-                <div class="header-title">BIN TO BIN MOVEMENT FOR RACK {num_bin_rack} LOCATIONS</div>
+                <div class="header-title">BIN TO BIN MOVEMENT FOR RACK {self.num_bin_rack} LOCATIONS</div>
             </div>
             """
             st.markdown(header_html, unsafe_allow_html=True)
 
         with btb_rack:
             st.html(f"<span class='df_btb'</span>")
-            st.dataframe(df_btb_rack, hide_index=True, height=500, use_container_width=True)
+            st.dataframe(self.df_btb_view_rack, hide_index=True, height=500, use_container_width=True)
 
         with title_btb_ww:
             # Header với container có thể control
             header_html  = f"""
             <div class="main-header" id="main-header">
-                <div class="header-title">BIN TO BIN MOVEMENT FOR WORKWAY {num_bin_ww} LOCATIONS</div>
+                <div class="header-title">BIN TO BIN MOVEMENT FOR WORKWAY {self.num_bin_ww} LOCATIONS</div>
             </div>
             """
             st.markdown(header_html, unsafe_allow_html=True)
 
         with btb_ww:
             st.html(f"<span class='df_btb'</span>")
-            st.dataframe(df_btb_ww, hide_index=True, height=250, use_container_width=True)
+            st.dataframe(self.df_btb_view_ww, hide_index=True, height=250, use_container_width=True)
