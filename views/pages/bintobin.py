@@ -200,7 +200,7 @@ class BintobinView:
                     # chu_de = st.selectbox("Chọn chủ đề bài viết:", ["Công nghệ", "Kinh doanh", "Sức khỏe"])
                     # dong_y = st.checkbox("Tôi đồng ý với điều khoản sử dụng")
                     
-                    text_content = f"{strategy_options[self.bintobin_controller.state.get(AppConfig.StateKeys.STRATEGY_BTB)]}"
+                    text_content = f"{strategy_options[selected_strategy]}"
                     color_code = "red"  # Hoặc dùng mã HEX như "#800080"
                     font_size = "18px"
                     # Sử dụng f-string truyền biến vào HTML
