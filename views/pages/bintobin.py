@@ -74,56 +74,72 @@ class BintobinView:
                     self.show_error(message=meesage)
                     st.stop()
 
-    def get_df_btb_view(self):
-        DEFAULT_ITEM_NOT_BTB = "80833958, 80833957, 80833959, 80841643, 80842234, 80842233, 80861956, 80863602, 80863601, 80883966, 80883983, 80883980, 80892777, 80892794, 80831266, 80831265, 83907572, 83907573, 83907574, 83907575, 83907576, 83907577, 83907578, 83907579, 83907580, 83907581, 83907582"
-        # Đọc file no_bin_to_bin_log.txt đưa content vào state
-        item_not_btb_from_txt = self.bintobin_controller.bintobin_model.read_item_not_btb()
-        self.bintobin_controller.state.set(AppConfig.StateKeys.ITEM_NOT_BTB, [int(item) for x in item_not_btb_from_txt.split(",") if (item := x.strip()).isdigit()])
-        self.item_not_btb_from_state = self.bintobin_controller.state.get(AppConfig.StateKeys.ITEM_NOT_BTB, [])
+    def get_df_btb_report(self):
+        DEFAULT_ITEM_NOT_BTB = ['80833958', '80833957', '80833959', '80841643',
+                                '80842234', '80842233', '80861956', '80863602',
+                                '80863601', '80883966', '80883983', '80883980',
+                                '80892777', '80892794', '80831266', '80831265',
+                                '83907572', '83907573', '83907574', '83907575',
+                                '83907576', '83907577', '83907578', '83907579',
+                                '83907580', '83907581', '83907582']
+        
+        try:
+            # Đọc file no_bin_to_bin_log.txt đưa content vào state
+            self.item_not_btb_from_txt = self.bintobin_controller.bintobin_model.read_item_not_btb()
+            self.bintobin_controller.state.set(AppConfig.StateKeys.ITEM_NOT_BTB, [int(item) for x in self.item_not_btb_from_txt.split(",") if (item := x.strip()).isdigit()])
+            self.item_not_btb_from_state = self.bintobin_controller.state.get(AppConfig.StateKeys.ITEM_NOT_BTB, [])
 
-        # Lấy data đã xử lý trong model từ state. Data này được set vào state từ ControllerBtB
-        self.df_btb_from_state = self.bintobin_controller.state.get(AppConfig.StateKeys.DF_BTB, pd.DataFrame())
-        # Tạo cột qty_total_need_move để remove bin duplicate
-        if len(self.df_btb_from_state)>0:
-            self.df_btb_from_state["qty_total_need_move"] = self.df_btb_from_state.groupby(["gcas", "location"])["qty_need_move"].transform("sum")
-            self.df_btb_from_state["pallet_count"] = self.df_btb_from_state.groupby(["gcas", "location"])["pallet"].transform("count")
-            self.df_btb_from_state["qty_total"] = self.df_btb_from_state.groupby(["gcas", "location"])["qty"].transform("sum")
-            self.df_btb_to_view = self.df_btb_from_state.drop_duplicates(subset=["location", "gcas"], keep="first").copy()
+            # Lấy data đã xử lý trong model từ state. Data này được set vào state từ ControllerBtB
+            self.df_btb_from_state = self.bintobin_controller.state.get(AppConfig.StateKeys.DF_BTB)
+            # Tạo cột qty_total_need_move để remove bin duplicate
+            if not self.df_btb_from_state is None:
+                self.df_btb_from_state["qty_total_need_move"] = self.df_btb_from_state.groupby(["gcas", "location"])["qty_need_move"].transform("sum")
+                self.df_btb_from_state["pallet_count"] = self.df_btb_from_state.groupby(["gcas", "location"])["pallet"].transform("count")
+                self.df_btb_from_state["qty_total"] = self.df_btb_from_state.groupby(["gcas", "location"])["qty"].transform("sum")
+                self.df_btb_to_view = self.df_btb_from_state.drop_duplicates(subset=["location", "gcas"], keep="first").copy()
 
-            if self.item_not_btb_from_state:
-                mask_item_not_btb = pd.Series(True, self.df_btb_to_view.index)
-                mask_item_not_btb &= self.df_btb_to_view['gcas'].isin(self.item_not_btb_from_state)
-                self.df_btb_to_view = self.df_btb_to_view[~mask_item_not_btb].copy()
+                if self.item_not_btb_from_state:
+                    mask_item_not_btb = pd.Series(True, self.df_btb_to_view.index)
+                    mask_item_not_btb &= self.df_btb_to_view['gcas'].isin(self.item_not_btb_from_state)
+                    self.df_btb_to_view = self.df_btb_to_view[~mask_item_not_btb].copy()
+                else:
+                    self.df_btb_to_view = self.df_btb_to_view
+                # Lọc ra df_rack và df_ww
+                mask = pd.Series(True, self.df_btb_to_view.index)
+                mask_is_rack = mask & self.df_btb_to_view['location_system_type'].isin(["PF"])
+                mask_is_ww = mask & self.df_btb_to_view['location_system_type'].isin(["WW"])
+
+                self.df_btb_report_rack = self.df_btb_to_view[mask_is_rack].copy()
+                self.df_btb_report_rack["gcas"] = pd.to_numeric(self.df_btb_report_rack["gcas"],downcast="integer")
+                self.df_btb_report_rack["gcas"] = self.df_btb_report_rack["gcas"].astype(str)
+                self.df_btb_report_rack = self.df_btb_report_rack.sort_values(by=["location"])
+                self.num_bin_rack = self.df_btb_report_rack["location"].nunique()
+
+                self.df_btb_report_ww = self.df_btb_to_view[mask_is_ww].copy()
+                self.df_btb_report_ww["gcas"] = pd.to_numeric(self.df_btb_report_ww["gcas"],downcast="integer")
+                self.df_btb_report_ww["gcas"] = self.df_btb_report_ww["gcas"].astype(str)
+                self.df_btb_report_ww = self.df_btb_report_ww.sort_values(by=["location"])
+                self.num_bin_ww = self.df_btb_report_ww["location"].nunique()
+                # Lọc ra cột cần hiển thị
+                name_col_view_rack = ["location", "gcas", "batch", "status", "pallet_count", "qty_total_need_move", "note_btb"]
+                name_col_view_ww = ["location", "gcas", "batch", "status", "pallet_count", "qty_total"]
+                self.df_btb_report_rack = self.df_btb_report_rack[name_col_view_rack]
+                self.df_btb_report_ww = self.df_btb_report_ww[name_col_view_ww]
+                # self.df_btb_report_rack = self.df_btb_report_rack
             else:
-                self.df_btb_to_view = self.df_btb_to_view
-            # Lọc ra df_rack và df_ww
-            mask = pd.Series(True, self.df_btb_to_view.index)
-            mask_is_rack = mask & self.df_btb_to_view['location_system_type'].isin(["PF"])
-            mask_is_ww = mask & self.df_btb_to_view['location_system_type'].isin(["WW"])
-
-            self.df_btb_view_rack = self.df_btb_to_view[mask_is_rack].copy()
-            self.df_btb_view_rack["gcas"] = pd.to_numeric(self.df_btb_view_rack["gcas"],downcast="integer")
-            self.df_btb_view_rack["gcas"] = self.df_btb_view_rack["gcas"].astype(str)
-            self.df_btb_view_rack = self.df_btb_view_rack.sort_values(by=["location"])
-            self.num_bin_rack = self.df_btb_view_rack["location"].nunique()
-
-            self.df_btb_view_ww = self.df_btb_to_view[mask_is_ww].copy()
-            self.df_btb_view_ww["gcas"] = pd.to_numeric(self.df_btb_view_ww["gcas"],downcast="integer")
-            self.df_btb_view_ww["gcas"] = self.df_btb_view_ww["gcas"].astype(str)
-            self.df_btb_view_ww = self.df_btb_view_ww.sort_values(by=["location"])
-            self.num_bin_ww = self.df_btb_view_ww["location"].nunique()
-            # Lọc ra cột cần hiển thị
-            name_col_view_rack = ["location", "gcas", "batch", "status", "pallet_count", "qty_total_need_move"]
-            name_col_view_ww = ["location", "gcas", "batch", "status", "pallet_count", "qty_total"]
-            self.df_btb_view_rack = self.df_btb_view_rack[name_col_view_rack]
-            self.df_btb_view_ww = self.df_btb_view_ww[name_col_view_ww]
+                self.num_bin_rack = 0
+                self.num_bin_ww = 0
+                self.df_btb_report_rack = pd.DataFrame()
+                self.df_btb_report_ww = pd.DataFrame()
+        except Exception as e:
+            self.show_error(e)
         
 
     def render_page_btb(self):
         self.run_bintobin()
         self.import_inv_prime_csv()
         self.import_file_demand()
-        self.get_df_btb_view()
+        self.get_df_btb_report()
         load_custom_css()
 
         #Create layout bin to bin
@@ -137,23 +153,33 @@ class BintobinView:
         title_btb_ww = cont_bintobin.container(border=StatusBorder.BORDER.value)
         btb_ww = cont_bintobin.container(border=StatusBorder.BORDER.value)
 
+        # Hiển thị msg khi button Update Config được click. Sẽ rerun và hiện thông báo này cho người dùng
+        # Nếu không đưa vào state thì khi vừa click button xong chương trình sẽ rerun lại và người dùng không kịp thấy thông báo
+        MESSAGE_BUTTON_UPDATE_CONFIG = "success_msg"
+        if MESSAGE_BUTTON_UPDATE_CONFIG in self.bintobin_controller.state:
+            # Hiển thị lại tin nhắn đã lưu ở lượt chạy trước
+            self.show_success(st.session_state.success_msg)
+            # Hiển thị xong thì xóa ngay trong state để không bị lặp lại ở lần sau
+            del self.bintobin_controller.state.success_msg
+
         with form_btb:
             with st.form(key="form_btb"):
                 col1, col2 = st.columns(2, gap="medium") #st.columns([3, 1])
                 with col1:
                     # Đọc file no_bin_to_bin_log.txt lấy những items không btb đã lưu
-                    item_not_btb_save = self.bintobin_controller.state.get(AppConfig.StateKeys.ITEM_NOT_BTB, [])
-                    if not item_not_btb_save:
-                        item_not_btb_save = None
-                    else:
-                        item_not_btb_save = ", ".join([str(item) for item in item_not_btb_save])
-
+                    #item_not_btb_save = self.bintobin_controller.state.get(AppConfig.StateKeys.ITEM_NOT_BTB, [])
+                    # item_not_btb_from_txt = self.bintobin_controller.bintobin_model.read_item_not_btb()
+                    # if not self.item_not_btb_from_state:
+                    #     self.item_not_btb_from_state = ""
+                    # else:
+                    #     self.item_not_btb_from_state = ", ".join([str(item) for item in self.item_not_btb_from_state])
                     item_not_btb = st.text_area(
                         label="Items Excluded from Bin-to-Bin",
-                        value = item_not_btb_save,
-                        placeholder="Điền những Items không cần bin to bin vào đây. Các Items cách nhau bằng dấu phẩy. Ví dụ: 80883962, 80892777, 80833957",
-                        height=68)
-                    
+                        value = self.item_not_btb_from_txt,
+                        # key="text_buffer",
+                        placeholder="Điền những Items không cần bin to bin vào đây. Các Items cách nhau bằng dấu phẩy. Ví dụ: 80833958, 80833957, 80833959, 80892777, 80883983",
+                        height=None)
+                   
                 with col2:
                     strategy_options = {
                         "standard": "Standard Approach (Chiến thuật tiêu chuẩn / Mặc định)",
@@ -174,7 +200,7 @@ class BintobinView:
                     # chu_de = st.selectbox("Chọn chủ đề bài viết:", ["Công nghệ", "Kinh doanh", "Sức khỏe"])
                     # dong_y = st.checkbox("Tôi đồng ý với điều khoản sử dụng")
                     
-                    text_content = f"{strategy_options[selected_strategy]}"
+                    text_content = f"{strategy_options[self.bintobin_controller.state.strategy_btb]}"
                     color_code = "red"  # Hoặc dùng mã HEX như "#800080"
                     font_size = "18px"
                     # Sử dụng f-string truyền biến vào HTML
@@ -207,7 +233,7 @@ class BintobinView:
                         submit_btn = st.form_submit_button(label="Update Configuration", type="primary", use_container_width=True)
 
         # 3. Xử lý logic khi bấm nút (nằm ngoài khối st.form)
-        # Hàm này trả về True nếu người dùng CLICK vào nút
+        # Hàm này trả về True nếu người dùng CLICK vào button
         if submit_btn:
             if item_not_btb:
                 final_int_list = [int(item) for x in item_not_btb.split(",") if (item := x.strip()).isdigit()]
@@ -222,7 +248,9 @@ class BintobinView:
 
             # Update strategy btb mới nếu có
             self.bintobin_controller.state.set(AppConfig.StateKeys.STRATEGY_BTB, selected_strategy)
-            self.show_success(message="Updated Done.")
+            # self.show_success(message="Configuration updated successfully") #Update completed
+            self.bintobin_controller.state.success_msg = f"Configuration updated successfully"
+            st.rerun()
             
 
         with title_btb_rack:
@@ -236,7 +264,7 @@ class BintobinView:
 
         with btb_rack:
             st.html(f"<span class='df_btb'</span>")
-            st.dataframe(self.df_btb_view_rack, hide_index=True, height=500, use_container_width=True)
+            st.dataframe(self.df_btb_report_rack, hide_index=True, height=500, use_container_width=True)
 
         with title_btb_ww:
             # Header với container có thể control
@@ -249,4 +277,4 @@ class BintobinView:
 
         with btb_ww:
             st.html(f"<span class='df_btb'</span>")
-            st.dataframe(self.df_btb_view_ww, hide_index=True, height=250, use_container_width=True)
+            st.dataframe(self.df_btb_report_ww, hide_index=True, height=250, use_container_width=True)

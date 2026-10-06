@@ -82,7 +82,7 @@ class BintobinModel:
         return location
     
     def write_item_not_btb(self, no_bin_to_bin_items: List) -> None:
-        file_path = "no_bin_to_bin_log.txt"
+        file_path = "no_bin_to_bin_log_no_delete.txt"
         if no_bin_to_bin_items is None:
             no_bin_to_bin_items = []
         # 1. Biến list thành chuỗi: "80883962, 67890, 112233"
@@ -92,7 +92,7 @@ class BintobinModel:
             file.write(csv_string)
 
     def read_item_not_btb(self) -> List:
-        file_path = "no_bin_to_bin_log.txt"
+        file_path = "no_bin_to_bin_log_no_delete.txt"
         # 2. Đọc file
         with open(file_path, "r", encoding="utf-8") as file:
             content = file.read()
@@ -192,7 +192,7 @@ class BintobinModel:
             # QUAN TRỌNG: Sắp xếp tồn kho tăng dần theo GCAS và QTY 
             # Việc này giúp ưu tiên giải phóng các location pallet nguyên và ưu tiên lấy hàng HD, QU trước, để hàng RL lại T1 để xuất (tối ưu không gian Bin)
             df_process = df_process.sort_values(by=['gcas', 'qty', 'status'], ascending=[True, False, False]).reset_index(drop=True)
-
+            
             # Chuyển dữ liệu sang dạng mảng NumPy/List để vòng lặp chạy với tốc độ phần cứng (nhanh gấp hàng trăm lần lặp df)
             gcas_arr = df_process['gcas'].values
             ton_arr = df_process['qty'].values
@@ -234,15 +234,25 @@ class BintobinModel:
             df_process['qty_need_move'] = thung_can_move_list
             df_process['available'] = con_lai_can_lay_list
 
+            # 4. Xác định item over_demand, not_in_demand hay chừa pds
+            inv_high = df_process["inv_high"]
+            qty_export = df_process["qty_export"]
+            qty_pds = df_process["qty_pds"]
+            qty_keep_t1 = df_process["keep_t1"]
+            not_in_demand = (qty_keep_t1 == 0) & (qty_pds == 0) & (qty_export == 0)
+            keep_pds = (inv_high < qty_pds)
+            conditions = [not_in_demand, keep_pds]
+            choices_name = ["Not In Demand", "Keep PDS"]
+            df_process["note_btb"] = np.select(condlist=conditions, choicelist=choices_name, default="Over Demand")
 
-            # 4. LỌC KẾT QUẢ CUỐI CÙNG
+            # 5. LỌC KẾT QUẢ CUỐI CÙNG
             df_btb_rack = df_process[df_process['qty_need_move'] > 0].copy()
 
             # final_move_list = final_move_list[[
             #     'gcas', 'location', 'qty', 'inv_t1', 'inv_high', 'total_inv', 'qty_pds', 'qty_export', 'inv_after_pds', 'keep_t1', 'qty_to_move', 'qty_need_move', 'available', 'location_system_type'
             # ]]
 
-            # 5. LẤY NHỮNG ITEM Ở ĐƯỜNG LUỒNG KHÔNG CÓ TRONG DEMAND
+            # 6. LẤY NHỮNG ITEM Ở ĐƯỜNG LUỒNG KHÔNG CÓ TRONG DEMAND
             df_item_not_in_deamnd = df_move_action[(df_move_action["qty_pds"] == 0) & (df_move_action["qty_export"] == 0)]
             df_btb_ww = pd.merge(df_inv_ww_lsl, df_item_not_in_deamnd, on='gcas', how='left')
             df_btb_ww = df_btb_ww[(df_btb_ww["qty_pds"] == 0) & (df_btb_ww["qty_export"] == 0)]
