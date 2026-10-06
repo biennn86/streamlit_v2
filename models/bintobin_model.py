@@ -412,48 +412,117 @@ class BintobinModel:
     
 
     def _get_demand_sheet_by_sheet(self, df: pd.DataFrame) -> pd.DataFrame:
-        # 1. Đọc toàn bộ file Excel
-        #1. Đọc file
-        # df = selected_sheets["DEMAND EXPORT"]
+        # CHUẨN HÓA DỮ LIỆU ĐỂ TÌM KIẾM (Tránh tạo bản sao lớn bằng cách xử lý trực tiếp)
+        df_upper = df.astype(str).apply(lambda x: x.str.strip().str.upper())
 
-        # 2. Tìm vị trí cột chứa chữ 'SKU' (Lấy phần tử đầu tiên của tuple)
-        sku_mask = df.astype(str).apply(lambda x: x.str.strip().str.upper()) == 'SKU'
-        sku_col_idx = np.where(sku_mask.any(axis=0))[0][0]
+        # VALIDATE 1: Tìm cột 'SKU' an toàn
+        sku_mask = df_upper == "SKU"
+        sku_positions = np.where(sku_mask.any(axis=0))[0]
+        if len(sku_positions) == 0:
+            raise ValueError(
+                "Không tìm thấy cột chứa từ khóa 'SKU' trong file dữ liệu."
+            )
+        sku_col_idx = sku_positions[0]
 
-        # 3. Tìm vị trí cột chứa chữ 'CON LAI/CÒN LẠI'
-        con_lai_mask = df.astype(str).apply(lambda x: x.str.strip().str.upper().str.contains('CON LAI|CÒN LẠI', regex=True))
-        con_lai_col_idx = np.where(con_lai_mask.any(axis=0))[0][0]
+        # VALIDATE 2: Tìm cột 'CON LAI/CÒN LẠI' an toàn
+        con_lai_mask = df_upper.apply(
+            lambda x: x.str.contains("CON LAI|CÒN LẠI", regex=True)
+        )
+        con_lai_positions = np.where(con_lai_mask.any(axis=0))[0]
+        if len(con_lai_positions) == 0:
+            raise ValueError(
+                "Không tìm thấy cột chứa từ khóa 'CON LAI' hoặc 'CÒN LẠI'."
+            )
+        con_lai_col_idx = con_lai_positions[0]
 
-        # Tọa độ cột Market = Cột SKU dịch sang phải 2 ô (Hết lỗi TypeError)
+        # VALIDATE 3: Kiểm tra giới hạn cột Market (SKU + 2)
         market_col_idx = sku_col_idx + 2
+        if market_col_idx >= df.shape[1]:
+            raise IndexError(
+                f"Cột Market tính toán (chỉ số {market_col_idx}) vượt quá số cột hiện có của file."
+            )
 
-        # 4. Trích xuất tên Market (Đã sửa lỗi FutureWarning bằng .astype(bool))
-        is_next_row_sku = sku_mask.iloc[:, sku_col_idx].shift(-1).astype(bool).fillna(False)
-        df['Market'] = np.where(is_next_row_sku, df.iloc[:, market_col_idx], np.nan)
+        # 4. Trích xuất tên Market an toàn (Dùng shift(-1) chuẩn hóa thành boolean)
+        is_next_row_sku = (
+            sku_mask.iloc[:, sku_col_idx].shift(-1).fillna(False).astype(bool)
+        )
+        df["Market"] = np.where(
+            is_next_row_sku, df.iloc[:, market_col_idx], np.nan
+        )
 
-        # Dùng ffill() để điền tên Market xuống các dòng dưới
-        df['Market'] = df['Market'].ffill()
+        # Điền Market xuống dưới
+        df["Market"] = df["Market"].ffill()
 
-        # 5. Gộp dữ liệu thành bảng kết quả mới bằng cách chỉ định chỉ số cột cụ thể
-        result_df = pd.DataFrame({
-            'Market': df['Market'],
-            'SKU': df.iloc[:, sku_col_idx],
-            'sl_demand': df.iloc[:, con_lai_col_idx]
-        })
+        # 5. Khởi tạo DataFrame kết quả
+        result_df = pd.DataFrame(
+            {
+                "Market": df["Market"],
+                "SKU": df.iloc[:, sku_col_idx],
+                "sl_demand": df.iloc[:, con_lai_col_idx],
+            }
+        )
 
-        # 6. Lọc sạch dữ liệu: Chỉ giữ dòng có SKU là chữ số
-        result_df['SKU_clean'] = result_df['SKU'].astype(str).str.strip()
-        final_df = result_df[result_df['SKU_clean'].str.isdigit() == True].copy()
+        # VALIDATE 4: Lọc sạch SKU (Chỉ giữ dòng là chữ số và loại bỏ NaN/Khoảng trắng)
+        result_df["SKU_clean"] = result_df["SKU"].astype(str).str.strip()
+        final_df = result_df[result_df["SKU_clean"].str.isdigit()].copy()
 
-        # Giữ lại đúng 3 cột cần thiết theo yêu cầu
-        final_df = final_df[['SKU', 'sl_demand', 'Market']]
-        final_df = final_df.rename(columns={
-            'SKU': 'gcas',
-            'Market': 'market'
-        })
+        # Nếu sau khi lọc không còn dữ liệu -> Validate lỗi cấu trúc dòng
+        if final_df.empty:
+            print(
+                "Cảnh báo: Không có dòng dữ liệu SKU hợp lệ (dạng số) nào được tìm thấy."
+            )
 
-        # Hiển thị kết quả kiểm tra
+        # 6. Định dạng lại đầu ra
+        final_df = final_df[["SKU", "sl_demand", "Market"]]
+        final_df = final_df.rename(columns={"SKU": "gcas", "Market": "market"})
+
         return final_df
+
+        #================================================
+        # # ĐOẠN CODE CŨ CHƯA VALIDATE
+        # # 1. Đọc toàn bộ file Excel
+        # #1. Đọc file
+        # # df = selected_sheets["DEMAND EXPORT"]
+
+        # # 2. Tìm vị trí cột chứa chữ 'SKU' (Lấy phần tử đầu tiên của tuple)
+        # sku_mask = df.astype(str).apply(lambda x: x.str.strip().str.upper()) == 'SKU'
+        # sku_col_idx = np.where(sku_mask.any(axis=0))[0][0]
+
+        # # 3. Tìm vị trí cột chứa chữ 'CON LAI/CÒN LẠI'
+        # con_lai_mask = df.astype(str).apply(lambda x: x.str.strip().str.upper().str.contains('CON LAI|CÒN LẠI', regex=True))
+        # con_lai_col_idx = np.where(con_lai_mask.any(axis=0))[0][0]
+
+        # # Tọa độ cột Market = Cột SKU dịch sang phải 2 ô (Hết lỗi TypeError)
+        # market_col_idx = sku_col_idx + 2
+
+        # # 4. Trích xuất tên Market (Đã sửa lỗi FutureWarning bằng .astype(bool))
+        # is_next_row_sku = sku_mask.iloc[:, sku_col_idx].shift(-1).astype(bool).fillna(False)
+        # df['Market'] = np.where(is_next_row_sku, df.iloc[:, market_col_idx], np.nan)
+
+        # # Dùng ffill() để điền tên Market xuống các dòng dưới
+        # df['Market'] = df['Market'].ffill()
+
+        # # 5. Gộp dữ liệu thành bảng kết quả mới bằng cách chỉ định chỉ số cột cụ thể
+        # result_df = pd.DataFrame({
+        #     'Market': df['Market'],
+        #     'SKU': df.iloc[:, sku_col_idx],
+        #     'sl_demand': df.iloc[:, con_lai_col_idx]
+        # })
+
+        # # 6. Lọc sạch dữ liệu: Chỉ giữ dòng có SKU là chữ số
+        # result_df['SKU_clean'] = result_df['SKU'].astype(str).str.strip()
+        # final_df = result_df[result_df['SKU_clean'].str.isdigit() == True].copy()
+
+        # # Giữ lại đúng 3 cột cần thiết theo yêu cầu
+        # final_df = final_df[['SKU', 'sl_demand', 'Market']]
+        # final_df = final_df.rename(columns={
+        #     'SKU': 'gcas',
+        #     'Market': 'market'
+        # })
+
+        # # Hiển thị kết quả kiểm tra
+        # return final_df
+        #=================================================
 
 #==========================================================================================================================
 # def process_bintobin(self, df_tonkho: pd.DataFrame, dict_demand: Dict[str, pd.DataFrame]) ->pd.DataFrame:
