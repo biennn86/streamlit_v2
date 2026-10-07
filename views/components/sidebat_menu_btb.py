@@ -54,7 +54,7 @@ def import_inv_prime_csv_btb():
             st.file_uploader('Choose File Inventory Prime CSV',
                                 accept_multiple_files=False,
                                 key=current_uploader_key,
-                                type=["csv"],
+                                type=["csv", "xlsx", "xlsm"],
                                 on_change=handle_new_import_inv_btb)
     if AppManager().state.get(AppConfig.StateKeys.CURRENT_FILE_INV_BTB, []):
         files_to_process = AppManager().state.get(AppConfig.StateKeys.CURRENT_FILE_INV_BTB, [])

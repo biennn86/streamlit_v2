@@ -43,9 +43,35 @@ class BintobinModel:
                 error_message=f"Lỗi hệ thống chưa xác định: {str(e)}"
             )
 
+    def real_file_import_inv_excel(self, link_file_inv_csv) -> pd.DataFrame:
+        try:
+            self.df_inv_csv = self.inventory_model._read_file_inv_excel_prime(link_file_inv_csv)
+            return ImportBtbResult(
+                    status=ImportFileStatus.SUCCESS,
+                    data = self.df_inv_csv
+                    )
+        except ValueError as val_error:
+            # ĐÂY LÀ NƠI HỨNG LỖI INVALID FILE TẬP TRUNG
+            # Bất kỳ file nào trong vòng lặp bị lỗi cấu trúc cột, nó sẽ nhảy ngay lập tức vào đây. Kể cả ValueError trong chương trình con
+            # Giúp ngắt toán tử concat phía dưới, không làm sập phần mềm.
+            return ImportBtbResult(
+                status=ImportFileStatus.INVALID,
+                error_message=f"Xử lý thất bại! Lý do: {str(val_error)}"
+            )
+        except Exception as e:
+            # Hứng các lỗi hệ thống bất ngờ khác (mất kết nối, file hỏng nặng...)
+            return ImportBtbResult(
+                status=ImportFileStatus.SYSTEM_ERROR,
+                error_message=f"Lỗi hệ thống chưa xác định: {str(e)}"
+            )
+
     def read_file_demand(self, link_file_demand) -> pd.DataFrame:
         try:
-            selected_sheets  = pd.read_excel(link_file_demand, sheet_name=["DEMAND EXPORT", "CTMZ,PDS,ST"])
+            try:
+                selected_sheets  = pd.read_excel(link_file_demand, sheet_name=["DEMAND EXPORT", "CTMZ,PDS,ST"])
+            except:
+                raise ValueError(f"File được chọn không phải là file Demand")
+            
             dict_demand = {}
             for key in selected_sheets.keys():
                 df_export = selected_sheets[key] #CTMZ,PDS,ST

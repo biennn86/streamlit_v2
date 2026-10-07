@@ -1,5 +1,6 @@
 import logging
 import pandas as pd
+from pathlib import Path
 from typing import List, Tuple, Dict, Any, Optional
 from utils.constants import ValidateFile, Pattern, Columns, VNL_CAT, ImportFileStatus
 from models.inventory_model import InventoryModel
@@ -24,7 +25,16 @@ class BintobinController(BaseStateController):
         }
 
     def import_file_tonkho_prime(self, link_file)-> Tuple[bool, str]:
-        result = self.bintobin_model.real_file_import_inv_csv(link_file)
+        # Nếu người dùng truyền vào một danh sách, chỉ lấy file đầu tiên ([0])
+        file = link_file[0] if isinstance(link_file, (list, tuple)) else link_file
+        extension = Path(file.name).suffix[1:].lower()
+        if extension in ("csv",):
+            result = self.bintobin_model.real_file_import_inv_csv(file)
+        elif extension in ("xlsx", "xlsm"):
+            result = self.bintobin_model.real_file_import_inv_excel(file)
+        else:
+            return False, f"Định dạng file .{extension} không được hỗ trợ!"
+
         if result.status == ImportFileStatus.SUCCESS:
             #Trả status file_import về False. Để không chạy vào phương thức import trong view nữa
             self.state.set(AppConfig.StateKeys.FILE_UPLOADER_INV_BTB, False)

@@ -85,7 +85,7 @@ class InventoryModel:
         list_df = []
         try:
             for file in uploaded_files:
-                extension = Path(file.name).suffix[1:]
+                extension = Path(file.name).suffix[1:].lower()
                 if extension in ["csv"]:
                     df_single = self._read_file_inv_prime(file)
                     #Lấy tên file để biết ngày giờ chạy tồn kho
@@ -566,7 +566,70 @@ class InventoryModel:
 
             # # Tự động thêm số 0 vào đầu cho đến khi chuỗi đủ 8 ký tự (ví dụ: '12345' -> '00012345')
             # df['prtnum'] = df['prtnum'].str.zfill(8)
-        
+    def _read_file_inv_excel_prime(self, link_excel) -> pd.DataFrame:
+        try:
+            df = pd.read_excel(link_excel, sheet_name=0)
+            is_invalid = self._validate_file_inv_prime(df)
+            if not is_invalid:
+                raise ValueError(f"Incorrect file type. Please upload an inventory Prime file")
+            if is_invalid:
+                #1. Loại bỏ những dòng trống hoàn toàn
+                df = df.dropna(how='all')
+                #2. Chuẩn hóa tên cột
+                df.columns = [re.sub(r"[\s+.,]", "_", col.strip().lower()) for col in df.columns]
+                #3. Tự động đánh số các cột trùng tên (ví dụ: uom, uom.1)
+                cols = pd.Series(df.columns)
+                for dup in cols[cols.duplicated()].unique(): 
+                    cols[cols == dup] = [f"{dup}_{i}" if i != 0 else dup for i in range(cols[cols == dup].shape[0])]
+                df.columns = cols
+                #4. Đổi tên cột stkuom thành uom nếu file inv Prime import là stkuom
+                df = df.rename(columns={"stkuom": "uom"})
+                #5. Thêm cột class
+                df["cat_inv"] = np.where(
+                    df["uom"].isin(["CS"]),
+                    "FG",
+                    "RPM"
+                )
+                #6. Edit lại cột status
+                conditions = [
+                    df['invsts'] == 'U',
+                    df['invsts'] == 'Q',
+                    df['invsts'] == 'B'
+                ]
+                choices = ['RL', 'QU', 'HD']
+                df['invsts'] = np.select(conditions, choices, default=df['invsts'])
+                #7. Thêm cột pallet
+                # df['pallet'] = df.groupby('locatn')['locatn'].transform('count')
+                df['pallet'] = 1
+                #8. Thêm số 0 vào trước cột lotnum cho đủ 10 ký tự
+                df['lotnum'] = df['lotnum'].str.zfill(10)
+                #9. Cột vnl tạm thời chứa lpn
+                df["vnl"] = df["lodnum"]
+                #10. Cột note_inv tạm thời để trống
+                df["note_inv"] = "NONE"
+                #11. Lọc cột cần lấy
+                df_inv_fillter = df[["prtnum", "lotnum", "vnl", "invsts",  "untqty", "pallet", "stoloc", "note_inv",  "cat_inv"]].copy()
+                #12. Đổi tên cột sang cột inv rtcis
+                df_inv_fillter = df_inv_fillter.rename(columns=
+                {   
+                    "prtnum": "gcas",
+                    "lotnum": "batch",
+                    "vln": "vnl",
+                    "invsts": "status",
+                    "stoloc": "location",
+                    "untqty": "qty",
+                    "lodnum": "note_inv",
+                    "cat_inv": "cat_inv"
+                })
+                
+                # print(df_inv_fillter.index.is_unique)
+                # df_inv_fillter.to_excel("tonkholoi.xlsx", index=False)
+                return df_inv_fillter
+        except ValueError as val_error:
+            raise val_error
+        except Exception as e:
+            raise e
+
     def get_datetime_from_filename_inv_prime(self, file_name) -> str:
         #Lấy tên file để biết ngày giờ chạy tồn kho
         #Lấy chuỗi ngày, giờ bằng regex từ chuỗi tên file
