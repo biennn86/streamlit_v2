@@ -568,7 +568,7 @@ class InventoryModel:
             # df['prtnum'] = df['prtnum'].str.zfill(8)
     def _read_file_inv_excel_prime(self, link_excel) -> pd.DataFrame:
         try:
-            df = pd.read_excel(link_excel, sheet_name=0)
+            df = pd.read_excel(link_excel, sheet_name=0, dtype={'lotnum': str, 'lodnum': str})
             is_invalid = self._validate_file_inv_prime(df)
             if not is_invalid:
                 raise ValueError(f"Incorrect file type. Please upload an inventory Prime file")
