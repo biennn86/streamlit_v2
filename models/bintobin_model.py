@@ -108,26 +108,57 @@ class BintobinModel:
         return location
     
     def write_item_not_btb(self, no_bin_to_bin_items: List) -> None:
-        file_path = "no_bin_to_bin_log_no_delete.txt"
+        FILE_PATH = "no_bin_to_bin_log_no_delete.txt"
         if no_bin_to_bin_items is None:
             no_bin_to_bin_items = []
         # 1. Biến list thành chuỗi: "80883962, 67890, 112233"
         csv_string = ", ".join([str(item) for item in no_bin_to_bin_items])
         # 2. Ghi xuống file
-        with open(file_path, "w", encoding="utf-8") as file:
-            file.write(csv_string)
+        try:
+            with open(FILE_PATH, "w", encoding="utf-8") as file:
+                file.write(csv_string)
+        except FileNotFoundError as err:
+            raise f"Lỗi không tìm thấy file txt Item not bin to bin: {err}"
 
     def read_item_not_btb(self) -> List:
-        file_path = "no_bin_to_bin_log_no_delete.txt"
+        FILE_PATH = "no_bin_to_bin_log_no_delete.txt"
         # 2. Đọc file
-        with open(file_path, "r", encoding="utf-8") as file:
-            content = file.read()
-        
-        # Chuyển ngược chuỗi thành list số nguyên, tự động dọn rác khoảng trắng
-        loaded_list = [int(item) for x in content.split(",") if (item := x.strip()).isdigit()]
-        loaded_string = ", ".join([str(item) for item in loaded_list])
-        return loaded_string
+        try:
+            with open(FILE_PATH, "r", encoding="utf-8") as file:
+                content = file.read()
+            # Chuyển ngược chuỗi thành list số nguyên, tự động dọn rác khoảng trắng
+            loaded_list = [int(item) for x in content.split(",") if (item := x.strip()).isdigit()]
+            loaded_string = ", ".join([str(item) for item in loaded_list])
+            return loaded_string
+        except FileNotFoundError as err:
+            raise f"Lỗi không tìm thấy file txt Item not bin to bin: {err}"
 
+    def get_deamnd_export(self, dict_demand: Dict[str, pd.DataFrame]) -> pd.DataFrame:
+        try:
+            if (not dict_demand):
+                return ImportBtbResult(status=ImportFileStatus.INVALID, error_message="Không có file nào được tải lên.")
+            df_demand_export = dict_demand.get("demand_export", pd.DataFrame()).rename(columns={"sl_demand": "qty_export"})
+            df_demand_pds = dict_demand.get("demand_pds", pd.DataFrame()).rename(columns={"sl_demand": "qty_pds"})
+            df_demand_export = df_demand_export[df_demand_export["qty_export"] > 0]
+            df_demand_export = df_demand_export.groupby(["gcas"]).agg({
+                "qty_export": "sum",
+                "market": lambda x: " & ".join(x.astype(str).str.strip().unique())
+            }).reset_index()
+
+            return ImportBtbResult(
+                                ImportFileStatus.SUCCESS,
+                                data = df_demand_export
+                            )
+        except ValueError as val_error:
+            return ImportBtbResult(
+                status=ImportFileStatus.INVALID,
+                error_message=f"Xử lý thất bại! Lý do: {str(val_error)}"
+            )
+        except Exception as e:
+            return ImportBtbResult(
+                status=ImportFileStatus.SYSTEM_ERROR,
+                error_message=f"Lỗi hệ thống chưa xác định: {str(e)}"
+            )
     def process_bintobin_standard(self, df_inventory: pd.DataFrame, dict_demand: Dict[str, pd.DataFrame]) ->pd.DataFrame:
         try:
             #df_inventory.empty and (not dict_demand or all(df.empty for df in dict_demand.values())):
@@ -262,14 +293,34 @@ class BintobinModel:
 
             # 4. Xác định item over_demand, not_in_demand hay chừa pds
             inv_high = df_process["inv_high"]
+            qty_to_move = df_process["qty_to_move"]
             qty_export = df_process["qty_export"]
             qty_pds = df_process["qty_pds"]
             qty_keep_t1 = df_process["keep_t1"]
+            # 4.1. Not in demand
             not_in_demand = (qty_keep_t1 == 0) & (qty_pds == 0) & (qty_export == 0)
-            keep_pds = (inv_high < qty_pds)
-            conditions = [not_in_demand, keep_pds]
-            choices_name = ["Not In Demand", "Keep PDS"]
-            df_process["note_btb"] = np.select(condlist=conditions, choicelist=choices_name, default="Over Demand")
+            # 4.2. qty_export = 0 và qty_pds > 0 => chỉ giữ pds không xuất export
+            keep_pds = (qty_export == 0) & (qty_pds > 0)
+            # 4.3. qty_export > 0 và qty_pds = 0 và ty_to_move > 0 => Over demand
+            over_demand = (qty_export > 0) & (qty_pds == 0) & (qty_to_move > 0)
+            # 4.4. qty_export > 0 và qty_pds > 0 qty_pds < inv_high  => Over demand
+            over_demand_keep_pds_done = (qty_export > 0) & (qty_pds > 0) & (qty_pds < inv_high)
+            # 4.5. qty_export > 0 và qty_pds > 0 qty_pds > inv_high  => Vừa keep pds vừa xuất export
+            keep_pds_and_export = (qty_export > 0) & (qty_pds > 0) & (qty_pds > inv_high)
+
+            conditions = [not_in_demand,
+                          keep_pds, over_demand,
+                          over_demand_keep_pds_done,
+                          keep_pds_and_export]
+            lost_pds = qty_pds - inv_high
+            choices_name = [
+                "Not In Demand",
+                "Keep PDS " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
+                "Over Demand " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
+                "Over Demand " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
+                "Keep PDS while exporting. PDS need keep " + lost_pds.fillna(0).astype(int).astype(str) + " CS. Mind not to over-export"]
+            
+            df_process["note_btb"] = np.select(condlist=conditions, choicelist=choices_name, default="Unknown")
 
             # 5. LỌC KẾT QUẢ CUỐI CÙNG
             df_btb_rack = df_process[df_process['qty_need_move'] > 0].copy()
@@ -282,6 +333,7 @@ class BintobinModel:
             df_item_not_in_deamnd = df_move_action[(df_move_action["qty_pds"] == 0) & (df_move_action["qty_export"] == 0)]
             df_btb_ww = pd.merge(df_inv_ww_lsl, df_item_not_in_deamnd, on='gcas', how='left')
             df_btb_ww = df_btb_ww[(df_btb_ww["qty_pds"] == 0) & (df_btb_ww["qty_export"] == 0)]
+            df_btb_ww["note_btb"] = "Not In Demand"
             # 6. GỘP 2 DATAFRAME BIN TO BIN RACK VÀ WW
             df_btb_final = pd.concat([df_btb_rack, df_btb_ww], ignore_index=True)
 
@@ -406,6 +458,38 @@ class BintobinModel:
             df_process['qty_need_move'] = thung_can_move_list
             df_process['available'] = con_lai_can_lay_list
 
+            # 4. Xác định item over_demand, not_in_demand hay chừa pds
+            inv_high = df_process["inv_high"]
+            qty_to_move = df_process["qty_to_move"]
+            qty_export = df_process["qty_export"]
+            qty_pds = df_process["qty_pds"]
+            qty_keep_t1 = df_process["keep_t1"]
+            # 4.1. Not in demand
+            not_in_demand = (qty_keep_t1 == 0) & (qty_pds == 0) & (qty_export == 0)
+            # 4.2. qty_export = 0 và qty_pds > 0 => chỉ giữ pds không xuất export
+            keep_pds = (qty_export == 0) & (qty_pds > 0)
+            # 4.3. qty_export > 0 và qty_pds = 0 và ty_to_move > 0 => Over demand
+            over_demand = (qty_export > 0) & (qty_pds == 0) & (qty_to_move > 0)
+            # 4.4. qty_export > 0 và qty_pds > 0 qty_pds < inv_high  => Over demand
+            over_demand_keep_pds_done = (qty_export > 0) & (qty_pds > 0) & (qty_pds < inv_high)
+            # 4.5. qty_export > 0 và qty_pds > 0 qty_pds > inv_high  => Vừa keep pds vừa xuất export
+            keep_pds_and_export = (qty_export > 0) & (qty_pds > 0) & (qty_pds > inv_high)
+
+            conditions = [not_in_demand,
+                            keep_pds, over_demand,
+                            over_demand_keep_pds_done,
+                            keep_pds_and_export]
+            lost_pds = qty_pds - inv_high
+            choices_name = [
+                "Not In Demand",
+                "Keep PDS " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
+                "Over Demand " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
+                "Over Demand " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
+                "Keep PDS while exporting. PDS need keep " + lost_pds.fillna(0).astype(int).astype(str) + " CS. Mind not to over-export"]
+            
+            df_process["note_btb"] = np.select(condlist=conditions, choicelist=choices_name, default="Unknown")
+
+
 
             # 4. LỌC KẾT QUẢ CUỐI CÙNG
             df_btb_rack = df_process[df_process['qty_need_move'] > 0].copy()
@@ -418,6 +502,7 @@ class BintobinModel:
             df_item_not_in_deamnd = df_move_action[(df_move_action["qty_pds"] == 0) & (df_move_action["qty_export"] == 0)]
             df_btb_ww = pd.merge(df_inv_ww_lsl, df_item_not_in_deamnd, on='gcas', how='left')
             df_btb_ww = df_btb_ww[(df_btb_ww["qty_pds"] == 0) & (df_btb_ww["qty_export"] == 0)]
+            df_btb_ww["note_btb"] = "Not In Demand"
             # 6. GỘP 2 DATAFRAME BIN TO BIN RACK VÀ WW LẠI
             df_btb_final = pd.concat([df_btb_rack, df_btb_ww], ignore_index=True)
 

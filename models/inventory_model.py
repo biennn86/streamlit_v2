@@ -507,7 +507,7 @@ class InventoryModel:
         df = pd.read_csv(csv_file, encoding=bng_ma, sep=None, engine='python', dtype={'lotnum': str, 'lodnum': str})
         is_invalid = self._validate_file_inv_prime(df)
         if not is_invalid:
-            raise ValueError(f"Incorrect file type. Please upload an inventory Prime file")
+            raise ValueError(f"File upload không phải file Inventory Prime")
         if is_invalid:
             #1. Loại bỏ những dòng trống hoàn toàn
             df = df.dropna(how='all')
@@ -571,7 +571,7 @@ class InventoryModel:
             df = pd.read_excel(link_excel, sheet_name=0, dtype={'lotnum': str, 'lodnum': str})
             is_invalid = self._validate_file_inv_prime(df)
             if not is_invalid:
-                raise ValueError(f"Incorrect file type. Please upload an inventory Prime file")
+                raise ValueError(f"File upload không phải file Inventory Prime")
             if is_invalid:
                 #1. Loại bỏ những dòng trống hoàn toàn
                 df = df.dropna(how='all')

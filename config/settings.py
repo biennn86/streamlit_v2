@@ -29,6 +29,7 @@ class AppConfig:
         UPLOAD_ID_DEMAND = "upload_id_demand"
         INV_BTB = "inv_btb"
         DEMAND_DATA = "demand_data"
+        DF_DEMAND_EXPORT_VIEW = "demand_export_view"
         FILE_UPLOADER_INV_BTB = "file_uploader_inv_btb"
         FILE_UPLOADER_DEMAND = "file_uploader_demand"
         CURRENT_FILE_INV_BTB = "curren_file_inv_btb"
@@ -59,6 +60,7 @@ class AppConfig:
         StateKeys.UPLOAD_ID_DEMAND: 0,
         StateKeys.INV_BTB: None,
         StateKeys.DEMAND_DATA: {},
+        StateKeys.DF_DEMAND_EXPORT_VIEW: None,
         StateKeys.FILE_UPLOADER_INV_BTB: False,
         StateKeys.FILE_UPLOADER_DEMAND: False,
         StateKeys.CURRENT_FILE_INV_BTB: [],

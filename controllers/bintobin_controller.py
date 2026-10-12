@@ -81,4 +81,14 @@ class BintobinController(BaseStateController):
             return False, result.error_message
         elif result.status == ImportFileStatus.SYSTEM_ERROR:
             return False, result.error_message
-        
+    
+    def get_demand_export_view(self, dict_demand):
+        result = self.bintobin_model.get_deamnd_export(dict_demand)
+        if result.status == ImportFileStatus.SUCCESS:
+            #Đưa dataframe btb final vào state
+            self.state.set(AppConfig.StateKeys.DF_DEMAND_EXPORT_VIEW,  result.data)
+            return True,  f"Demand Export Report"
+        elif result.status == ImportFileStatus.INVALID:
+            return False, result.error_message
+        elif result.status == ImportFileStatus.SYSTEM_ERROR:
+            return False, result.error_message

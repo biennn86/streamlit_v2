@@ -45,7 +45,7 @@ def main():
         if page == "Dashboard":
             DashboardView().render()
         elif page == "Bintobin":
-            BintobinView().render_page_btb()
+            BintobinView().render()
         elif page == "Profile":
             render_profile()
         elif page == "Registry User":
