@@ -154,8 +154,11 @@ class BaseStreamlitView:
                             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
                         else:
                             cell.font = data_font
+                            # Kiểm tra dữ liệu số để căn phải và định dạng phân tách hàng nghìn
                             if isinstance(cell.value, (int, float)):
                                 cell.alignment = Alignment(horizontal="right", vertical="center")
+                                # Gán mã định dạng phân tách hàng nghìn của Excel (Ví dụ: 12500 -> 12,500)
+                                cell.number_format = '#,##0' 
                             else:
                                 cell.alignment = Alignment(horizontal="left", vertical="center")
 
@@ -170,7 +173,12 @@ class BaseStreamlitView:
                         if cell.row == 1: 
                             continue  # Bỏ qua dòng 1 gộp ô để không tính sai chiều rộng cột
                         if cell.value is not None:
-                            max_len = max(max_len, len(str(cell.value)))
+                            # Nếu là ô số và đã được gán định dạng dấu phẩy, ta ước lượng độ dài chuỗi sau khi hiển thị
+                            if isinstance(cell.value, (int, float)):
+                                val_str = f"{cell.value:,.0f}" # Giả lập chuỗi có dấu phẩy để tính độ rộng chính xác
+                            else:
+                                val_str = str(cell.value)
+                            max_len = max(max_len, len(val_str))
                     
                     # Khổ dọc chừa hao lề khít (+4) để giữ độ co giãn tối đa cho trang giấy
                     worksheet.column_dimensions[col_letter].width = max(max_len + 4, 9)
