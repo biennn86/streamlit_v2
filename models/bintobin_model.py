@@ -300,13 +300,13 @@ class BintobinModel:
             # 4.1. Not in demand
             not_in_demand = (qty_keep_t1 == 0) & (qty_pds == 0) & (qty_export == 0)
             # 4.2. qty_export = 0 và qty_pds > 0 => chỉ giữ pds không xuất export
-            keep_pds = (qty_export == 0) & (qty_pds > 0)
+            keep_pds = (qty_export == 0) & (qty_pds > 0) & (qty_to_move > 0)
             # 4.3. qty_export > 0 và qty_pds = 0 và ty_to_move > 0 => Over demand
             over_demand = (qty_export > 0) & (qty_pds == 0) & (qty_to_move > 0)
             # 4.4. qty_export > 0 và qty_pds > 0 qty_pds < inv_high  => Over demand
-            over_demand_keep_pds_done = (qty_export > 0) & (qty_pds > 0) & (qty_pds < inv_high)
+            over_demand_keep_pds_done = (qty_export > 0) & (qty_pds > 0) & (qty_pds < inv_high) & (qty_to_move > 0)
             # 4.5. qty_export > 0 và qty_pds > 0 qty_pds > inv_high  => Vừa keep pds vừa xuất export
-            keep_pds_and_export = (qty_export > 0) & (qty_pds > 0) & (qty_pds > inv_high)
+            keep_pds_and_export = (qty_export > 0) & (qty_pds > 0) & (qty_pds > inv_high) & (qty_to_move > 0)
 
             conditions = [not_in_demand,
                           keep_pds, over_demand,
@@ -467,13 +467,13 @@ class BintobinModel:
             # 4.1. Not in demand
             not_in_demand = (qty_keep_t1 == 0) & (qty_pds == 0) & (qty_export == 0)
             # 4.2. qty_export = 0 và qty_pds > 0 => chỉ giữ pds không xuất export
-            keep_pds = (qty_export == 0) & (qty_pds > 0)
+            keep_pds = (qty_export == 0) & (qty_pds > 0) & (qty_to_move > 0)
             # 4.3. qty_export > 0 và qty_pds = 0 và ty_to_move > 0 => Over demand
             over_demand = (qty_export > 0) & (qty_pds == 0) & (qty_to_move > 0)
             # 4.4. qty_export > 0 và qty_pds > 0 qty_pds < inv_high  => Over demand
-            over_demand_keep_pds_done = (qty_export > 0) & (qty_pds > 0) & (qty_pds < inv_high)
+            over_demand_keep_pds_done = (qty_export > 0) & (qty_pds > 0) & (qty_pds < inv_high) & (qty_to_move > 0)
             # 4.5. qty_export > 0 và qty_pds > 0 qty_pds > inv_high  => Vừa keep pds vừa xuất export
-            keep_pds_and_export = (qty_export > 0) & (qty_pds > 0) & (qty_pds > inv_high)
+            keep_pds_and_export = (qty_export > 0) & (qty_pds > 0) & (qty_pds > inv_high) & (qty_to_move > 0)
 
             conditions = [not_in_demand,
                             keep_pds, over_demand,
