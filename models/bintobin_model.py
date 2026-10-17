@@ -366,7 +366,8 @@ class BintobinModel:
                 "Keep PDS " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
                 "Over Demand " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
                 "Over Demand " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
-                "Holds PDS while exporting. Maintain at " + qty_pds.fillna(0).astype(int).astype(str) + " CS, an additional " + lost_pds.fillna(0).astype(int).astype(str) + " CS for bin-to-bin. " + "Do not over-export"]
+                "Holds PDS while exporting. Do not over-export"]
+            #"Holds PDS while exporting. Maintain at " + qty_pds.fillna(0).astype(int).astype(str) + " CS, an additional " + lost_pds.fillna(0).astype(int).astype(str) + " CS for bin-to-bin. " + "Do not over-export"
             
             df_process["note_btb"] = np.select(condlist=conditions, choicelist=choices_name, default="Unknown")
 
