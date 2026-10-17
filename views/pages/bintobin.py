@@ -111,6 +111,7 @@ class BintobinView(BaseStreamlitView):
                 self.df_btb_report_rack = self.df_btb_report_rack.sort_values(by=["location"])
                 self.df_btb_report_rack.index = range(1, len(self.df_btb_report_rack)+1)
                 self.num_bin_rack = self.df_btb_report_rack["location"].nunique()
+                self.num_pallet_rack = self.df_btb_report_rack["pallet_count"].sum()
 
                 self.df_btb_report_ww = self.df_btb_to_view[mask_is_ww].copy()
                 self.df_btb_report_ww["gcas"] = pd.to_numeric(self.df_btb_report_ww["gcas"],downcast="integer")
@@ -118,6 +119,8 @@ class BintobinView(BaseStreamlitView):
                 self.df_btb_report_ww = self.df_btb_report_ww.sort_values(by=["location"])
                 self.df_btb_report_ww.index = range(1, len(self.df_btb_report_ww)+1)
                 self.num_bin_ww = self.df_btb_report_ww["location"].nunique()
+                self.num_pallet_ww = self.df_btb_report_ww["pallet_count"].sum()
+
                 # Lọc ra cột cần hiển thị
                 name_col_view_rack = ["location", "gcas", "batch", "status", "pallet_count", "qty_total_need_move", "note_btb"]
                 name_col_view_ww = ["location", "gcas", "batch", "status", "pallet_count", "qty_total", "note_btb"]
@@ -133,6 +136,8 @@ class BintobinView(BaseStreamlitView):
             else:
                 self.num_bin_rack = 0
                 self.num_bin_ww = 0
+                self.num_pallet_rack = 0
+                self.num_pallet_ww = 0
                 self.df_btb_report_rack = pd.DataFrame()
                 self.df_btb_report_ww = pd.DataFrame()
         except FileNotFoundError as e:
@@ -315,7 +320,8 @@ class BintobinView(BaseStreamlitView):
             with btb_rack:
                 st.html(f"<span class='df_btb'</span>")
                 st.dataframe(self.df_btb_report_rack, hide_index=False, height=500, use_container_width=True)
-                self.download_data_excel_format_display(self.df_btb_report_rack, key="download_btb_rack_report")
+                title_text = f"BIN TO BIN MOVEMENT FOR RACK {self.num_bin_rack} LOCATIONS - {self.num_pallet_rack} PALLETS"
+                self.download_data_excel_format_display(self.df_btb_report_rack, key="download_btb_rack_report", title_text=title_text)
 
             with title_btb_ww:
                 # Header với container có thể control
@@ -329,7 +335,8 @@ class BintobinView(BaseStreamlitView):
             with btb_ww:
                 st.html(f"<span class='df_btb'</span>")
                 st.dataframe(self.df_btb_report_ww, hide_index=False, height=250, use_container_width=True)
-                self.download_data_excel_format_display(self.df_btb_report_ww, key="download_btb_ww_report")
+                title_text = f"BIN TO BIN MOVEMENT FOR WORKWAY {self.num_bin_ww} LOCATIONS - {self.num_pallet_ww} PALLETS"
+                self.download_data_excel_format_display(self.df_btb_report_ww, key="download_btb_ww_report", title_text=title_text)
     
 
     

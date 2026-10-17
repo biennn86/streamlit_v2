@@ -61,7 +61,7 @@ class BaseStreamlitView:
 
 
 
-    def download_data_excel_format_display(self, df, key="data_download"):
+    def download_data_excel_format_display(self, df, key="data_download", title_text = None):
         if not df.empty:
             # 1. Tạo một file Excel ảo trong bộ nhớ
             buffer = io.BytesIO()
@@ -118,7 +118,10 @@ class BaseStreamlitView:
                 # BƯỚC 4: GỘP Ô DÒNG TIÊU ĐỀ 1 VÀ CĂN GIỮA TOÀN BẢNG
                 # -------------------------------------------------------------
                 # "BÁO CÁO CHI TIẾT BIN TO BIN MOVEMENT"
-                title_text = "LIST FG LEVEL A NEED BIN TO BIN"
+                if title_text is None:
+                    title_text = "LIST FG LEVEL A NEED BIN TO BIN"
+                else:
+                    title_text = title_text
                 worksheet['A1'] = title_text
                 
                 # Gộp từ cột A sang cột cuối cùng trên dòng 1
