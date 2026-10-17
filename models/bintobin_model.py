@@ -173,15 +173,21 @@ class BintobinModel:
             df_demand_pds = dict_demand.get("demand_pds", pd.DataFrame()).rename(columns={"sl_demand": "qty_pds"})
             df_demand_export = df_demand_export[df_demand_export["qty_export"]>0].groupby("gcas", as_index=False)["qty_export"].sum()
             df_demand_pds = df_demand_pds[df_demand_pds["qty_pds"]>0].groupby("gcas", as_index=False)["qty_pds"].sum()
+
             #Lấy master_location
             location = self.get_master_location()
             #Lấy df tồn kho FG
-            df_inventory = df_inventory[df_inventory['cat_inv']=='FG']
+            df_inventory = df_inventory[df_inventory['cat_inv']=='FG'].copy()
 
             # Bước 1: Tính toán tồn kho chi tiết (Tầng 1 riêng và Các tầng cao riêng)
             df_location = location[["location", "location_system_type", "name_warehouse"]]
             df_inventory = pd.merge(df_inventory, df_location, on='location', how='left')
-            #Lọc tồn kho chỉ lấy tầng A của WH2
+            # Lọc tồn kho chỉ lấy tầng A, WW, LSL để tính tổng tồn kho
+            mask_is_t1_ww_lsl = pd.Series(True, df_inventory.index)
+            mask_is_t1_ww_lsl &= df_inventory['location_system_type'].isin(["PF"])
+            mask_is_t1_ww_lsl &= df_inventory['name_warehouse'].isin(["WH2"])
+            df_inv_t1_ww_lsl = df_inventory[mask_is_t1_ww_lsl]
+            # Lọc tồn kho chỉ lấy tầng A. Dùng để đi allocate vị trí cần btb
             mask_is_t1 = pd.Series(True, df_inventory.index)
             mask_is_t1 &= df_inventory['location_system_type'].isin(["PF"])
             mask_is_t1 &= df_inventory['name_warehouse'].isin(["WH2"])
@@ -194,8 +200,9 @@ class BintobinModel:
             mask_is_ww = pd.Series(True, df_inventory.index)
             mask_is_ww &= df_inventory['location_system_type'].isin(["WW", "LSL"])
             df_inv_ww_lsl = df_inventory[mask_is_ww]
+
             # Nhóm tổng tồn tầng a của từng item
-            df_inv_grp_t1 = df_inv_t1.groupby('gcas', as_index=False)['qty'].sum().rename(columns={'qty': 'inv_t1'})
+            df_inv_grp_t1 = df_inv_t1_ww_lsl.groupby('gcas', as_index=False)['qty'].sum().rename(columns={'qty': 'inv_t1'})
             # Nhóm tổng tồn tầng cao của từng item
             df_inv_grp_high = df_inv_high.groupby('gcas', as_index=False)['qty'].sum().rename(columns={'qty': 'inv_high'})
             # Bước 2: Gộp tất cả dữ liệu (Tồn kho + Demand) vào một bảng tổng master theo SKU
@@ -211,6 +218,7 @@ class BintobinModel:
             # Chỉ fillna và ép kiểu trên các cột số đó
             df_master = df_master.fillna(0).astype('float64')
             # df_master = df_master.fillna(0).infer_objects(copy=False)
+
             # Bước 3: Tính toán theo Logic tổng kho
             # 3.1. Tính Tổng tồn kho toàn hệ thống
             df_master['total_inv'] = df_master['inv_t1'] + df_master['inv_high']
@@ -240,11 +248,47 @@ class BintobinModel:
                 df_master['inv_t1'], 
                 np.minimum(df_master['inv_after_pds'], df_master['qty_export'])
             )
+            ''' Thuật toán mới này có một lỗ hổng rất lớn (gọi là "điểm mù") dẫn đến việc chừa hàng thiếu cho PDS, làm hụt hàng vận hành của PDS trên tầng cao
+                Lỗ hổng này xảy ra khi Tổng kho đủ cho PDS (Total_Inv >= Qty_pds) nhưng không đủ cho CẢ HAI (PDS + Export), và lượng hàng ở Tầng 1 vô tình "nuốt" mất phần hàng đáng lẽ phải thuộc về PDS.
+                Ví dụ thực tế chứng minh lỗ hổng:
+                Giả sử bạn có số liệu một SKU như sau:
+                • Tồn kho thực tế: Tầng 1 = 10, Tầng cao = 0 -> Total_Inv = 10.
+                • Nhu cầu (Demand): PDS cần 8, Export cần 7. (Tổng nhu cầu hệ thống = 15).
+
+                1. Kiểm tra điều kiện của thuật toán mới:
+
+                • Hệ thống so sánh: Total_Inv (10) >= Qty_pds (8).
+                • Kết quả: Thỏa mãn! (Tổng kho rõ ràng đủ hàng cho PDS). Hệ thống kích hoạt nhánh 1.
+
+                2. Tính toán lượng giữ lại và lượng chuyển đi:
+
+                • Keep_T1 = np.minimum(Inv_T1, Qty_export) = np.minimum(10, 7) = 7 thùng.
+                • Qty_To_Move = Inv_T1 - Keep_T1 = 10 - 7 = 3 thùng.
+
+                3. Hậu quả vận hành thực tế tại Kho:
+
+                • Bạn làm lệnh bốc 3 thùng từ Tầng 1 lên Tầng cao cho PDS. Lúc này Tầng cao có 3 thùng.
+                • Bạn để lại 7 thùng dưới Tầng 1 cho Export.
+                • KẾT CỤC: Khi đến giờ đóng gói hàng PDS, khu vực Tầng cao chỉ có 3 thùng, trong khi nhu cầu PDS cần tận 8 thùng. PDS bị thiếu hụt nghiêm trọng tận 5 thùng! Trong khi đó, Export dưới Tầng 1 lại thong dong cầm đủ 7 thùng.
+                Tại sao lỗ hổng này lại xuất hiện?
+                Lỗi nằm ở chỗ thuật toán mới chỉ kiểm tra xem tổng kho có đủ cho riêng một mình PDS hay không, chứ chưa kiểm tra xem sau khi trừ đi PDS thì tổng kho còn lại bao nhiêu cho Export.
+                Bản chất của việc Total_Inv >= Qty_pds không đồng nghĩa với việc bạn được phép cho Export lấy trọn vẹn nhu cầu của họ.
+                Vì hàng của PDS đang nằm "lẫn" ở Tầng 1 (do Tầng cao bằng 0), nên khi bạn cho Export lấy đủ 7 thùng, Export đã lấy lẹm vào số hàng đáng lẽ phải đưa lên Tầng cao cho PDS.
+            '''
+            # df_master['keep_t1'] = np.where(
+            #     df_master['total_inv'] >= df_master['qty_pds'],
+            #     # TRƯỜNG HỢP ĐỦ HÀNG CHO PDS: Giữ lại Tầng 1 tối đa theo nhu cầu Export
+            #     np.minimum(df_master['inv_t1'], df_master['qty_export']),
+            #     # TRƯỜNG HỢP THIẾU HÀNG CHO PDS: (Áp dụng lại logic phòng thủ ở câu trước)
+            #     np.minimum(df_master['inv_t1'], np.minimum(df_master['inv_after_pds'], df_master['qty_export']))
+            # )
+
             # 3.4. Tính Lượng hàng cần bốc từ Tầng 1 lên Tầng cao
             df_master['qty_to_move'] = df_master['inv_t1'] - df_master['keep_t1']
             # Bước 4: Xuất kết quả danh sách lệnh chuyển hàng
             #inv_t1, inv_high, qty_pds,	qty_export,	total_inv, inv_after_pds, keep_t1, qty_to_move
-            df_move_action = df_master[df_master['qty_to_move'] > 0]#[['gcas', 'inv_t1', 'keep_t1', 'qty_to_move']]
+            df_move_action = df_master[df_master['qty_to_move'] > 0] #[['gcas', 'inv_t1', 'keep_t1', 'qty_to_move']]
+
             # Bước 4. THUẬT TOÁN TRỪ LÙI LÀM TRÒN XUỐNG (TỐI ƯU TỐC ĐỘ BẰNG MẢNG)
             # Gộp dữ liệu tổng vào chi tiết vị trí và chỉ lấy các vị trí thuộc Tầng A
             df_process = pd.merge(df_inv_t1, df_move_action, on='gcas', how='left')
@@ -359,7 +403,7 @@ class BintobinModel:
             if (df_inventory is None) and (not dict_demand):
                 return ImportBtbResult(status=ImportFileStatus.INVALID, error_message="Không có file nào được tải lên.")
             #Version mới nhất
-            # Chiến thuật này tính chừa PDS trên tồn kho tầng cao. Ưu tiên chừa PDS là tối thường và 100% hàng PDS phải đưa lên tầng cao
+            # Chiến thuật này tính chừa PDS trên tồn kho tầng cao. Ưu tiên chừa PDS là tối thường và 100% hàng PDS phải đưa lên tầng cao. Thuật toán tham lam
             #Lấy demand export và demand pds
             df_demand_export = dict_demand.get("demand_export", pd.DataFrame()).rename(columns={"sl_demand": "qty_export"})
             df_demand_pds = dict_demand.get("demand_pds", pd.DataFrame()).rename(columns={"sl_demand": "qty_pds"})
@@ -386,6 +430,7 @@ class BintobinModel:
             mask_is_ww = pd.Series(True, df_inventory.index)
             mask_is_ww &= df_inventory['location_system_type'].isin(["WW", "LSL"])
             df_inv_ww_lsl = df_inventory[mask_is_ww]
+
             # Nhóm tổng tồn tầng a của từng item
             df_inv_grp_t1 = df_inv_t1.groupby('gcas', as_index=False)['qty'].sum().rename(columns={'qty': 'inv_t1'})
             # Nhóm tổng tồn tầng cao của từng item
@@ -403,6 +448,7 @@ class BintobinModel:
             # Chỉ fillna và ép kiểu trên các cột số đó
             df_master = df_master.fillna(0).astype('float64')
             # df_master = df_master.fillna(0).infer_objects(copy=False)
+
             # Bước 2: Tính lượng PDS còn THIẾU trên tầng cao cần phải bù vào
             df_master['pds_needed_high'] = np.maximum(0, df_master['qty_pds'] - df_master['inv_high'])
             # Bước 3: Tính lượng tồn Tầng 1 còn lại sau khi đã ưu tiên cất đi để bù vào PDS trên tầng cao
@@ -411,7 +457,7 @@ class BintobinModel:
             df_master['keep_t1'] = np.minimum(df_master['t1_available_after_pds'], df_master['qty_export'])
             # Bước 5: Lượng hàng bốc từ Tầng 1 lên tầng cao (Bao gồm PDS thiếu + Tồn thừa export)
             df_master['qty_to_move'] = df_master['inv_t1'] - df_master['keep_t1']
-            df_move_action = df_master[df_master['qty_to_move'] > 0]#[['gcas', 'inv_t1', 'keep_t1', 'qty_to_move']]
+            df_move_action = df_master[df_master['qty_to_move'] > 0] #[['gcas', 'inv_t1', 'keep_t1', 'qty_to_move']]
             # Bước 6. THUẬT TOÁN TRỪ LÙI LÀM TRÒN XUỐNG (TỐI ƯU TỐC ĐỘ BẰNG MẢNG)
             # Gộp dữ liệu tổng vào chi tiết vị trí và chỉ lấy các vị trí thuộc Tầng A
             df_process = pd.merge(df_inv_t1, df_move_action, on='gcas', how='left')
@@ -487,7 +533,7 @@ class BintobinModel:
                 "Keep PDS " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
                 "Over Demand " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
                 "Over Demand " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
-                "Keep PDS while exporting. PDS need keep " + lost_pds.fillna(0).astype(int).astype(str) + " CS. Mind not to over-export"]
+                "Holds PDS while exporting. Do not over-export"]
             
             df_process["note_btb"] = np.select(condlist=conditions, choicelist=choices_name, default="Unknown")
 
