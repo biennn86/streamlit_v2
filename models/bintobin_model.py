@@ -136,7 +136,8 @@ class BintobinModel:
     def get_deamnd_export(self, dict_demand: Dict[str, pd.DataFrame]) -> pd.DataFrame:
         try:
             if (not dict_demand):
-                return ImportBtbResult(status=ImportFileStatus.INVALID, error_message="Không có file nào được tải lên.")
+                return ImportBtbResult(status=ImportFileStatus.INVALID) #error_message="Không có file nào được tải lên.")
+
             df_demand_export = dict_demand.get("demand_export", pd.DataFrame()).rename(columns={"sl_demand": "qty_export"})
             df_demand_pds = dict_demand.get("demand_pds", pd.DataFrame()).rename(columns={"sl_demand": "qty_pds"})
             df_demand_export = df_demand_export[df_demand_export["qty_export"] > 0]
@@ -146,9 +147,10 @@ class BintobinModel:
             }).reset_index()
 
             return ImportBtbResult(
-                                ImportFileStatus.SUCCESS,
-                                data = df_demand_export
-                            )
+                        ImportFileStatus.SUCCESS,
+                        data = df_demand_export
+                    )
+            
         except ValueError as val_error:
             return ImportBtbResult(
                 status=ImportFileStatus.INVALID,
@@ -318,7 +320,7 @@ class BintobinModel:
                 "Keep PDS " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
                 "Over Demand " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
                 "Over Demand " + qty_to_move.fillna(0).astype(int).astype(str) + " CS",
-                "Keep PDS while exporting. PDS need keep " + lost_pds.fillna(0).astype(int).astype(str) + " CS. Mind not to over-export"]
+                "Holds PDS while exporting. Maintain at " + qty_pds.fillna(0).astype(int).astype(str) + " CS, an additional " + lost_pds.fillna(0).astype(int).astype(str) + " CS for bin-to-bin. " + "Do not over-export"]
             
             df_process["note_btb"] = np.select(condlist=conditions, choicelist=choices_name, default="Unknown")
 

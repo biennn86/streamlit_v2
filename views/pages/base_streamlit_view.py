@@ -188,7 +188,7 @@ class BaseStreamlitView:
             
             # 8. Tạo nút bấm download trên Streamlit giao diện Excel (.xlsx)
             st.download_button(
-                label="Download Displayed Data as Excel",
+                label="Download Data as Excel",
                 data=excel_bytes,
                 file_name=f"{key}_{pd.Timestamp.now().strftime('%Y%m%d%H%M')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

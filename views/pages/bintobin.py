@@ -180,8 +180,15 @@ class BintobinView(BaseStreamlitView):
 
                 self.download_data_display(df_final, key="download_demand_report")
         else:
-            self.show_error(message=meesage)
-            st.stop()
+            header_html  = f"""
+                <div class="main-header" id="main-header">
+                    <div class="header-title">Chưa có file demand nào được tải lên!</div>
+                </div>
+                """
+            st.markdown(header_html, unsafe_allow_html=True)
+            # st.subheader("Chưa có file demand nào được tải lên!")
+            # self.show_error(message=meesage)
+            # st.stop()
 
     def render_tab_btb(self):
         self.run_bintobin()
