@@ -127,7 +127,7 @@ class BaseStreamlitView:
                 # Gộp từ cột A sang cột cuối cùng trên dòng 1
                 worksheet.merge_cells(f"A1:{last_col_letter}1")
                 
-                title_font = Font(name="Calibri", size=22, bold=True, color="FF000000") #1F4E78
+                title_font = Font(name="Calibri", size=18, bold=True, color="FF000000") #1F4E78
                 worksheet['A1'].font = title_font
                 worksheet['A1'].alignment = Alignment(horizontal="center", vertical="center")
                 worksheet.row_dimensions[1].height = 30  # Chiều cao rộng rãi cho tiêu đề gộp dòng 1
