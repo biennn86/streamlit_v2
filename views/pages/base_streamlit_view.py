@@ -101,6 +101,10 @@ class BaseStreamlitView:
                 worksheet.oddFooter.center.text = "Trang &P / &N"
                 worksheet.oddFooter.center.size = 10
                 worksheet.oddFooter.center.font = "Calibri"
+                # Hiển thị Ngày và Giờ ở phía bên phải của header
+                worksheet.oddHeader.right.text = "In ngày: &D - Giờ: &T"
+                worksheet.oddHeader.center.size = 10
+                worksheet.oddHeader.center.font = "Calibri"
 
                 # Ép vừa khít chiều ngang khổ dọc (không bị vỡ cột sang trang khác)
                 worksheet.sheet_properties.pageSetUpPr.fitToPage = True
