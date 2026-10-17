@@ -294,7 +294,7 @@ class BintobinModel:
             df_process = pd.merge(df_inv_t1, df_move_action, on='gcas', how='left')
             # QUAN TRỌNG: Sắp xếp tồn kho tăng dần theo GCAS và QTY 
             # Việc này giúp ưu tiên giải phóng các location pallet nguyên và ưu tiên lấy hàng HD, QU trước, để hàng RL lại T1 để xuất (tối ưu không gian Bin)
-            df_process = df_process.sort_values(by=['gcas', 'qty', 'status'], ascending=[True, False, False]).reset_index(drop=True)
+            df_process = df_process.sort_values(by=['gcas', 'batch', 'qty', 'status', 'location'], ascending=[True, False, False, False, False]).reset_index(drop=True)
             
             # Chuyển dữ liệu sang dạng mảng NumPy/List để vòng lặp chạy với tốc độ phần cứng (nhanh gấp hàng trăm lần lặp df)
             gcas_arr = df_process['gcas'].values
@@ -463,7 +463,7 @@ class BintobinModel:
             df_process = pd.merge(df_inv_t1, df_move_action, on='gcas', how='left')
             # QUAN TRỌNG: Sắp xếp tồn kho tăng dần theo GCAS và QTY 
             # Việc này giúp ưu tiên giải phóng các location pallet nguyên và ưu tiên lấy hàng HD, QU trước, để hàng RL lại T1 để xuất (tối ưu không gian Bin)
-            df_process = df_process.sort_values(by=['gcas', 'qty', 'status'], ascending=[True, False, False]).reset_index(drop=True)
+            df_process = df_process.sort_values(by=['gcas', 'batch', 'qty', 'status', 'location'], ascending=[True, False, False, False, False]).reset_index(drop=True)
 
             # Chuyển dữ liệu sang dạng mảng NumPy/List để vòng lặp chạy với tốc độ phần cứng (nhanh gấp hàng trăm lần lặp df)
             gcas_arr = df_process['gcas'].values
