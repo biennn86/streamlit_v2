@@ -162,6 +162,9 @@ class BintobinModel:
                 error_message=f"Lỗi hệ thống chưa xác định: {str(e)}"
             )
     def process_bintobin_standard(self, df_inventory: pd.DataFrame, dict_demand: Dict[str, pd.DataFrame]) ->pd.DataFrame:
+        # Chiến thuật tiêu chuẩn
+        # Lấy tồn kho tầng A ở toàn bộ WH và WW để tính toán lượng hàng cần giữ lại tầng A. Và đi allocate trên tồn đó
+        # Allocate ưu tiên lot cao trước, lấy ở wh3 trước, ww, lsl trước pf, lấy F7 về ngược tới F1, pallet chẵn trước, status HD, QU trước
         try:
             #df_inventory.empty and (not dict_demand or all(df.empty for df in dict_demand.values())):
             if (df_inventory is None) and (not dict_demand):
@@ -301,6 +304,7 @@ class BintobinModel:
             df_process['type_loc_sort'] = pd.Categorical(df_process['location_system_type'], categories=custom_order, ordered=True)
 
             # Việc này giúp ưu tiên giải phóng các location pallet nguyên và ưu tiên lấy hàng HD, QU trước, để hàng RL lại T1 để xuất (tối ưu không gian Bin)
+            # Loại bỏ chữ cái ra khỏi batch để sort được chính xác
             df_process['date_sort'] = df_process['batch'].str[1:4]
             df_process = df_process.sort_values(by=['gcas', 'date_sort', 'location', 'qty', 'status', 'name_warehouse', 'type_loc_sort'], ascending=[True, False, False, False, False, False, True]).reset_index(drop=True)
             df_process.drop(columns=['date_sort', 'type_loc_sort'], inplace=True)
@@ -379,7 +383,7 @@ class BintobinModel:
             df_process["note_btb"] = np.select(condlist=conditions, choicelist=choices_name, default="Unknown")
 
             # 5. LỌC KẾT QUẢ CUỐI CÙNG
-            df_btb_rack = df_process[df_process['qty_need_move'] > 0].copy()
+            df_btb_rack = df_process[(df_process['qty_need_move'] > 0) & (df_process['location_system_type'] != "WW")].copy()
 
             # final_move_list = final_move_list[[
             #     'gcas', 'location', 'qty', 'inv_t1', 'inv_high', 'total_inv', 'qty_pds', 'qty_export', 'inv_after_pds', 'keep_t1', 'qty_to_move', 'qty_need_move', 'available', 'location_system_type'
@@ -390,11 +394,12 @@ class BintobinModel:
             df_btb_ww = pd.merge(df_inv_ww_lsl, df_item_not_in_deamnd, on='gcas', how='left')
             df_btb_ww = df_btb_ww[(df_btb_ww["qty_pds"] == 0) & (df_btb_ww["qty_export"] == 0)]
             df_btb_ww["note_btb"] = "Not In Demand"
+            
             # 6. GỘP 2 DATAFRAME BIN TO BIN RACK VÀ WW
             df_btb_final = pd.concat([df_btb_rack, df_btb_ww], ignore_index=True)
             # 7. LỌC NHỮNG LOCATION Ở WW MÀ ALLOCATE ĐÃ LẤY. MỤC ĐÍCH ĐỂ DF WW CHỈ LÀ NHƯNG ITEM NOT IN DEMAND
-            cond_to_remove = (df_btb_final["qty_pds"] > 0) | (df_btb_final["qty_export"] > 0) & (df_btb_final["location_system_type"] == "WW")
-            df_btb_final = df_btb_final[~cond_to_remove].copy()
+            # cond_to_remove = (df_btb_final["qty_pds"] > 0) | (df_btb_final["qty_export"] > 0) & (df_btb_final["location_system_type"] == "WW")
+            # df_btb_final = df_btb_final[~cond_to_remove].copy()
 
             return ImportBtbResult(
                         ImportFileStatus.SUCCESS,
@@ -412,11 +417,12 @@ class BintobinModel:
             )
 
     def process_bintobin_greedy(self, df_inventory: pd.DataFrame, dict_demand: Dict[str, pd.DataFrame]) ->pd.DataFrame:
+        # Chiến thuật này tính chừa PDS trên tồn kho tầng cao. Ưu tiên chừa PDS là tối thượng và 100% hàng PDS phải đưa lên tầng cao. Thuật toán tham lam
+        # Chỉ lấy tồn tầng A wh2 để tính toán lượng tầng A cần giữ lại. Chỉ allocate trên tồn tầng A của WH2
+        # Allocate ưu tiên lot cao trước, lấy ở wh3 trước, ww, lsl trước pf, lấy F7 về ngược tới F1, pallet chẵn trước, status HD, QU trước
         try:
             if (df_inventory is None) and (not dict_demand):
                 return ImportBtbResult(status=ImportFileStatus.INVALID, error_message="Không có file nào được tải lên.")
-            #Version mới nhất
-            # Chiến thuật này tính chừa PDS trên tồn kho tầng cao. Ưu tiên chừa PDS là tối thường và 100% hàng PDS phải đưa lên tầng cao. Thuật toán tham lam
             #Lấy demand export và demand pds
             df_demand_export = dict_demand.get("demand_export", pd.DataFrame()).rename(columns={"sl_demand": "qty_export"})
             df_demand_pds = dict_demand.get("demand_pds", pd.DataFrame()).rename(columns={"sl_demand": "qty_pds"})
@@ -471,6 +477,7 @@ class BintobinModel:
             # Bước 5: Lượng hàng bốc từ Tầng 1 lên tầng cao (Bao gồm PDS thiếu + Tồn thừa export)
             df_master['qty_to_move'] = df_master['inv_t1'] - df_master['keep_t1']
             df_move_action = df_master[df_master['qty_to_move'] > 0] #[['gcas', 'inv_t1', 'keep_t1', 'qty_to_move']]
+            
             # Bước 6. THUẬT TOÁN TRỪ LÙI LÀM TRÒN XUỐNG (TỐI ƯU TỐC ĐỘ BẰNG MẢNG)
             # Gộp dữ liệu tổng vào chi tiết vị trí và chỉ lấy các vị trí thuộc Tầng A
             df_process = pd.merge(df_inv_t1, df_move_action, on='gcas', how='left')
@@ -482,6 +489,7 @@ class BintobinModel:
             df_process['type_loc_sort'] = pd.Categorical(df_process['location_system_type'], categories=custom_order, ordered=True)
 
             # Việc này giúp ưu tiên giải phóng các location pallet nguyên và ưu tiên lấy hàng HD, QU trước, để hàng RL lại T1 để xuất (tối ưu không gian Bin)
+            # Loại bỏ chữ cái ra khỏi batch để sort được chính xác
             df_process['date_sort'] = df_process['batch'].str[1:4]
             df_process = df_process.sort_values(by=['gcas', 'date_sort', 'location', 'qty', 'status', 'name_warehouse', 'type_loc_sort'], ascending=[True, False, False, False, False, False, True]).reset_index(drop=True)
             df_process.drop(columns=['date_sort', 'type_loc_sort'], inplace=True)
