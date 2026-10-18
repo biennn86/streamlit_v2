@@ -103,6 +103,7 @@ class BintobinView(BaseStreamlitView):
                 # Lọc ra df_rack và df_ww
                 mask = pd.Series(True, self.df_btb_to_view.index)
                 mask_is_rack = mask & self.df_btb_to_view['location_system_type'].isin(["PF"])
+                mask_is_rack &= self.df_btb_to_view['name_warehouse'].isin(["WH2"])
                 mask_is_ww = mask & self.df_btb_to_view['location_system_type'].isin(["WW"])
 
                 self.df_btb_report_rack = self.df_btb_to_view[mask_is_rack].copy()

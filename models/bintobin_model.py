@@ -184,8 +184,8 @@ class BintobinModel:
             df_inventory = pd.merge(df_inventory, df_location, on='location', how='left')
             # Lọc tồn kho chỉ lấy tầng A, WW, LSL để tính tổng tồn kho
             mask_is_t1_ww_lsl = pd.Series(True, df_inventory.index)
-            mask_is_t1_ww_lsl &= df_inventory['location_system_type'].isin(["PF"])
-            mask_is_t1_ww_lsl &= df_inventory['name_warehouse'].isin(["WH2"])
+            mask_is_t1_ww_lsl &= df_inventory['location_system_type'].isin(["PF", "WW", "LSL"])
+            mask_is_t1_ww_lsl &= df_inventory['name_warehouse'].isin(["WH2", "WH3", "WH1"])
             df_inv_t1_ww_lsl = df_inventory[mask_is_t1_ww_lsl]
             # Lọc tồn kho chỉ lấy tầng A. Dùng để đi allocate vị trí cần btb
             mask_is_t1 = pd.Series(True, df_inventory.index)
@@ -291,12 +291,19 @@ class BintobinModel:
 
             # Bước 4. THUẬT TOÁN TRỪ LÙI LÀM TRÒN XUỐNG (TỐI ƯU TỐC ĐỘ BẰNG MẢNG)
             # Gộp dữ liệu tổng vào chi tiết vị trí và chỉ lấy các vị trí thuộc Tầng A
-            df_process = pd.merge(df_inv_t1, df_move_action, on='gcas', how='left')
+            df_process = pd.merge(df_inv_t1_ww_lsl, df_move_action, on='gcas', how='left')
+
             # QUAN TRỌNG: Sắp xếp tồn kho tăng dần theo GCAS và QTY 
+            # Sắp xếp ký tự tự định nghĩa
+            # 1. Định nghĩa thứ tự ưu tiên muốn sắp xếp
+            custom_order = ['LSL', 'WW', 'PF']
+            # 2. Chuyển đổi cột sang kiểu Categorical với thứ tự đã định nghĩa ở trên
+            df_process['type_loc_sort'] = pd.Categorical(df_process['location_system_type'], categories=custom_order, ordered=True)
+
             # Việc này giúp ưu tiên giải phóng các location pallet nguyên và ưu tiên lấy hàng HD, QU trước, để hàng RL lại T1 để xuất (tối ưu không gian Bin)
             df_process['date_sort'] = df_process['batch'].str[1:4]
-            df_process = df_process.sort_values(by=['gcas', 'date_sort', 'location', 'qty', 'status'], ascending=[True, False, False, False, False]).reset_index(drop=True)
-            df_process.drop(columns=['date_sort'], inplace=True)
+            df_process = df_process.sort_values(by=['gcas', 'date_sort', 'location', 'qty', 'status', 'name_warehouse', 'type_loc_sort'], ascending=[True, False, False, False, False, False, True]).reset_index(drop=True)
+            df_process.drop(columns=['date_sort', 'type_loc_sort'], inplace=True)
             
             # Chuyển dữ liệu sang dạng mảng NumPy/List để vòng lặp chạy với tốc độ phần cứng (nhanh gấp hàng trăm lần lặp df)
             gcas_arr = df_process['gcas'].values
@@ -385,6 +392,9 @@ class BintobinModel:
             df_btb_ww["note_btb"] = "Not In Demand"
             # 6. GỘP 2 DATAFRAME BIN TO BIN RACK VÀ WW
             df_btb_final = pd.concat([df_btb_rack, df_btb_ww], ignore_index=True)
+            # 7. LỌC NHỮNG LOCATION Ở WW MÀ ALLOCATE ĐÃ LẤY. MỤC ĐÍCH ĐỂ DF WW CHỈ LÀ NHƯNG ITEM NOT IN DEMAND
+            cond_to_remove = (df_btb_final["qty_pds"] > 0) | (df_btb_final["qty_export"] > 0) & (df_btb_final["location_system_type"] == "WW")
+            df_btb_final = df_btb_final[~cond_to_remove].copy()
 
             return ImportBtbResult(
                         ImportFileStatus.SUCCESS,
@@ -465,10 +475,16 @@ class BintobinModel:
             # Gộp dữ liệu tổng vào chi tiết vị trí và chỉ lấy các vị trí thuộc Tầng A
             df_process = pd.merge(df_inv_t1, df_move_action, on='gcas', how='left')
             # QUAN TRỌNG: Sắp xếp tồn kho tăng dần theo GCAS và QTY 
+            # Sắp xếp ký tự tự định nghĩa
+            # 1. Định nghĩa thứ tự ưu tiên muốn sắp xếp
+            custom_order = ['LSL', 'WW', 'PF']
+            # 2. Chuyển đổi cột sang kiểu Categorical với thứ tự đã định nghĩa ở trên
+            df_process['type_loc_sort'] = pd.Categorical(df_process['location_system_type'], categories=custom_order, ordered=True)
+
             # Việc này giúp ưu tiên giải phóng các location pallet nguyên và ưu tiên lấy hàng HD, QU trước, để hàng RL lại T1 để xuất (tối ưu không gian Bin)
             df_process['date_sort'] = df_process['batch'].str[1:4]
-            df_process = df_process.sort_values(by=['gcas', 'date_sort', 'location', 'qty', 'status'], ascending=[True, False, False, False, False]).reset_index(drop=True)
-            df_process.drop(columns=['date_sort'], inplace=True)
+            df_process = df_process.sort_values(by=['gcas', 'date_sort', 'location', 'qty', 'status', 'name_warehouse', 'type_loc_sort'], ascending=[True, False, False, False, False, False, True]).reset_index(drop=True)
+            df_process.drop(columns=['date_sort', 'type_loc_sort'], inplace=True)
 
             # Chuyển dữ liệu sang dạng mảng NumPy/List để vòng lặp chạy với tốc độ phần cứng (nhanh gấp hàng trăm lần lặp df)
             gcas_arr = df_process['gcas'].values
