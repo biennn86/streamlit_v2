@@ -535,7 +535,7 @@ class BintobinModel:
             df_process['qty_need_move'] = thung_can_move_list
             df_process['available'] = con_lai_can_lay_list
 
-            # 4. Xác định item over_demand, not_in_demand hay chừa pds
+            # 4. Thêm cột note_btb. Xác định item over_demand, not_in_demand hay chừa pds
             inv_high = df_process["inv_high"]
             qty_to_move = df_process["qty_to_move"]
             qty_export = df_process["qty_export"]
